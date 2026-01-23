@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { OrbitControls, Environment } from '@react-three/drei'
-import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Noise, Vignette, TiltShift2 } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
@@ -35,12 +35,14 @@ export const Experience = () => {
   return (
     <>
       <EffectComposer disableNormalPass>
-        {/* Softer, dreamier bloom */}
-        <Bloom luminanceThreshold={0.8} mipmapBlur intensity={0.2} radius={0.4} />
-        {/* Fainter noise for texture */}
-        <Noise opacity={0.015} />
-        {/* Softer vignette */}
-        <Vignette eskil={false} offset={0.3} darkness={0.2} />
+        {/* Dreamier, slightly stronger bloom for that magical feel */}
+        <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.5} radius={0.6} />
+        {/* Film grain for texture */}
+        <Noise opacity={0.025} />
+        {/* Cinematic vignette */}
+        <Vignette eskil={false} offset={0.1} darkness={0.35} />
+        {/* Miniature effect for a polished look */}
+        <TiltShift2 blur={0.15} />
       </EffectComposer>
 
       <OrbitControls

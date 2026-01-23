@@ -2,10 +2,12 @@ import React from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Experience } from './components/Experience'
 import { Overlay } from './components/Overlay'
+import { Cursor } from './components/Cursor'
 
 function App() {
   return (
-    <div className="w-full h-screen bg-black relative">
+    <div className="w-full h-screen bg-black relative cursor-none">
+      <Cursor />
       <div className="noise-overlay" />
       <Overlay />
       <Canvas
