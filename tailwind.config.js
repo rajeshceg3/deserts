@@ -8,13 +8,16 @@ export default {
     extend: {
       colors: {
         pastel: {
-          peach: '#FFDAB9',
-          mint: '#E0F2F1', // More subtle mint
-          lavender: '#E6E6FA',
-          sky: '#E1F5FE', // Very light blue
-          rose: '#FCE4EC', // Very light pink
-          cream: '#FFFDD0',
-          sand: '#F5E6D3',
+          apricot: '#F2D1C9',
+          cream: '#FFF5F5',
+          mint: '#D4F1F4',
+          azure: '#E8FAFC',
+          lilac: '#DCD6F7',
+          periwinkle: '#F4EEFF',
+          gold: '#FBE7C6',
+          vanilla: '#FFFCF2',
+          pink: '#FBC4AB',
+          blush: '#FDE2E4',
         },
         glass: {
           10: 'rgba(255, 255, 255, 0.1)',
@@ -29,6 +32,21 @@ export default {
       },
       dropShadow: {
         'glow': '0 0 10px rgba(255, 255, 255, 0.5)',
+        'glow-strong': '0 0 20px rgba(255, 255, 255, 0.7)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 1s ease-in-out',
+        'float': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        }
       }
     },
   },

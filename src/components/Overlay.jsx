@@ -80,20 +80,43 @@ export const Overlay = () => {
           <AnimatePresence mode="wait">
             <motion.div
               key={currentDesertIndex}
-              initial={{ opacity: 0, x: -50, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, x: 50, filter: 'blur(10px)' }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="relative"
             >
-              <h1 className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 drop-shadow-2xl mb-4 tracking-tighter font-serif">
-                {desert.name}
-              </h1>
+              <div className="overflow-hidden mb-4">
+                <h1 className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 drop-shadow-2xl tracking-tighter font-serif flex flex-wrap gap-x-4">
+                  {desert.name.split(" ").map((word, wIndex) => (
+                    <span key={wIndex} className="inline-block whitespace-nowrap">
+                      {word.split("").map((char, cIndex) => (
+                        <motion.span
+                          key={`${wIndex}-${cIndex}`}
+                          initial={{ y: 100, opacity: 0, rotate: 5 }}
+                          animate={{ y: 0, opacity: 1, rotate: 0 }}
+                          exit={{ y: -50, opacity: 0 }}
+                          transition={{
+                            duration: 0.8,
+                            ease: [0.2, 0.65, 0.3, 0.9],
+                            delay: (wIndex * word.length + cIndex) * 0.03
+                          }}
+                          className="inline-block"
+                        >
+                          {char}
+                        </motion.span>
+                      ))}
+                    </span>
+                  ))}
+                </h1>
+              </div>
+
               <div className="overflow-hidden">
                 <motion.p
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
-                  className="text-white/80 text-lg md:text-xl font-light leading-relaxed drop-shadow-md border-l-2 border-white/20 pl-6"
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: 20, opacity: 0 }}
+                  transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+                  className="text-white/80 text-lg md:text-xl font-light leading-relaxed drop-shadow-md border-l-2 border-white/20 pl-6 backdrop-blur-[2px]"
                 >
                   {desert.description}
                 </motion.p>
@@ -103,46 +126,53 @@ export const Overlay = () => {
         </div>
 
         {/* Navigation */}
-        <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-12 pointer-events-auto z-20 transition-all duration-700 ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
-          <motion.button
-            whileHover={{ scale: 1.1, x: -5 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={prevDesert}
-            className="text-white/70 hover:text-white transition-colors"
-            aria-label="Previous Desert"
-          >
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </motion.button>
+        <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-8 pointer-events-auto z-20 transition-all duration-700 ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
 
-          <div className="flex gap-4">
-             {deserts.map((_, index) => (
-                <motion.div
-                    key={index}
-                    className="w-2 h-2 rounded-full cursor-pointer"
-                    onClick={() => setDesert(index)}
-                    initial={false}
-                    animate={{
-                        backgroundColor: index === currentDesertIndex ? "#ffffff" : "rgba(255,255,255,0.2)",
-                        scale: index === currentDesertIndex ? 1.5 : 1
-                    }}
-                    transition={{ duration: 0.3 }}
-                />
-             ))}
+          <div className="flex items-center gap-6 bg-white/5 backdrop-blur-md px-8 py-4 rounded-full border border-white/10 shadow-2xl">
+            <motion.button
+              whileHover={{ scale: 1.2, x: -2 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={prevDesert}
+              className="text-white/50 hover:text-white transition-colors p-2"
+              aria-label="Previous Desert"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </motion.button>
+
+            <div className="flex gap-4 items-center mx-4">
+               {deserts.map((_, index) => (
+                  <motion.div
+                      key={index}
+                      className="relative cursor-pointer group py-2" // Added py-2 for larger hit area
+                      onClick={() => setDesert(index)}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                  >
+                      <motion.div
+                          className={`rounded-full transition-colors duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]' : 'bg-white/20 hover:bg-white/40'}`}
+                          animate={{
+                              width: index === currentDesertIndex ? 12 : 8,
+                              height: index === currentDesertIndex ? 12 : 8,
+                          }}
+                      />
+                  </motion.div>
+               ))}
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.2, x: 2 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={nextDesert}
+              className="text-white/50 hover:text-white transition-colors p-2"
+              aria-label="Next Desert"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </motion.button>
           </div>
-
-          <motion.button
-            whileHover={{ scale: 1.1, x: 5 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={nextDesert}
-            className="text-white/70 hover:text-white transition-colors"
-            aria-label="Next Desert"
-          >
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
-          </motion.button>
         </div>
 
         {/* Controls */}
@@ -162,22 +192,34 @@ export const Overlay = () => {
                 </span>
             </div>
 
-            <div className="relative h-8 flex items-center group">
+            <div className="relative h-12 flex items-center group cursor-pointer">
               {/* Track Background */}
-              <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-white/5 via-white/20 to-white/5 rounded-full overflow-hidden" />
+              <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+                 <div
+                   className="h-full bg-gradient-to-r from-pastel-apricot to-pastel-lilac opacity-50 transition-all duration-300"
+                   style={{ width: `${dayNightCycle * 100}%` }}
+                 />
+              </div>
 
               {/* Sun/Moon Indicator Visual */}
               <motion.div
-                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] pointer-events-none z-10 group-hover:scale-125 transition-transform duration-300"
+                className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] flex items-center justify-center z-10 pointer-events-none"
                 style={{ left: `${dayNightCycle * 100}%`, x: '-50%' }}
-              />
+                whileHover={{ scale: 1.1 }}
+              >
+                 {dayNightCycle > 0.25 && dayNightCycle < 0.75 ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="animate-spin-slow"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                 ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                 )}
+              </motion.div>
 
               {/* Invisible Range Input */}
               <input
                   type="range"
                   min="0"
                   max="1"
-                  step="0.01"
+                  step="0.001"
                   value={dayNightCycle}
                   onChange={(e) => setDayNightCycle(parseFloat(e.target.value))}
                   className="w-full relative z-20 opacity-0 cursor-pointer h-full"
