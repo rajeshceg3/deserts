@@ -35,9 +35,9 @@ export const Experience = () => {
   return (
     <>
       <EffectComposer disableNormalPass>
-        <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.4} radius={0.4} />
-        <Noise opacity={0.04} />
-        <Vignette eskil={false} offset={0.1} darkness={0.6} />
+        <Bloom luminanceThreshold={0.65} mipmapBlur intensity={0.5} radius={0.6} />
+        <Noise opacity={0.03} />
+        <Vignette eskil={false} offset={0.05} darkness={0.35} />
       </EffectComposer>
 
       <OrbitControls
@@ -50,7 +50,7 @@ export const Experience = () => {
 
       <Environment preset="sunset" />
 
-      <ambientLight ref={ambientLightRef} intensity={0.5} />
+      <ambientLight ref={ambientLightRef} intensity={0.6} />
       <directionalLight
         ref={directionalLightRef}
         position={[10, 10, 5]}

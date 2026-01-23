@@ -6,6 +6,7 @@ import { Overlay } from './components/Overlay'
 function App() {
   return (
     <div className="w-full h-screen bg-black relative">
+      <div className="noise-overlay" />
       <Overlay />
       <Canvas
         camera={{
