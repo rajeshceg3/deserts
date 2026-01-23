@@ -13,18 +13,17 @@ export const Terrain = () => {
   const desert = deserts[currentDesertIndex]
 
   const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(100, 100, 128, 128)
+    const geo = new THREE.PlaneGeometry(100, 100, 150, 150) // Increased resolution slightly
     geo.rotateX(-Math.PI / 2)
     return geo
   }, [])
 
   // Ref to store current heights for animation
-  const currentHeights = useRef(new Float32Array(geometry.attributes.position.count))
   const targetHeights = useRef(new Float32Array(geometry.attributes.position.count))
 
   // Generate target heights when desert changes
   useEffect(() => {
-    const { roughness, height, scale } = desert.terrainParams
+    const { height, scale } = desert.terrainParams
     const positions = geometry.attributes.position.array
     const count = geometry.attributes.position.count
 
@@ -32,8 +31,8 @@ export const Terrain = () => {
       const x = positions[i * 3]
       const z = positions[i * 3 + 2]
       // Simple noise generation
-      const y = noise2D(x / (10 * scale), z / (10 * scale)) * height * roughness +
-                noise2D(x / (2 * scale), z / (2 * scale)) * (height / 4) * roughness
+      const y = noise2D(x / (10 * scale), z / (10 * scale)) * height * 1.5 + // Multiplier for better height
+                noise2D(x / (3 * scale), z / (3 * scale)) * (height / 2)
 
       targetHeights.current[i] = y
     }
@@ -51,8 +50,9 @@ export const Terrain = () => {
       const current = positions[i * 3 + 1]
       const target = targetHeights.current[i]
 
-      if (Math.abs(current - target) > 0.01) {
-        positions[i * 3 + 1] = THREE.MathUtils.lerp(current, target, delta * 2)
+      // Smooth lerp
+      if (Math.abs(current - target) > 0.001) {
+        positions[i * 3 + 1] = THREE.MathUtils.lerp(current, target, delta * 3)
         needsUpdate = true
       } else {
         positions[i * 3 + 1] = target
@@ -67,14 +67,18 @@ export const Terrain = () => {
     // Lerp Color
     const material = meshRef.current.material
     material.color.lerp(new THREE.Color(desert.colors.ground), delta * 2)
+
+    // Lerp Roughness
+    material.roughness = THREE.MathUtils.lerp(material.roughness, desert.terrainParams.roughness, delta)
   })
 
   return (
-    <mesh ref={meshRef} geometry={geometry} receiveShadow>
-      <meshStandardMaterial
+    <mesh ref={meshRef} geometry={geometry} receiveShadow castShadow>
+      <meshPhysicalMaterial
         color={desert.colors.ground}
-        roughness={1}
-        flatShading
+        roughness={desert.terrainParams.roughness}
+        metalness={0.05}
+        flatShading={false}
       />
     </mesh>
   )

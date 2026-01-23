@@ -1,87 +1,87 @@
 export const deserts = [
   {
-    name: 'Sahara',
-    description: 'The largest hot desert in the world, known for its endless golden dunes.',
+    name: 'Serene Sands',
+    description: 'A calming expanse of soft peach dunes under a gentle rose sky.',
     colors: {
-      ground: '#e0c090',
-      sky: '#87CEEB',
-      fog: '#e0c090',
-      groundHigh: '#ffcc00',
-      groundLow: '#c2b280'
+      ground: '#F5E6D3',
+      sky: '#FFC1CC',
+      fog: '#F5E6D3',
+      groundHigh: '#FFD1DC',
+      groundLow: '#E6CDB2'
+    },
+    terrainParams: {
+      roughness: 0.4,
+      height: 2.0,
+      scale: 4
+    },
+    creatures: ['Camel']
+  },
+  {
+    name: 'Mint Mirage',
+    description: 'Fresh, cool breezes sweep across these tranquil green valleys.',
+    colors: {
+      ground: '#D1E8E2',
+      sky: '#A0D8D0',
+      fog: '#D1E8E2',
+      groundHigh: '#B8E0D9',
+      groundLow: '#A9CFC6'
     },
     terrainParams: {
       roughness: 0.5,
-      height: 2.5,
-      scale: 3
-    },
-    creatures: ['Camel', 'Scorpion']
-  },
-  {
-    name: 'Gobi',
-    description: 'A vast, arid region in northern China and southern Mongolia, known for its dunes and rare animals.',
-    colors: {
-      ground: '#a08060',
-      sky: '#b0c0d0',
-      fog: '#a08060',
-      groundHigh: '#8a6e4e',
-      groundLow: '#6b543a'
-    },
-    terrainParams: {
-      roughness: 1.2,
       height: 1.5,
       scale: 5
-    },
-    creatures: ['Lizard', 'Camel']
-  },
-  {
-    name: 'Atacama',
-    description: 'The driest non-polar desert in the world, located in Chile.',
-    colors: {
-      ground: '#c06040',
-      sky: '#506080',
-      fog: '#c06040',
-      groundHigh: '#e08060',
-      groundLow: '#a04020'
-    },
-    terrainParams: {
-      roughness: 0.8,
-      height: 2.0,
-      scale: 4
     },
     creatures: ['Lizard']
   },
   {
-    name: 'Mojave',
-    description: 'A rain-shadow desert in the southwestern United States.',
+    name: 'Lavender Dreams',
+    description: 'A mysterious yet soothing landscape bathed in violet hues.',
     colors: {
-      ground: '#d0c0a0',
-      sky: '#88aaff',
-      fog: '#d0c0a0',
-      groundHigh: '#e0d0b0',
-      groundLow: '#b0a080'
+      ground: '#E6E6FA',
+      sky: '#B0C4DE',
+      fog: '#E6E6FA',
+      groundHigh: '#D8BFD8',
+      groundLow: '#CCCCFF'
     },
     terrainParams: {
       roughness: 0.6,
-      height: 1.0,
-      scale: 2
-    },
-    creatures: ['Fox', 'Scorpion']
-  },
-  {
-    name: 'Thar',
-    description: 'Also known as the Great Indian Desert, a large, arid region in the northwestern part of the Indian subcontinent.',
-    colors: {
-      ground: '#f0d060',
-      sky: '#ffeecc',
-      fog: '#f0d060',
-      groundHigh: '#ffe080',
-      groundLow: '#d0b040'
-    },
-    terrainParams: {
-      roughness: 0.7,
-      height: 1.8,
+      height: 2.2,
       scale: 3.5
     },
-    creatures: ['Camel']
+    creatures: ['Scorpion']
+  },
+  {
+    name: 'Golden Echo',
+    description: 'Eternal sunset vibes with warm, embracing golden tones.',
+    colors: {
+      ground: '#FAEBD7',
+      sky: '#FFD700',
+      fog: '#FAEBD7',
+      groundHigh: '#F0E68C',
+      groundLow: '#DEB887'
+    },
+    terrainParams: {
+      roughness: 0.3,
+      height: 1.8,
+      scale: 6
+    },
+    creatures: ['Camel', 'Fox']
+  },
+  {
+    name: 'Azure Drift',
+    description: 'Cool, crisp, and refreshing, like walking on clouds.',
+    colors: {
+      ground: '#F0F8FF',
+      sky: '#87CEFA',
+      fog: '#F0F8FF',
+      groundHigh: '#B0E0E6',
+      groundLow: '#ADD8E6'
+    },
+    terrainParams: {
+      roughness: 0.45,
+      height: 2.5,
+      scale: 4.5
+    },
+    creatures: ['Lizard', 'Fox']
   }
 ]
