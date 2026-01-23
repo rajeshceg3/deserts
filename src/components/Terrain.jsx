@@ -47,8 +47,6 @@ export const Terrain = () => {
     const targetColor = new THREE.Color(desert.colors.ground);
     const targetRoughness = desert.terrainParams.roughness;
 
-    let needsUpdate = false;
-
     // Animate vertex positions
     if (isAnimating.current) {
       const positions = meshRef.current.geometry.attributes.position.array;
@@ -73,19 +71,16 @@ export const Terrain = () => {
       } else {
         isAnimating.current = false;
       }
-      needsUpdate = true;
     }
 
     // Animate color
     if (!material.color.equals(targetColor)) {
       material.color.lerp(targetColor, delta * 2);
-      needsUpdate = true;
     }
 
     // Animate roughness
     if (Math.abs(material.roughness - targetRoughness) > 0.01) {
       material.roughness = THREE.MathUtils.lerp(material.roughness, targetRoughness, delta);
-      needsUpdate = true;
     }
   }, [desert]);
 

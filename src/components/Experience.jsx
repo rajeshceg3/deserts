@@ -28,7 +28,7 @@ export const Experience = () => {
 
         // Intensity changes
         const intensity = Math.max(0, Math.sin(angle))
-        directionalLightRef.current.intensity = intensity * 2.5 // Increased slightly for vibrancy
+        directionalLightRef.current.intensity = intensity * 1.0 // Reduced for subtle effect
     }
   })
 
@@ -36,11 +36,11 @@ export const Experience = () => {
     <>
       <EffectComposer disableNormalPass>
         {/* Softer, dreamier bloom */}
-        <Bloom luminanceThreshold={0.55} mipmapBlur intensity={0.8} radius={0.7} />
+        <Bloom luminanceThreshold={0.8} mipmapBlur intensity={0.2} radius={0.4} />
         {/* Fainter noise for texture */}
-        <Noise opacity={0.04} />
+        <Noise opacity={0.015} />
         {/* Softer vignette */}
-        <Vignette eskil={false} offset={0.3} darkness={0.4} />
+        <Vignette eskil={false} offset={0.3} darkness={0.2} />
       </EffectComposer>
 
       <OrbitControls
@@ -55,11 +55,11 @@ export const Experience = () => {
 
       <Environment preset="sunset" />
 
-      <ambientLight ref={ambientLightRef} intensity={0.7} />
+      <ambientLight ref={ambientLightRef} intensity={0.4} />
       <directionalLight
         ref={directionalLightRef}
         position={[10, 10, 5]}
-        intensity={1.5}
+        intensity={1.0}
         castShadow
         shadow-mapSize={[2048, 2048]}
       />
