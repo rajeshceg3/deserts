@@ -1,8 +1,54 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { Soundscape } from './Soundscape'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
+
+const MagneticButton = ({ children, onClick, className = "" }) => {
+  const ref = useRef(null)
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+
+  const springConfig = { damping: 15, stiffness: 150, mass: 0.1 }
+  const springX = useSpring(x, springConfig)
+  const springY = useSpring(y, springConfig)
+
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e
+    const { left, top, width, height } = ref.current.getBoundingClientRect()
+    const centerX = left + width / 2
+    const centerY = top + height / 2
+    const distanceX = clientX - centerX
+    const distanceY = clientY - centerY
+
+    if (Math.abs(distanceX) < width && Math.abs(distanceY) < height) {
+        x.set(distanceX * 0.2)
+        y.set(distanceY * 0.2)
+    } else {
+        x.set(0)
+        y.set(0)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    x.set(0)
+    y.set(0)
+  }
+
+  return (
+    <motion.button
+      ref={ref}
+      onClick={onClick}
+      className={className}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ x: springX, y: springY }}
+      whileTap={{ scale: 0.9 }}
+    >
+      {children}
+    </motion.button>
+  )
+}
 
 export const Overlay = () => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
@@ -17,7 +63,7 @@ export const Overlay = () => {
   const [zenMode, setZenMode] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIntroFinished(true), 1500)
+    const timer = setTimeout(() => setIntroFinished(true), 2000)
     return () => clearTimeout(timer)
   }, [])
 
@@ -28,13 +74,13 @@ export const Overlay = () => {
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black text-white pointer-events-none"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
+            exit={{ opacity: 0, filter: 'blur(20px)' }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
           >
              <motion.h1
-               initial={{ opacity: 0, scale: 0.9, letterSpacing: '0.1em' }}
-               animate={{ opacity: 1, scale: 1, letterSpacing: '0.2em' }}
-               transition={{ duration: 1.2, ease: "easeOut" }}
+               initial={{ opacity: 0, scale: 0.9, letterSpacing: '0.1em', filter: 'blur(10px)' }}
+               animate={{ opacity: 1, scale: 1, letterSpacing: '0.2em', filter: 'blur(0px)' }}
+               transition={{ duration: 1.5, ease: "easeOut" }}
                className="text-4xl md:text-6xl font-serif italic text-white/90"
              >
                 Desert Dreams
@@ -51,31 +97,33 @@ export const Overlay = () => {
       >
         {/* Zen Mode Toggle */}
         <div className="absolute top-8 left-8 pointer-events-auto z-50">
-           <button
+           <MagneticButton
              onClick={() => setZenMode(!zenMode)}
-             className="text-white/40 hover:text-white transition-colors duration-300 group flex items-center gap-2"
+             className="text-white/40 hover:text-white transition-colors duration-300 group flex items-center gap-2 p-2"
            >
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-               {zenMode ? (
-                 <>
-                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                   <line x1="1" y1="1" x2="23" y2="23" />
-                 </>
-               ) : (
-                 <>
-                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                   <circle cx="12" cy="12" r="3" />
-                 </>
-               )}
-             </svg>
-             <span className="text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity font-mono">
+             <div className="bg-white/5 backdrop-blur-sm p-3 rounded-full border border-white/5 hover:bg-white/10 transition-colors">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                 {zenMode ? (
+                   <>
+                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                     <line x1="1" y1="1" x2="23" y2="23" />
+                   </>
+                 ) : (
+                   <>
+                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                     <circle cx="12" cy="12" r="3" />
+                   </>
+                 )}
+               </svg>
+             </div>
+             <span className="text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-mono -ml-2">
                {zenMode ? "Show UI" : "Zen Mode"}
              </span>
-           </button>
+           </MagneticButton>
         </div>
 
         {/* Header */}
-        <div className={`pointer-events-auto max-w-xl mt-8 transition-opacity duration-700 ${zenMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div className={`pointer-events-auto max-w-2xl mt-8 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 -translate-x-20 blur-sm pointer-events-none' : 'opacity-100 translate-x-0 blur-0'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentDesertIndex}
@@ -84,20 +132,20 @@ export const Overlay = () => {
               exit={{ opacity: 0 }}
               className="relative"
             >
-              <div className="overflow-hidden mb-4">
-                <h1 className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 drop-shadow-2xl tracking-tighter font-serif flex flex-wrap gap-x-4">
+              <div className="overflow-hidden mb-6">
+                <h1 className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/40 drop-shadow-glow tracking-tighter font-serif flex flex-wrap gap-x-6 pb-2">
                   {desert.name.split(" ").map((word, wIndex) => (
                     <span key={wIndex} className="inline-block whitespace-nowrap">
                       {word.split("").map((char, cIndex) => (
                         <motion.span
                           key={`${wIndex}-${cIndex}`}
-                          initial={{ y: 100, opacity: 0, rotate: 5 }}
-                          animate={{ y: 0, opacity: 1, rotate: 0 }}
-                          exit={{ y: -50, opacity: 0 }}
+                          initial={{ y: 40, opacity: 0, filter: 'blur(10px)' }}
+                          animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                          exit={{ y: -40, opacity: 0, filter: 'blur(10px)' }}
                           transition={{
-                            duration: 0.8,
+                            duration: 1.0,
                             ease: [0.2, 0.65, 0.3, 0.9],
-                            delay: (wIndex * word.length + cIndex) * 0.03
+                            delay: (wIndex * word.length + cIndex) * 0.04
                           }}
                           className="inline-block"
                         >
@@ -109,13 +157,13 @@ export const Overlay = () => {
                 </h1>
               </div>
 
-              <div className="overflow-hidden">
+              <div className="overflow-hidden max-w-lg">
                 <motion.p
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: 20, opacity: 0 }}
-                  transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-                  className="text-white/80 text-lg md:text-xl font-light leading-relaxed drop-shadow-md border-l-2 border-white/20 pl-6 backdrop-blur-[2px]"
+                  initial={{ x: -20, opacity: 0, filter: 'blur(5px)' }}
+                  animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
+                  exit={{ x: 20, opacity: 0, filter: 'blur(5px)' }}
+                  transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+                  className="text-white/80 text-lg md:text-xl font-light leading-relaxed drop-shadow-md border-l border-white/30 pl-6"
                 >
                   {desert.description}
                 </motion.p>
@@ -125,61 +173,53 @@ export const Overlay = () => {
         </div>
 
         {/* Navigation */}
-        <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-8 pointer-events-auto z-20 transition-all duration-700 ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+        <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-auto z-20 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none blur-sm' : 'translate-y-0 opacity-100 blur-0'}`}>
 
-          <div className="flex items-center gap-6 bg-white/5 backdrop-blur-md px-8 py-4 rounded-full border border-white/10 shadow-2xl">
-            <motion.button
-              whileHover={{ scale: 1.2, x: -2 }}
-              whileTap={{ scale: 0.9 }}
+          <div className="glass-panel rounded-full px-10 py-5 flex items-center gap-8">
+            <MagneticButton
               onClick={prevDesert}
               className="text-white/50 hover:text-white transition-colors p-2"
-              aria-label="Previous Desert"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 18l-6-6 6-6"/>
               </svg>
-            </motion.button>
+            </MagneticButton>
 
             <div className="flex gap-4 items-center mx-4">
                {deserts.map((_, index) => (
                   <motion.div
                       key={index}
-                      className="relative cursor-pointer group py-2" // Added py-2 for larger hit area
+                      className="relative cursor-pointer group py-2"
                       onClick={() => setDesert(index)}
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.9 }}
                   >
                       <motion.div
-                          className={`rounded-full transition-colors duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]' : 'bg-white/20 hover:bg-white/40'}`}
+                          className={`rounded-full transition-all duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.9)]' : 'bg-white/20 hover:bg-white/50'}`}
                           animate={{
-                              width: index === currentDesertIndex ? 12 : 8,
-                              height: index === currentDesertIndex ? 12 : 8,
+                              width: index === currentDesertIndex ? 12 : 6,
+                              height: index === currentDesertIndex ? 12 : 6,
                           }}
                       />
                   </motion.div>
                ))}
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.2, x: 2 }}
-              whileTap={{ scale: 0.9 }}
+            <MagneticButton
               onClick={nextDesert}
               className="text-white/50 hover:text-white transition-colors p-2"
-              aria-label="Next Desert"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6"/>
               </svg>
-            </motion.button>
+            </MagneticButton>
           </div>
         </div>
 
         {/* Controls */}
-        <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-700 ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
+        <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
           <Soundscape />
-          <div
-              className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl w-72"
-          >
+          <div className="glass-panel p-6 rounded-2xl w-72">
             <div className="flex justify-between items-center mb-6">
                 <label className="text-white text-[10px] font-bold tracking-[0.2em] uppercase opacity-70">Time of Day</label>
                 <span className="text-[10px] text-white font-mono bg-white/10 px-2 py-1 rounded border border-white/5">
@@ -189,18 +229,19 @@ export const Overlay = () => {
 
             <div className="relative h-12 flex items-center group cursor-pointer">
               {/* Track Background */}
-              <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+              <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm border border-white/5 group-hover:h-3 transition-all duration-300">
                  <div
-                   className="h-full bg-gradient-to-r from-pastel-apricot to-pastel-lilac opacity-50 transition-all duration-300"
+                   className="h-full bg-gradient-to-r from-pastel-apricot via-pastel-lilac to-pastel-mint opacity-80 transition-all duration-300"
                    style={{ width: `${dayNightCycle * 100}%` }}
                  />
               </div>
 
               {/* Sun/Moon Indicator Visual */}
               <motion.div
-                className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] flex items-center justify-center z-10 pointer-events-none"
+                className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.6)] flex items-center justify-center z-10 pointer-events-none border-2 border-transparent group-hover:border-pastel-azure transition-colors"
                 style={{ left: `${dayNightCycle * 100}%`, x: '-50%' }}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.2 }}
+                layout
               >
                  {dayNightCycle > 0.25 && dayNightCycle < 0.75 ? (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="animate-spin-slow"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -231,7 +272,7 @@ export const Overlay = () => {
         </div>
 
         {/* Footer / Instructions */}
-        <div className={`absolute bottom-8 right-8 text-white/30 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-opacity duration-700 ${zenMode ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute bottom-8 right-8 text-white/30 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
         </div>
       </motion.div>
