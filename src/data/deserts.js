@@ -3,11 +3,11 @@ export const deserts = [
     name: 'Ethereal Dunes',
     description: 'A realm where soft peach sands whisper secrets to the morning sun, creating a sanctuary of warmth and tranquility.',
     colors: {
-      ground: '#FFDAB9', // Peach
-      sky: '#FFF0F5',    // Lavender Blush
-      fog: '#FFDAB9',
-      groundHigh: '#FFE4E1', // Misty Rose
-      groundLow: '#F5DEB3'   // Wheat
+      ground: '#F2D1C9', // Soft Apricot
+      sky: '#FFF5F5',    // Blush Cream
+      fog: '#F2D1C9',
+      groundHigh: '#FFDFD3', // Light Peach
+      groundLow: '#E6B8B0'   // Muted Rose
     },
     terrainParams: {
       roughness: 0.4,
@@ -20,11 +20,11 @@ export const deserts = [
     name: 'Glacial Serenity',
     description: 'Crisp, mint-kissed valleys that breathe freshness into the soul, under a sky of infinite possibility.',
     colors: {
-      ground: '#E0F2F1', // Mint
-      sky: '#E1F5FE',    // Light Sky Blue
-      fog: '#E0F2F1',
-      groundHigh: '#F0F8FF', // Alice Blue
-      groundLow: '#B2DFDB'   // Darker Mint
+      ground: '#D4F1F4', // Icy Mint
+      sky: '#E8FAFC',    // Pale Azure
+      fog: '#D4F1F4',
+      groundHigh: '#E2F7F9', // Lighter Mint
+      groundLow: '#BCE3E7'   // Deep Ice
     },
     terrainParams: {
       roughness: 0.5,
@@ -37,11 +37,11 @@ export const deserts = [
     name: 'Velvet Twilight',
     description: 'A dreamscape bathed in lavender hues, where the boundary between earth and mystery dissolves into starlight.',
     colors: {
-      ground: '#E6E6FA', // Lavender
-      sky: '#F3E5F5',    // Purple 50
-      fog: '#E6E6FA',
-      groundHigh: '#D1C4E9', // Deep Purple 100
-      groundLow: '#EDE7F6'
+      ground: '#DCD6F7', // Dusty Lilac
+      sky: '#F4EEFF',    // Periwinkle Mist
+      fog: '#DCD6F7',
+      groundHigh: '#E5DFFB', // Light Lilac
+      groundLow: '#C5BDF0'   // Deep Lavender
     },
     terrainParams: {
       roughness: 0.6,
@@ -54,11 +54,11 @@ export const deserts = [
     name: 'Golden Hour',
     description: 'An eternal embrace of amber light, casting long, soft shadows across a landscape of pure nostalgia.',
     colors: {
-      ground: '#F5E6D3', // Sand
-      sky: '#FFF8E1',    // Amber 50
-      fog: '#F5E6D3',
-      groundHigh: '#FFECB3', // Amber 100
-      groundLow: '#FFE0B2'   // Orange 100
+      ground: '#FBE7C6', // Muted Gold
+      sky: '#FFFCF2',    // Vanilla
+      fog: '#FBE7C6',
+      groundHigh: '#FDF0D8', // Light Gold
+      groundLow: '#EACD9E'   // Deep Amber
     },
     terrainParams: {
       roughness: 0.3,
@@ -71,11 +71,11 @@ export const deserts = [
     name: 'Rose Horizon',
     description: 'Soft pink waves of sand stretching into forever, painting the world with the gentle blush of a first love.',
     colors: {
-      ground: '#FCE4EC', // Rose
-      sky: '#FFEBEE',    // Red 50
-      fog: '#FCE4EC',
-      groundHigh: '#F8BBD0', // Pink 100
-      groundLow: '#F48FB1'   // Pink 200
+      ground: '#FBC4AB', // Millennial Pink
+      sky: '#FDE2E4',    // Blush
+      fog: '#FBC4AB',
+      groundHigh: '#FCD5C3', // Light Pink
+      groundLow: '#F0AFA0'   // Deep Rose
     },
     terrainParams: {
       roughness: 0.45,
