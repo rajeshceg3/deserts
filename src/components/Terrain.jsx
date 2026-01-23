@@ -20,9 +20,11 @@ export const Terrain = () => {
 
   // Ref to store current heights for animation
   const targetHeights = useRef(new Float32Array(geometry.attributes.position.count))
+  const isAnimating = useRef(true)
 
   // Generate target heights when desert changes
   useEffect(() => {
+    isAnimating.current = true
     const { height, scale } = desert.terrainParams
     const positions = geometry.attributes.position.array
     const count = geometry.attributes.position.count
@@ -41,27 +43,35 @@ export const Terrain = () => {
   useFrame((state, delta) => {
     if (!meshRef.current) return
 
-    // Lerp positions
-    const positions = meshRef.current.geometry.attributes.position.array
-    const count = meshRef.current.geometry.attributes.position.count
-    let needsUpdate = false
+    if (isAnimating.current) {
+      // Lerp positions
+      const positions = meshRef.current.geometry.attributes.position.array
+      const count = meshRef.current.geometry.attributes.position.count
+      let needsUpdate = false
+      let stillMoving = false
 
-    for (let i = 0; i < count; i++) {
-      const current = positions[i * 3 + 1]
-      const target = targetHeights.current[i]
+      for (let i = 0; i < count; i++) {
+        const current = positions[i * 3 + 1]
+        const target = targetHeights.current[i]
 
-      // Smooth lerp
-      if (Math.abs(current - target) > 0.001) {
-        positions[i * 3 + 1] = THREE.MathUtils.lerp(current, target, delta * 3)
-        needsUpdate = true
-      } else {
-        positions[i * 3 + 1] = target
+        // Smooth lerp
+        if (Math.abs(current - target) > 0.001) {
+          positions[i * 3 + 1] = THREE.MathUtils.lerp(current, target, delta * 3)
+          needsUpdate = true
+          stillMoving = true
+        } else {
+          positions[i * 3 + 1] = target
+        }
       }
-    }
 
-    if (needsUpdate) {
-      meshRef.current.geometry.attributes.position.needsUpdate = true
-      meshRef.current.geometry.computeVertexNormals()
+      if (needsUpdate) {
+        meshRef.current.geometry.attributes.position.needsUpdate = true
+        meshRef.current.geometry.computeVertexNormals()
+      }
+
+      if (!stillMoving) {
+        isAnimating.current = false
+      }
     }
 
     // Lerp Color

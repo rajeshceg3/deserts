@@ -18,6 +18,7 @@ export default {
           vanilla: '#FFFCF2',
           pink: '#FBC4AB',
           blush: '#FDE2E4',
+          rose: '#F0AFA0',
         },
         glass: {
           10: 'rgba(255, 255, 255, 0.1)',
