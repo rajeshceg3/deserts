@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { Soundscape } from './Soundscape'
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const Overlay = () => {
@@ -178,11 +177,7 @@ export const Overlay = () => {
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-700 ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
           <Soundscape />
-
-          <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
+          <div
               className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl w-72"
           >
             <div className="flex justify-between items-center mb-6">
@@ -232,7 +227,7 @@ export const Overlay = () => {
                 <span>Day</span>
                 <span>Night</span>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Footer / Instructions */}
