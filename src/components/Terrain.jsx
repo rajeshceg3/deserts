@@ -41,46 +41,53 @@ export const Terrain = () => {
   }, [desert, geometry])
 
   useFrame((state, delta) => {
-    if (!meshRef.current) return
+    if (!meshRef.current) return;
 
+    const material = meshRef.current.material;
+    const targetColor = new THREE.Color(desert.colors.ground);
+    const targetRoughness = desert.terrainParams.roughness;
+
+    let needsUpdate = false;
+
+    // Animate vertex positions
     if (isAnimating.current) {
-      // Lerp positions
-      const positions = meshRef.current.geometry.attributes.position.array
-      const count = meshRef.current.geometry.attributes.position.count
-      let needsUpdate = false
-      let stillMoving = false
+      const positions = meshRef.current.geometry.attributes.position.array;
+      const count = positions.length / 3;
+      let stillMoving = false;
 
       for (let i = 0; i < count; i++) {
-        const current = positions[i * 3 + 1]
-        const target = targetHeights.current[i]
+        const currentY = positions[i * 3 + 1];
+        const targetY = targetHeights.current[i];
 
-        // Smooth lerp
-        if (Math.abs(current - target) > 0.001) {
-          positions[i * 3 + 1] = THREE.MathUtils.lerp(current, target, delta * 3)
-          needsUpdate = true
-          stillMoving = true
+        if (Math.abs(currentY - targetY) > 0.001) {
+          positions[i * 3 + 1] = THREE.MathUtils.lerp(currentY, targetY, delta * 3);
+          stillMoving = true;
         } else {
-          positions[i * 3 + 1] = target
+          positions[i * 3 + 1] = targetY;
         }
       }
 
-      if (needsUpdate) {
-        meshRef.current.geometry.attributes.position.needsUpdate = true
-        meshRef.current.geometry.computeVertexNormals()
+      if (stillMoving) {
+        meshRef.current.geometry.attributes.position.needsUpdate = true;
+        meshRef.current.geometry.computeVertexNormals(); // Expensive, but needed for lighting
+      } else {
+        isAnimating.current = false;
       }
-
-      if (!stillMoving) {
-        isAnimating.current = false
-      }
+      needsUpdate = true;
     }
 
-    // Lerp Color
-    const material = meshRef.current.material
-    material.color.lerp(new THREE.Color(desert.colors.ground), delta * 2)
+    // Animate color
+    if (!material.color.equals(targetColor)) {
+      material.color.lerp(targetColor, delta * 2);
+      needsUpdate = true;
+    }
 
-    // Lerp Roughness
-    material.roughness = THREE.MathUtils.lerp(material.roughness, desert.terrainParams.roughness, delta)
-  })
+    // Animate roughness
+    if (Math.abs(material.roughness - targetRoughness) > 0.01) {
+      material.roughness = THREE.MathUtils.lerp(material.roughness, targetRoughness, delta);
+      needsUpdate = true;
+    }
+  }, [desert]);
 
   return (
     <mesh ref={meshRef} geometry={geometry} receiveShadow castShadow>
