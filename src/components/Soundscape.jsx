@@ -6,66 +6,40 @@ export const Soundscape = () => {
   const audioContext = useRef(null);
   const gainNode = useRef(null);
 
-  const toggleSound = () => {
-    if (!audioContext.current) {
-      initAudio();
-    }
-
-    if (audioContext.current.state === 'suspended') {
-      audioContext.current.resume();
-    }
-
-    if (isPlaying) {
-      gainNode.current.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioContext.current.currentTime + 1
-      );
-      setIsPlaying(false);
-    } else {
-      gainNode.current.gain.exponentialRampToValueAtTime(
-        0.1,
-        audioContext.current.currentTime + 1
-      );
-      setIsPlaying(true);
-    }
-  };
-
   const initAudio = () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioContext.current = new AudioContext();
 
-    // Create Pink Noise
-    const bufferSize = 4096;
-    const pinkNoise = (function () {
-      let b0, b1, b2, b3, b4, b5, b6;
-      b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
-      const node = audioContext.current.createScriptProcessor(bufferSize, 1, 1);
-      node.onaudioprocess = function (e) {
-        const output = e.outputBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.99886 * b0 + white * 0.0555179;
-          b1 = 0.99332 * b1 + white * 0.075076;
-          b2 = 0.969 * b2 + white * 0.153852;
-          b3 = 0.8665 * b3 + white * 0.3104856;
-          b4 = 0.55 * b4 + white * 0.5329522;
-          b5 = -0.7616 * b5 - white * 0.016898;
-          output[i] =
-            b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-          output[i] *= 0.11; // (roughly) compensate for gain
-          b6 = white * 0.115926;
-        }
-      };
-      return node;
-    })();
+    // Create Pink Noise Buffer (5 seconds)
+    const bufferSize = audioContext.current.sampleRate * 5;
+    const buffer = audioContext.current.createBuffer(1, bufferSize, audioContext.current.sampleRate);
+    const output = buffer.getChannelData(0);
 
-    // Lowpass filter for wind howl
+    let b0, b1, b2, b3, b4, b5, b6;
+    b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+
+    for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.075076;
+        b2 = 0.969 * b2 + white * 0.153852;
+        b3 = 0.8665 * b3 + white * 0.3104856;
+        b4 = 0.55 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.016898;
+        output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+        output[i] *= 0.11; // Compensate for gain
+        b6 = white * 0.115926;
+    }
+
+    // Nodes
+    gainNode.current = audioContext.current.createGain();
+    gainNode.current.gain.value = 0; // Start silent
+
     const filter = audioContext.current.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.value = 400;
-    filter.Q.value = 1;
 
-    // Modulate filter frequency for "gusts"
+    // Wind modulation
     const osc = audioContext.current.createOscillator();
     osc.type = 'sine';
     osc.frequency.value = 0.1; // Slow wind changes
@@ -75,22 +49,57 @@ export const Soundscape = () => {
     oscGain.connect(filter.frequency);
     osc.start();
 
-    // Master Gain
-    gainNode.current = audioContext.current.createGain();
-    gainNode.current.gain.value = 0.001;
-
-    pinkNoise.connect(filter);
+    // Source
+    const sourceNode = audioContext.current.createBufferSource();
+    sourceNode.buffer = buffer;
+    sourceNode.loop = true;
+    sourceNode.connect(filter);
     filter.connect(gainNode.current);
     gainNode.current.connect(audioContext.current.destination);
+
+    sourceNode.start();
+  };
+
+  const toggleSound = () => {
+    if (!audioContext.current) {
+      initAudio();
+    }
+
+    // Resume if suspended (browser policy often suspends initially)
+    if (audioContext.current.state === 'suspended') {
+      audioContext.current.resume();
+    }
+
+    const currentTime = audioContext.current.currentTime;
+
+    if (isPlaying) {
+      // Fade out
+      gainNode.current.gain.cancelScheduledValues(currentTime);
+      gainNode.current.gain.exponentialRampToValueAtTime(
+        0.001,
+        currentTime + 1
+      );
+      setIsPlaying(false);
+    } else {
+      // Fade in
+      gainNode.current.gain.cancelScheduledValues(currentTime);
+      gainNode.current.gain.exponentialRampToValueAtTime(
+        0.1,
+        currentTime + 1
+      );
+      setIsPlaying(true);
+    }
   };
 
   // Cleanup
   useEffect(() => {
     return () => {
-      if (audioContext.current) {
-        audioContext.current.close();
-      }
-    };
+        if (audioContext.current) {
+            const context = audioContext.current;
+            context.close().catch(e => console.error("Error closing AudioContext:", e));
+            audioContext.current = null;
+        }
+    }
   }, []);
 
   return (

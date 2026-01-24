@@ -4,18 +4,31 @@ import { deserts } from '../data/deserts'
 import { Soundscape } from './Soundscape'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 
-const MagneticButton = ({ children, onClick, className = "" }) => {
+const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaLabel }) => {
   const ref = useRef(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
+  const bounds = useRef({ left: 0, top: 0, width: 0, height: 0 })
 
   const springConfig = { damping: 15, stiffness: 150, mass: 0.1 }
   const springX = useSpring(x, springConfig)
   const springY = useSpring(y, springConfig)
 
+  const handleMouseEnter = () => {
+    if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        bounds.current = {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height
+        };
+    }
+  }
+
   const handleMouseMove = (e) => {
     const { clientX, clientY } = e
-    const { left, top, width, height } = ref.current.getBoundingClientRect()
+    const { left, top, width, height } = bounds.current
     const centerX = left + width / 2
     const centerY = top + height / 2
     const distanceX = clientX - centerX
@@ -40,10 +53,12 @@ const MagneticButton = ({ children, onClick, className = "" }) => {
       ref={ref}
       onClick={onClick}
       className={className}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x: springX, y: springY }}
       whileTap={{ scale: 0.9 }}
+      aria-label={ariaLabel}
     >
       {children}
     </motion.button>
@@ -66,6 +81,12 @@ export const Overlay = () => {
     const timer = setTimeout(() => setIntroFinished(true), 2000)
     return () => clearTimeout(timer)
   }, [])
+
+  const handleKeyDown = (e, index) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+          setDesert(index);
+      }
+  }
 
   return (
     <>
@@ -100,6 +121,7 @@ export const Overlay = () => {
            <MagneticButton
              onClick={() => setZenMode(!zenMode)}
              className="text-white/40 hover:text-white transition-colors duration-300 group flex items-center gap-2 p-2"
+             aria-label={zenMode ? "Show UI" : "Enable Zen Mode"}
            >
              <div className="bg-white/5 backdrop-blur-sm p-3 rounded-full border border-white/5 hover:bg-white/10 transition-colors">
                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -179,6 +201,7 @@ export const Overlay = () => {
             <MagneticButton
               onClick={prevDesert}
               className="text-white/50 hover:text-white transition-colors p-2"
+              aria-label="Previous Desert"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 18l-6-6 6-6"/>
@@ -191,8 +214,12 @@ export const Overlay = () => {
                       key={index}
                       className="relative cursor-pointer group py-2"
                       onClick={() => setDesert(index)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.9 }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Select ${deserts[index].name}`}
                   >
                       <motion.div
                           className={`rounded-full transition-all duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.9)]' : 'bg-white/20 hover:bg-white/50'}`}
@@ -208,6 +235,7 @@ export const Overlay = () => {
             <MagneticButton
               onClick={nextDesert}
               className="text-white/50 hover:text-white transition-colors p-2"
+              aria-label="Next Desert"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6"/>
