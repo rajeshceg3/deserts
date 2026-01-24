@@ -21,6 +21,7 @@ export const Terrain = () => {
   // Ref to store current heights for animation
   const targetHeights = useRef(new Float32Array(geometry.attributes.position.count))
   const isAnimating = useRef(true)
+  const tempColor = useMemo(() => new THREE.Color(), [])
 
   // Generate target heights when desert changes
   useEffect(() => {
@@ -44,7 +45,7 @@ export const Terrain = () => {
     if (!meshRef.current) return;
 
     const material = meshRef.current.material;
-    const targetColor = new THREE.Color(desert.colors.ground);
+    tempColor.set(desert.colors.ground);
     const targetRoughness = desert.terrainParams.roughness;
 
     // Animate vertex positions
@@ -74,8 +75,8 @@ export const Terrain = () => {
     }
 
     // Animate color
-    if (!material.color.equals(targetColor)) {
-      material.color.lerp(targetColor, delta * 2);
+    if (!material.color.equals(tempColor)) {
+      material.color.lerp(tempColor, delta * 2);
     }
 
     // Animate roughness

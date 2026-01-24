@@ -20,16 +20,14 @@ export const Cursor = () => {
     }
 
     const checkHover = (e) => {
-      // Check if the target or any of its parents are interactive
-      const target = e.target
+      const target = e.target;
+
+      // Check for common interactive elements and styles
+      // We look for tags, roles, specific classes, and computed cursor style
       const isInteractive =
-        target.tagName.toLowerCase() === 'button' ||
-        target.tagName.toLowerCase() === 'a' ||
-        target.tagName.toLowerCase() === 'input' ||
-        target.closest('button') ||
-        target.closest('a') ||
-        target.closest('.interactive') ||
-        target.style.cursor === 'pointer'
+        target.matches('button, a, input, select, textarea, [role="button"], [role="link"], .cursor-pointer') ||
+        target.closest('button, a, input, select, textarea, [role="button"], [role="link"], .cursor-pointer') ||
+        window.getComputedStyle(target).cursor === 'pointer';
 
       setIsHovered(!!isInteractive)
     }
