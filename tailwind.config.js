@@ -19,12 +19,16 @@ export default {
           pink: '#FBC4AB',
           blush: '#FDE2E4',
           rose: '#F0AFA0',
+          dark: '#1A1A2E',
         },
         glass: {
           10: 'rgba(255, 255, 255, 0.1)',
           20: 'rgba(255, 255, 255, 0.2)',
           30: 'rgba(255, 255, 255, 0.3)',
           40: 'rgba(255, 255, 255, 0.4)',
+          50: 'rgba(255, 255, 255, 0.5)',
+          60: 'rgba(255, 255, 255, 0.6)',
+          70: 'rgba(255, 255, 255, 0.7)',
         }
       },
       fontFamily: {
@@ -39,6 +43,7 @@ export default {
       animation: {
         'fade-in': 'fadeIn 1s ease-in-out',
         'float': 'float 6s ease-in-out infinite',
+        'spin-slow': 'spin 8s linear infinite',
       },
       keyframes: {
         fadeIn: {
