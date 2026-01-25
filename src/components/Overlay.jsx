@@ -65,6 +65,32 @@ const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaL
   )
 }
 
+const Tilt = ({ children }) => {
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+    const mouseX = useSpring(x, { stiffness: 50, damping: 20 })
+    const mouseY = useSpring(y, { stiffness: 50, damping: 20 })
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            const { clientX, clientY } = e
+            const { innerWidth, innerHeight } = window
+            const xPct = (clientX / innerWidth - 0.5)
+            const yPct = (clientY / innerHeight - 0.5)
+            x.set(xPct * 10)
+            y.set(yPct * -10)
+        }
+        window.addEventListener("mousemove", handleMouseMove)
+        return () => window.removeEventListener("mousemove", handleMouseMove)
+    }, [x, y])
+
+    return (
+        <motion.div style={{ rotateX: mouseY, rotateY: mouseX, perspective: 1000, transformStyle: "preserve-3d" }}>
+            {children}
+        </motion.div>
+    )
+}
+
 export const Overlay = () => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const nextDesert = useStore((state) => state.nextDesert)
@@ -74,13 +100,7 @@ export const Overlay = () => {
   const setDayNightCycle = useStore((state) => state.setDayNightCycle)
 
   const desert = deserts[currentDesertIndex]
-  const [introFinished, setIntroFinished] = useState(false)
   const [zenMode, setZenMode] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIntroFinished(true), 2000)
-    return () => clearTimeout(timer)
-  }, [])
 
   const handleKeyDown = (e, index) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -89,33 +109,12 @@ export const Overlay = () => {
   }
 
   return (
-    <>
-      <AnimatePresence>
-        {!introFinished && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black text-white pointer-events-none"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: 'blur(20px)' }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-          >
-             <motion.h1
-               initial={{ opacity: 0, scale: 0.9, letterSpacing: '0.1em', filter: 'blur(10px)' }}
-               animate={{ opacity: 1, scale: 1, letterSpacing: '0.2em', filter: 'blur(0px)' }}
-               transition={{ duration: 1.5, ease: "easeOut" }}
-               className="text-4xl md:text-6xl font-serif italic text-white/90"
-             >
-                Desert Dreams
-             </motion.h1>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <motion.div
+    <motion.div
         className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 flex flex-col justify-between p-8 md:p-12"
         initial={{ opacity: 0 }}
-        animate={{ opacity: introFinished ? 1 : 0 }}
-        transition={{ duration: 1, delay: 0.5 }}
-      >
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+    >
         {/* Zen Mode Toggle */}
         <div className="absolute top-8 left-8 pointer-events-auto z-50">
            <MagneticButton
@@ -123,7 +122,7 @@ export const Overlay = () => {
              className="text-white/40 hover:text-white transition-colors duration-300 group flex items-center gap-2 p-2"
              aria-label={zenMode ? "Show UI" : "Enable Zen Mode"}
            >
-             <div className="bg-white/5 backdrop-blur-sm p-3 rounded-full border border-white/5 hover:bg-white/10 transition-colors">
+             <div className="bg-white/5 backdrop-blur-sm p-3 rounded-full border border-white/5 hover:bg-white/10 transition-colors shadow-lg">
                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                  {zenMode ? (
                    <>
@@ -138,14 +137,14 @@ export const Overlay = () => {
                  )}
                </svg>
              </div>
-             <span className="text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-mono -ml-2">
+             <span className="text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-mono -ml-2 drop-shadow-md">
                {zenMode ? "Show UI" : "Zen Mode"}
              </span>
            </MagneticButton>
         </div>
 
         {/* Header */}
-        <div className={`pointer-events-auto max-w-2xl mt-8 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 -translate-x-20 blur-sm pointer-events-none' : 'opacity-100 translate-x-0 blur-0'}`}>
+        <div className={`pointer-events-auto max-w-4xl mt-8 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 -translate-x-20 blur-sm pointer-events-none' : 'opacity-100 translate-x-0 blur-0'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentDesertIndex}
@@ -154,42 +153,44 @@ export const Overlay = () => {
               exit={{ opacity: 0 }}
               className="relative"
             >
-              <div className="overflow-hidden mb-6">
-                <h1 className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/40 drop-shadow-glow tracking-tighter font-serif flex flex-wrap gap-x-6 pb-2">
-                  {desert.name.split(" ").map((word, wIndex) => (
-                    <span key={wIndex} className="inline-block whitespace-nowrap">
-                      {word.split("").map((char, cIndex) => (
-                        <motion.span
-                          key={`${wIndex}-${cIndex}`}
-                          initial={{ y: 40, opacity: 0, filter: 'blur(10px)' }}
-                          animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-                          exit={{ y: -40, opacity: 0, filter: 'blur(10px)' }}
-                          transition={{
-                            duration: 1.0,
-                            ease: [0.2, 0.65, 0.3, 0.9],
-                            delay: (wIndex * word.length + cIndex) * 0.04
-                          }}
-                          className="inline-block"
-                        >
-                          {char}
-                        </motion.span>
+              <Tilt>
+                  <div className="overflow-hidden mb-6 py-2">
+                    <h1 className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/40 drop-shadow-glow tracking-tighter font-serif flex flex-wrap gap-x-6 pb-2">
+                      {desert.name.split(" ").map((word, wIndex) => (
+                        <span key={wIndex} className="inline-block whitespace-nowrap">
+                          {word.split("").map((char, cIndex) => (
+                            <motion.span
+                              key={`${wIndex}-${cIndex}`}
+                              initial={{ y: 40, opacity: 0, filter: 'blur(10px)' }}
+                              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                              exit={{ y: -40, opacity: 0, filter: 'blur(10px)' }}
+                              transition={{
+                                duration: 1.0,
+                                ease: [0.2, 0.65, 0.3, 0.9],
+                                delay: (wIndex * word.length + cIndex) * 0.04
+                              }}
+                              className="inline-block hover:text-pastel-apricot transition-colors duration-300"
+                            >
+                              {char}
+                            </motion.span>
+                          ))}
+                        </span>
                       ))}
-                    </span>
-                  ))}
-                </h1>
-              </div>
+                    </h1>
+                  </div>
 
-              <div className="overflow-hidden max-w-lg">
-                <motion.p
-                  initial={{ x: -20, opacity: 0, filter: 'blur(5px)' }}
-                  animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
-                  exit={{ x: 20, opacity: 0, filter: 'blur(5px)' }}
-                  transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                  className="text-white/80 text-lg md:text-xl font-light leading-relaxed drop-shadow-md border-l border-white/30 pl-6"
-                >
-                  {desert.description}
-                </motion.p>
-              </div>
+                  <div className="overflow-hidden max-w-lg">
+                    <motion.p
+                      initial={{ x: -20, opacity: 0, filter: 'blur(5px)' }}
+                      animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
+                      exit={{ x: 20, opacity: 0, filter: 'blur(5px)' }}
+                      transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+                      className="text-white/80 text-lg md:text-xl font-light leading-relaxed drop-shadow-md border-l border-white/30 pl-6 backdrop-blur-sm"
+                    >
+                      {desert.description}
+                    </motion.p>
+                  </div>
+              </Tilt>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -215,17 +216,17 @@ export const Overlay = () => {
                       className="relative cursor-pointer group py-2"
                       onClick={() => setDesert(index)}
                       onKeyDown={(e) => handleKeyDown(e, index)}
-                      whileHover={{ scale: 1.2 }}
+                      whileHover={{ scale: 1.5 }}
                       whileTap={{ scale: 0.9 }}
                       role="button"
                       tabIndex={0}
                       aria-label={`Select ${deserts[index].name}`}
                   >
                       <motion.div
-                          className={`rounded-full transition-all duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.9)]' : 'bg-white/20 hover:bg-white/50'}`}
+                          className={`rounded-full transition-all duration-500 box-content border-2 ${index === currentDesertIndex ? 'bg-white border-white shadow-[0_0_15px_rgba(255,255,255,0.9)]' : 'bg-transparent border-white/30 group-hover:border-white/80'}`}
                           animate={{
-                              width: index === currentDesertIndex ? 12 : 6,
-                              height: index === currentDesertIndex ? 12 : 6,
+                              width: index === currentDesertIndex ? 8 : 6,
+                              height: index === currentDesertIndex ? 8 : 6,
                           }}
                       />
                   </motion.div>
@@ -247,10 +248,10 @@ export const Overlay = () => {
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
           <Soundscape />
-          <div className="glass-panel p-6 rounded-2xl w-72">
+          <div className="glass-panel p-6 rounded-2xl w-72 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
                 <label className="text-white text-[10px] font-bold tracking-[0.2em] uppercase opacity-70">Time of Day</label>
-                <span className="text-[10px] text-white font-mono bg-white/10 px-2 py-1 rounded border border-white/5">
+                <span className="text-[10px] text-white font-mono bg-white/10 px-2 py-1 rounded border border-white/5 shadow-inner">
                   {Math.floor(dayNightCycle * 24).toString().padStart(2, '0')}:00
                 </span>
             </div>
@@ -268,7 +269,7 @@ export const Overlay = () => {
               <motion.div
                 className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.6)] flex items-center justify-center z-10 pointer-events-none border-2 border-transparent group-hover:border-pastel-azure transition-colors"
                 style={{ left: `${dayNightCycle * 100}%`, x: '-50%' }}
-                whileHover={{ scale: 1.2 }}
+                whileHover={{ scale: 1.2, boxShadow: "0 0 25px rgba(255,255,255,0.8)" }}
                 layout
               >
                  {dayNightCycle > 0.25 && dayNightCycle < 0.75 ? (
@@ -303,7 +304,6 @@ export const Overlay = () => {
         <div className={`absolute bottom-8 right-8 text-white/30 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
         </div>
-      </motion.div>
-    </>
+    </motion.div>
   )
 }
