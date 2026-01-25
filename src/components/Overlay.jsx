@@ -3,8 +3,9 @@ import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { Soundscape } from './Soundscape'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
+import { useUISound } from '../hooks/useUISound'
 
-const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaLabel }) => {
+const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaLabel, onMouseEnter }) => {
   const ref = useRef(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
@@ -24,6 +25,7 @@ const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaL
             height: rect.height
         };
     }
+    if (onMouseEnter) onMouseEnter();
   }
 
   const handleMouseMove = (e) => {
@@ -99,12 +101,15 @@ export const Overlay = ({ started }) => {
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const setDayNightCycle = useStore((state) => state.setDayNightCycle)
 
+  const { play } = useUISound()
+
   const desert = deserts[currentDesertIndex]
   const [zenMode, setZenMode] = useState(false)
 
   const handleKeyDown = (e, index) => {
       if (e.key === 'Enter' || e.key === ' ') {
           setDesert(index);
+          play('click');
       }
   }
 
@@ -115,10 +120,17 @@ export const Overlay = ({ started }) => {
         animate={{ opacity: started ? 1 : 0, pointerEvents: started ? 'auto' : 'none' }}
         transition={{ duration: 1.5, ease: "easeOut" }}
     >
+        {/* Vignette Overlay */}
+        <div className="pointer-events-none fixed inset-0 z-0 bg-radial-vignette opacity-50" />
+
         {/* Zen Mode Toggle */}
         <div className="absolute top-8 left-8 pointer-events-auto z-50">
            <MagneticButton
-             onClick={() => setZenMode(!zenMode)}
+             onClick={() => {
+                setZenMode(!zenMode);
+                play('click');
+             }}
+             onMouseEnter={() => play('hover')}
              className="text-white/40 hover:text-white transition-colors duration-300 group flex items-center gap-2 p-2"
              aria-label={zenMode ? "Show UI" : "Enable Zen Mode"}
            >
@@ -144,12 +156,12 @@ export const Overlay = ({ started }) => {
         </div>
 
         {/* Header */}
-        <div className={`pointer-events-auto max-w-4xl mt-8 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 -translate-x-20 blur-sm pointer-events-none' : 'opacity-100 translate-x-0 blur-0'}`}>
+        <div className={`pointer-events-auto max-w-4xl mt-8 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] relative z-10 ${zenMode ? 'opacity-0 -translate-x-20 blur-sm pointer-events-none' : 'opacity-100 translate-x-0 blur-0'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentDesertIndex}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              animate={{ opacity: 1, transition: { staggerChildren: 0.05 } }}
               exit={{ opacity: 0 }}
               className="relative"
             >
@@ -167,9 +179,9 @@ export const Overlay = ({ started }) => {
                               transition={{
                                 duration: 1.0,
                                 ease: [0.2, 0.65, 0.3, 0.9],
-                                delay: (wIndex * word.length + cIndex) * 0.04
                               }}
                               className="inline-block hover:text-pastel-apricot transition-colors duration-300"
+                              onMouseEnter={() => play('hover')}
                             >
                               {char}
                             </motion.span>
@@ -200,7 +212,8 @@ export const Overlay = ({ started }) => {
 
           <div className="glass-panel rounded-full px-10 py-5 flex items-center gap-8">
             <MagneticButton
-              onClick={prevDesert}
+              onClick={() => { prevDesert(); play('click'); }}
+              onMouseEnter={() => play('hover')}
               className="text-white/50 hover:text-white transition-colors p-2"
               aria-label="Previous Desert"
             >
@@ -214,7 +227,8 @@ export const Overlay = ({ started }) => {
                   <motion.div
                       key={index}
                       className="relative cursor-pointer group py-2"
-                      onClick={() => setDesert(index)}
+                      onClick={() => { setDesert(index); play('click'); }}
+                      onMouseEnter={() => play('hover')}
                       onKeyDown={(e) => handleKeyDown(e, index)}
                       whileHover={{ scale: 1.5 }}
                       whileTap={{ scale: 0.9 }}
@@ -234,7 +248,8 @@ export const Overlay = ({ started }) => {
             </div>
 
             <MagneticButton
-              onClick={nextDesert}
+              onClick={() => { nextDesert(); play('click'); }}
+              onMouseEnter={() => play('hover')}
               className="text-white/50 hover:text-white transition-colors p-2"
               aria-label="Next Desert"
             >
@@ -256,7 +271,10 @@ export const Overlay = ({ started }) => {
                 </span>
             </div>
 
-            <div className="relative h-12 flex items-center group cursor-pointer">
+            <div
+                className="relative h-12 flex items-center group cursor-pointer"
+                onMouseEnter={() => play('hover')}
+            >
               {/* Track Background */}
               <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm border border-white/5 group-hover:h-3 transition-all duration-300">
                  <div

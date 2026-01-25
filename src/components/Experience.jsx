@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Bloom, Noise, Vignette, TiltShift2 } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Noise, Vignette, TiltShift2, ChromaticAberration } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
@@ -48,6 +48,8 @@ export const Experience = () => {
         <Vignette eskil={false} offset={0.05} darkness={0.4} />
         {/* TiltShift for miniature/dreamy focus - subtle vertical blur */}
         <TiltShift2 blur={0.1} />
+        {/* Chromatic Aberration for that lens imperfection feel */}
+        <ChromaticAberration offset={[0.002, 0.002]} />
       </EffectComposer>
 
       <OrbitControls
