@@ -17,7 +17,7 @@ function App() {
       <Loader started={started} onStarted={() => setStarted(true)} />
 
       {/* UI Overlay appears only after the user has entered */}
-      {started && <Overlay />}
+      <Overlay started={started} />
 
       <Canvas
         shadows

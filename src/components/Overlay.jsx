@@ -91,7 +91,7 @@ const Tilt = ({ children }) => {
     )
 }
 
-export const Overlay = () => {
+export const Overlay = ({ started }) => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const nextDesert = useStore((state) => state.nextDesert)
   const prevDesert = useStore((state) => state.prevDesert)
@@ -110,9 +110,9 @@ export const Overlay = () => {
 
   return (
     <motion.div
-        className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 flex flex-col justify-between p-8 md:p-12"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        className="absolute top-0 left-0 w-full h-full z-10 flex flex-col justify-between p-8 md:p-12"
+        initial={{ opacity: 0, pointerEvents: 'none' }}
+        animate={{ opacity: started ? 1 : 0, pointerEvents: started ? 'auto' : 'none' }}
         transition={{ duration: 1.5, ease: "easeOut" }}
     >
         {/* Zen Mode Toggle */}
