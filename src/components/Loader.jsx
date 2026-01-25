@@ -16,7 +16,8 @@ export const Loader = ({ onStarted, started }) => {
 
   useEffect(() => {
     if (loaded) {
-       const timer = setTimeout(() => setShowButton(true), 500)
+       // Short delay for visual pacing
+       const timer = setTimeout(() => setShowButton(true), 100)
        return () => clearTimeout(timer)
     }
   }, [loaded])

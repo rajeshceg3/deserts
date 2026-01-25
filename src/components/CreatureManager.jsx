@@ -6,6 +6,7 @@ import { Lizard } from './creatures/Lizard'
 import { Fox } from './creatures/Fox'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
+import { getTerrainHeight } from '../utils/terrainUtils'
 
 const CreatureMap = {
   Camel,
@@ -37,10 +38,13 @@ export const CreatureManager = () => {
         // Avoid center where camera might be looking or close to 0,0
         if (Math.abs(x) < 5 && Math.abs(z) < 5) continue
 
+        // Calculate correct Y position so creatures are on the ground
+        const y = getTerrainHeight(x, z, desert.terrainParams)
+
         list.push({
           id: `${type}-${i}`,
           Component: ComponentType,
-          position: [x, 0, z],
+          position: [x, y, z],
         })
       }
     })
