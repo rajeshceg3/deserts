@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Stars, Cloud } from '@react-three/drei'
 import { useStore } from '../store'
@@ -13,8 +13,6 @@ const NightStars = () => {
         if (starsRef.current?.material) {
             const dayness = Math.sin(dayNightCycle * Math.PI)
             // Fade out stars during the day.
-            // dayness is 1 at noon (0.5 cycle), 0 at midnight (0 or 1 cycle).
-            // We want stars visible when dayness is low.
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
 
             starsRef.current.material.transparent = true
@@ -44,6 +42,18 @@ export const Atmosphere = () => {
 
   const colorRef = useRef()
   const fogRef = useRef()
+
+  // Calculate cloud color based on time of day
+  const cloudColor = useMemo(() => {
+    const dayness = Math.sin(dayNightCycle * Math.PI)
+    const baseColor = new THREE.Color(desert.colors.sky)
+    const sunsetColor = new THREE.Color('#FF9A8B') // Soft sunset pink/orange
+
+    // Lerp towards sunset color when dayness is low (but not 0 which is night)
+    // Use a bell curve or specific range for sunset?
+    // Simplified: Mixing some sunset color as we approach night
+    return baseColor.lerp(sunsetColor, (1 - dayness) * 0.5)
+  }, [dayNightCycle, desert.colors.sky])
 
   useFrame((state, delta) => {
     // Determine target sky color based on Day/Night
@@ -77,7 +87,14 @@ export const Atmosphere = () => {
 
         {/* Subtle clouds for depth */}
         <group position={[0, 15, -20]}>
-            <Cloud opacity={0.3} speed={0.2} width={20} depth={5} segments={10} color={desert.colors.sky} />
+            <Cloud
+              opacity={0.3}
+              speed={0.2}
+              width={20}
+              depth={5}
+              segments={10}
+              color={cloudColor}
+            />
         </group>
     </>
   )
