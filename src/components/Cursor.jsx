@@ -12,8 +12,15 @@ export const Cursor = () => {
   const [isHovered, setIsHovered] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
 
   useEffect(() => {
+    // Hide custom cursor on touch devices to avoid double cursor/UX issues
+    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+        setIsTouch(true)
+        return
+    }
+
     const moveCursor = (e) => {
       mouseX.set(e.clientX)
       mouseY.set(e.clientY)
@@ -45,6 +52,8 @@ export const Cursor = () => {
       window.removeEventListener('mouseup', handleMouseUp)
     }
   }, [mouseX, mouseY, isVisible])
+
+  if (isTouch) return null
 
   return (
     <>

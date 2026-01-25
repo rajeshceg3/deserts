@@ -1,11 +1,9 @@
 import React, { useMemo, useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { createNoise2D } from 'simplex-noise'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
+import { getTerrainHeight } from '../utils/terrainUtils'
 import * as THREE from 'three'
-
-const noise2D = createNoise2D()
 
 export const Terrain = () => {
   const meshRef = useRef()
@@ -23,19 +21,20 @@ export const Terrain = () => {
   const isAnimating = useRef(true)
   const tempColor = useMemo(() => new THREE.Color(), [])
 
+  // Ref for frame counting to throttle expensive operations
+  const frameCount = useRef(0)
+
   // Generate target heights when desert changes
   useEffect(() => {
     isAnimating.current = true
-    const { height, scale } = desert.terrainParams
     const positions = geometry.attributes.position.array
     const count = geometry.attributes.position.count
 
     for (let i = 0; i < count; i++) {
       const x = positions[i * 3]
       const z = positions[i * 3 + 2]
-      // Simple noise generation
-      const y = noise2D(x / (10 * scale), z / (10 * scale)) * height * 1.5 + // Multiplier for better height
-                noise2D(x / (3 * scale), z / (3 * scale)) * (height / 2)
+
+      const y = getTerrainHeight(x, z, desert.terrainParams)
 
       targetHeights.current[i] = y
     }
@@ -43,6 +42,7 @@ export const Terrain = () => {
 
   useFrame((state, delta) => {
     if (!meshRef.current) return;
+    frameCount.current += 1;
 
     const material = meshRef.current.material;
     tempColor.set(desert.colors.ground);
@@ -68,9 +68,14 @@ export const Terrain = () => {
 
       if (stillMoving) {
         meshRef.current.geometry.attributes.position.needsUpdate = true;
-        meshRef.current.geometry.computeVertexNormals(); // Expensive, but needed for lighting
+        // Throttle normal computation to every 3rd frame to save performance
+        if (frameCount.current % 3 === 0) {
+            meshRef.current.geometry.computeVertexNormals();
+        }
       } else {
         isAnimating.current = false;
+        // Ensure normals are perfect at the end
+        meshRef.current.geometry.computeVertexNormals();
       }
     }
 

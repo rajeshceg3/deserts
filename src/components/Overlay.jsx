@@ -301,7 +301,7 @@ export const Overlay = ({ started }) => {
         </div>
 
         {/* Footer / Instructions */}
-        <div className={`absolute bottom-8 right-8 text-white/30 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
+        <div className={`absolute bottom-8 right-8 text-white/60 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
         </div>
     </motion.div>

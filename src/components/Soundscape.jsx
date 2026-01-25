@@ -61,33 +61,48 @@ export const Soundscape = () => {
   };
 
   const toggleSound = () => {
-    if (!audioContext.current) {
-      initAudio();
-    }
+    try {
+      if (!audioContext.current) {
+        initAudio();
+      }
 
-    // Resume if suspended (browser policy often suspends initially)
-    if (audioContext.current.state === 'suspended') {
-      audioContext.current.resume();
-    }
+      // Resume if suspended (browser policy often suspends initially)
+      if (audioContext.current.state === 'suspended') {
+        audioContext.current.resume();
+      }
 
-    const currentTime = audioContext.current.currentTime;
+      const currentTime = audioContext.current.currentTime;
 
-    if (isPlaying) {
-      // Fade out
-      gainNode.current.gain.cancelScheduledValues(currentTime);
-      gainNode.current.gain.exponentialRampToValueAtTime(
-        0.001,
-        currentTime + 1
-      );
+      if (isPlaying) {
+        // Fade out
+        gainNode.current.gain.cancelScheduledValues(currentTime);
+        gainNode.current.gain.exponentialRampToValueAtTime(
+          0.001,
+          currentTime + 1
+        );
+        // Ensure it goes to absolute zero after fade
+        gainNode.current.gain.setValueAtTime(0, currentTime + 1.1);
+        setIsPlaying(false);
+      } else {
+        // Fade in
+        gainNode.current.gain.cancelScheduledValues(currentTime);
+        // Exponential ramp requires starting from a non-zero value
+        const currentValue = gainNode.current.gain.value;
+        if (currentValue < 0.001) {
+            gainNode.current.gain.setValueAtTime(0.001, currentTime);
+        } else {
+            gainNode.current.gain.setValueAtTime(currentValue, currentTime);
+        }
+
+        gainNode.current.gain.exponentialRampToValueAtTime(
+          0.1,
+          currentTime + 1
+        );
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("Audio toggle failed:", error);
       setIsPlaying(false);
-    } else {
-      // Fade in
-      gainNode.current.gain.cancelScheduledValues(currentTime);
-      gainNode.current.gain.exponentialRampToValueAtTime(
-        0.1,
-        currentTime + 1
-      );
-      setIsPlaying(true);
     }
   };
 
