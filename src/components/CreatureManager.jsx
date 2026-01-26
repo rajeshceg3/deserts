@@ -21,34 +21,40 @@ export const CreatureManager = () => {
   const [creatures, setCreatures] = useState([])
 
   useEffect(() => {
-    const list = []
+    // Clear existing creatures immediately during transition
+    setCreatures([])
+
     if (!desert.creatures) {
-        setCreatures([])
         return
     }
 
-    desert.creatures.forEach((type) => {
-      const ComponentType = CreatureMap[type]
-      if (!ComponentType) return
+    const timer = setTimeout(() => {
+        const list = []
+        desert.creatures.forEach((type) => {
+          const ComponentType = CreatureMap[type]
+          if (!ComponentType) return
 
-      // Spawn 3 of each type
-      for (let i = 0; i < 3; i++) {
-        const x = (Math.random() - 0.5) * 40
-        const z = (Math.random() - 0.5) * 40
-        // Avoid center where camera might be looking or close to 0,0
-        if (Math.abs(x) < 5 && Math.abs(z) < 5) continue
+          // Spawn 3 of each type
+          for (let i = 0; i < 3; i++) {
+            const x = (Math.random() - 0.5) * 40
+            const z = (Math.random() - 0.5) * 40
+            // Avoid center where camera might be looking or close to 0,0
+            if (Math.abs(x) < 5 && Math.abs(z) < 5) continue
 
-        // Calculate correct Y position so creatures are on the ground
-        const y = getTerrainHeight(x, z, desert.terrainParams)
+            // Calculate correct Y position so creatures are on the ground
+            const y = getTerrainHeight(x, z, desert.terrainParams)
 
-        list.push({
-          id: `${type}-${i}`,
-          Component: ComponentType,
-          position: [x, y, z],
+            list.push({
+              id: `${type}-${i}`,
+              Component: ComponentType,
+              position: [x, y, z],
+            })
+          }
         })
-      }
-    })
-    setCreatures(list)
+        setCreatures(list)
+    }, 1500) // Delay spawn to match terrain morph duration (stabilization)
+
+    return () => clearTimeout(timer)
   }, [desert])
 
   return (

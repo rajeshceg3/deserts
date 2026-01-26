@@ -131,7 +131,7 @@ export const Overlay = ({ started }) => {
                 play('click');
              }}
              onMouseEnter={() => play('hover')}
-             className="text-white/40 hover:text-white transition-colors duration-300 group flex items-center gap-2 p-2"
+             className="text-white/80 hover:text-white transition-colors duration-300 group flex items-center gap-2 p-2"
              aria-label={zenMode ? "Show UI" : "Enable Zen Mode"}
            >
              <div className="bg-white/5 backdrop-blur-sm p-3 rounded-full border border-white/5 hover:bg-white/10 transition-colors shadow-lg">
@@ -214,7 +214,7 @@ export const Overlay = ({ started }) => {
             <MagneticButton
               onClick={() => { prevDesert(); play('click'); }}
               onMouseEnter={() => play('hover')}
-              className="text-white/50 hover:text-white transition-colors p-2"
+              className="text-white/80 hover:text-white transition-colors p-2"
               aria-label="Previous Desert"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -250,7 +250,7 @@ export const Overlay = ({ started }) => {
             <MagneticButton
               onClick={() => { nextDesert(); play('click'); }}
               onMouseEnter={() => play('hover')}
-              className="text-white/50 hover:text-white transition-colors p-2"
+              className="text-white/80 hover:text-white transition-colors p-2"
               aria-label="Next Desert"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -310,7 +310,7 @@ export const Overlay = ({ started }) => {
               />
             </div>
 
-            <div className="flex justify-between text-[8px] text-white/30 mt-4 font-mono uppercase tracking-widest">
+            <div className="flex justify-between text-[8px] text-white/60 mt-4 font-mono uppercase tracking-widest">
                 <span>Night</span>
                 <span>Day</span>
                 <span>Night</span>
