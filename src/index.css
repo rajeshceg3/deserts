@@ -16,6 +16,22 @@
   :focus-visible {
     @apply outline-none ring-2 ring-pastel-rose ring-offset-2 ring-offset-black;
   }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
 }
 
 /* Global Noise Overlay */
@@ -46,9 +62,18 @@
   90% { transform: translate(-10%, 10%); }
 }
 
-/* Glass Utility - Enhanced */
+/* Glass Utility - Premium */
 .glass-panel {
-  @apply backdrop-blur-xl backdrop-saturate-150 bg-white/10 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  @apply backdrop-blur-xl backdrop-saturate-150 bg-white/10 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] transition-all duration-300;
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+.glass-panel:hover {
+  @apply bg-white/15 border-white/30;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 /* Subtle Gradient Animation for Text */

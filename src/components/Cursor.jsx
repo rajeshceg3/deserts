@@ -5,13 +5,16 @@ export const Cursor = () => {
   const mouseX = useMotionValue(-100)
   const mouseY = useMotionValue(-100)
 
-  const springConfig = { damping: 20, stiffness: 400, mass: 0.5 }
+  // Fluid physics for the trailing circle
+  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 }
   const springX = useSpring(mouseX, springConfig)
   const springY = useSpring(mouseY, springConfig)
 
   const [isHovered, setIsHovered] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
+  const [ripples, setRipples] = useState([])
+
   const [isTouch] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
       return true
@@ -30,15 +33,21 @@ export const Cursor = () => {
 
     const checkHover = (e) => {
       const target = e.target;
+      // Expanded interactive elements selector
       const isInteractive =
-        target.matches('button, a, input, select, textarea, [role="button"], [role="link"], .cursor-pointer') ||
-        target.closest('button, a, input, select, textarea, [role="button"], [role="link"], .cursor-pointer') ||
+        target.matches('button, a, input, select, textarea, [role="button"], [role="link"], .cursor-pointer, .interactive') ||
+        target.closest('button, a, input, select, textarea, [role="button"], [role="link"], .cursor-pointer, .interactive') ||
         window.getComputedStyle(target).cursor === 'pointer';
 
       setIsHovered(!!isInteractive)
     }
 
-    const handleMouseDown = () => setIsClicked(true)
+    const handleMouseDown = (e) => {
+        setIsClicked(true)
+        // Add a new ripple
+        const newRipple = { id: Date.now(), x: e.clientX, y: e.clientY }
+        setRipples(prev => [...prev.slice(-4), newRipple]) // Keep last 5 ripples
+    }
     const handleMouseUp = () => setIsClicked(false)
 
     window.addEventListener('mousemove', moveCursor)
@@ -54,13 +63,73 @@ export const Cursor = () => {
     }
   }, [mouseX, mouseY, isVisible, isTouch])
 
+  // Cleanup ripples
+  useEffect(() => {
+      if (ripples.length > 0) {
+          const timer = setTimeout(() => {
+              setRipples(prev => prev.slice(1))
+          }, 1000)
+          return () => clearTimeout(timer)
+      }
+  }, [ripples])
+
   if (isTouch) return null
 
   return (
     <>
+      {/* Ripples */}
+      <AnimatePresence>
+          {ripples.map((ripple) => (
+              <motion.div
+                  key={ripple.id}
+                  className="fixed pointer-events-none z-[9997] border border-white/50 rounded-full mix-blend-exclusion"
+                  initial={{
+                      left: ripple.x,
+                      top: ripple.y,
+                      width: 10,
+                      height: 10,
+                      x: '-50%',
+                      y: '-50%',
+                      opacity: 1,
+                      scale: 1
+                  }}
+                  animate={{
+                      width: 100,
+                      height: 100,
+                      opacity: 0,
+                      scale: 1.5
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+          ))}
+      </AnimatePresence>
+
+      {/* Trailing Circle */}
+      <motion.div
+        className="fixed top-0 left-0 w-8 h-8 border rounded-full pointer-events-none z-[9998] mix-blend-exclusion transition-colors duration-300"
+        style={{
+          x: springX,
+          y: springY,
+          translateX: '-50%',
+          translateY: '-50%',
+          opacity: isVisible ? 1 : 0,
+          borderColor: 'rgba(255, 255, 255, 0.8)'
+        }}
+        animate={{
+          scale: isClicked ? 0.8 : (isHovered ? 2.5 : 1),
+          backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+          borderWidth: isHovered ? '1px' : '2px',
+        }}
+        transition={{
+          scale: { duration: 0.2 },
+          backgroundColor: { duration: 0.2 }
+        }}
+      />
+
       {/* Main Cursor Dot */}
       <motion.div
-        className="fixed top-0 left-0 w-3 h-3 bg-white rounded-full pointer-events-none z-[9999] mix-blend-exclusion"
+        className="fixed top-0 left-0 w-3 h-3 bg-white rounded-full pointer-events-none z-[9999] mix-blend-exclusion backdrop-invert"
         style={{
           x: mouseX,
           y: mouseY,
@@ -69,30 +138,22 @@ export const Cursor = () => {
           opacity: isVisible ? 1 : 0
         }}
         animate={{
-            scale: isClicked ? 0.5 : 1
+            scale: isClicked ? 0.5 : (isHovered ? 0 : 1) // Disappear when hovering (the ring takes over) or scale down on click
         }}
       />
 
-      {/* Trailing Circle */}
+      {/* Hover Icon (optional, e.g. Drag indicator) */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 border border-white rounded-full pointer-events-none z-[9998] mix-blend-exclusion"
-        style={{
-          x: springX,
-          y: springY,
-          translateX: '-50%',
-          translateY: '-50%',
-          opacity: isVisible ? 1 : 0
-        }}
-        animate={{
-          scale: isClicked ? 0.8 : (isHovered ? 2.5 : 1),
-          backgroundColor: isHovered ? 'rgba(255, 255, 255, 1)' : 'transparent',
-          borderColor: isHovered ? 'transparent' : 'white'
-        }}
-        transition={{
-          scale: { duration: 0.2 },
-          backgroundColor: { duration: 0.2 }
-        }}
-      />
+          className="fixed top-0 left-0 pointer-events-none z-[9999] text-white mix-blend-exclusion text-[10px] font-mono tracking-widest uppercase"
+          style={{
+              x: mouseX,
+              y: mouseY,
+              translateX: '-50%',
+              translateY: '20px',
+              opacity: isHovered ? 1 : 0
+          }}
+      >
+      </motion.div>
     </>
   )
 }
