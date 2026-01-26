@@ -1,7 +1,15 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 export const useUISound = () => {
   const audioContext = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioContext.current) {
+        audioContext.current.close().catch(e => console.error("Error closing AudioContext:", e));
+      }
+    }
+  }, [])
 
   const initAudio = () => {
     if (!audioContext.current) {

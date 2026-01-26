@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, Bloom, Noise, Vignette, TiltShift2, ChromaticAberration } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
@@ -14,6 +14,11 @@ export const Experience = () => {
 
   // Ref for lights to animate
   const directionalLightRef = useRef()
+
+  // Reusable objects to prevent memory leaks in loop
+  const sunColorStart = useMemo(() => new THREE.Color('#FFF5E0'), [])
+  const sunColorEnd = useMemo(() => new THREE.Color('#FF8C00'), [])
+  const tempColor = useMemo(() => new THREE.Color(), [])
 
   useFrame(() => {
     // Simple cycle logic
@@ -32,8 +37,8 @@ export const Experience = () => {
 
         // Color temperature shift?
         // Noon: White, Dawn/Dusk: Orange
-        const sunColor = new THREE.Color('#FFF5E0').lerp(new THREE.Color('#FF8C00'), 1 - Math.sin(dayNightCycle * Math.PI))
-        directionalLightRef.current.color = sunColor
+        tempColor.copy(sunColorStart).lerp(sunColorEnd, 1 - Math.sin(dayNightCycle * Math.PI))
+        directionalLightRef.current.color.copy(tempColor)
     }
   })
 
