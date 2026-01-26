@@ -16,7 +16,6 @@ export const Loader = ({ onStarted, started }) => {
 
   useEffect(() => {
     if (loaded) {
-       // Short delay for visual pacing
        const timer = setTimeout(() => setShowButton(true), 100)
        return () => clearTimeout(timer)
     }
@@ -26,63 +25,86 @@ export const Loader = ({ onStarted, started }) => {
     <AnimatePresence mode="wait">
         {!started && (
             <motion.div
-              className="fixed inset-0 z-[100] flex flex-col items-center justify-center text-white overflow-hidden"
-              style={{
-                background: 'radial-gradient(circle at center, #F0AFA0 0%, #F2D1C9 40%, #DCD6F7 100%)'
-              }}
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center text-white overflow-hidden bg-gradient-to-br from-pastel-rose via-pastel-lilac to-pastel-mint"
               initial={{ opacity: 1 }}
               exit={{
                 opacity: 0,
                 scale: 1.1,
                 filter: 'blur(20px)',
-                transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] }
+                transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] }
               }}
               key="loader"
             >
-              {/* Decorative background elements */}
-              <div className="absolute inset-0 opacity-20 noise-overlay" />
+              {/* Noise Overlay */}
+              <div className="absolute inset-0 opacity-10 noise-overlay" />
 
-              <div className="relative w-64 h-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
-                 <motion.div
-                   className="absolute left-0 top-0 bottom-0 bg-white box-shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-                   initial={{ width: 0 }}
-                   animate={{ width: `${progress}%` }}
-                   transition={{ duration: 0.1 }}
-                 />
+              {/* Circular Progress Structure */}
+              <div className="relative z-10 flex flex-col items-center">
+                  <div className="relative w-32 h-32 mb-8">
+                      {/* Background Circle */}
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                          <motion.circle
+                              cx="50"
+                              cy="50"
+                              r="45"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1"
+                              className="text-white/20"
+                              animate={{ opacity: [0.2, 0.4, 0.2] }}
+                              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                          {/* Progress Circle */}
+                          <motion.circle
+                              cx="50"
+                              cy="50"
+                              r="45"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                              initial={{ pathLength: 0 }}
+                              animate={{ pathLength: progress / 100 }}
+                              transition={{ duration: 0.5, ease: "easeOut" }}
+                          />
+                      </svg>
+
+                      {/* Center Text */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="font-mono text-sm tracking-widest text-white/80">
+                              {Math.round(progress)}%
+                          </span>
+                      </div>
+                  </div>
+
+                  <div className="h-16 flex items-center justify-center">
+                     {!loaded ? (
+                         <motion.span
+                           initial={{ opacity: 0 }}
+                           animate={{ opacity: 1 }}
+                           exit={{ opacity: 0 }}
+                           className="font-serif italic text-lg text-white/60"
+                         >
+                           Building Atmosphere...
+                         </motion.span>
+                     ) : (
+                        <AnimatePresence>
+                            {showButton && (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    whileHover={{ scale: 1.05, letterSpacing: "0.2em" }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={onStarted}
+                                    className="px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30"
+                                >
+                                    Enter Experience
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
+                     )}
+                  </div>
               </div>
-
-              <motion.div className="mt-8 text-center h-12 relative z-10">
-                 {!loaded ? (
-                     <motion.span
-                       key="loading"
-                       initial={{ opacity: 0 }}
-                       animate={{
-                         opacity: [0.4, 1, 0.4],
-                         transition: { repeat: Infinity, duration: 2, ease: "easeInOut" }
-                       }}
-                       exit={{ opacity: 0 }}
-                       className="font-mono text-xs tracking-[0.3em] uppercase drop-shadow-md"
-                     >
-                       Loading World... {Math.round(progress)}%
-                     </motion.span>
-                 ) : (
-                    <AnimatePresence>
-                        {showButton && (
-                            <motion.button
-                                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                whileHover={{ scale: 1.1, letterSpacing: "0.5em" }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onStarted}
-                                className="font-serif italic text-3xl md:text-4xl tracking-widest cursor-pointer text-white drop-shadow-lg"
-                                style={{ textShadow: '0 0 20px rgba(255,255,255,0.5)' }}
-                            >
-                                Enter
-                            </motion.button>
-                        )}
-                    </AnimatePresence>
-                 )}
-              </motion.div>
             </motion.div>
         )}
     </AnimatePresence>
