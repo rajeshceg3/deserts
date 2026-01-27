@@ -105,6 +105,7 @@ export const Overlay = ({ started }) => {
 
   const desert = deserts[currentDesertIndex]
   const [zenMode, setZenMode] = useState(false)
+  const [isTimeFocused, setIsTimeFocused] = useState(false)
 
   const handleKeyDown = (e, index) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -309,7 +310,7 @@ export const Overlay = ({ started }) => {
 
               {/* Draggable Thumb */}
               <motion.div
-                  className="absolute top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center justify-center z-10 pointer-events-none"
+                  className={`absolute top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center justify-center z-10 pointer-events-none transition-shadow duration-200 ${isTimeFocused ? 'ring-4 ring-pastel-mint ring-opacity-50' : ''}`}
                   style={{ left: `${dayNightCycle * 100}%`, x: '-50%' }}
               >
                    <motion.div
@@ -333,6 +334,8 @@ export const Overlay = ({ started }) => {
                   step="0.001"
                   value={dayNightCycle}
                   onChange={(e) => setDayNightCycle(parseFloat(e.target.value))}
+                  onFocus={() => setIsTimeFocused(true)}
+                  onBlur={() => setIsTimeFocused(false)}
                   className="w-full relative z-20 opacity-0 cursor-pointer h-full"
                   aria-label="Time of Day"
               />

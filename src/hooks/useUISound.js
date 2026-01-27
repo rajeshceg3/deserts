@@ -1,28 +1,22 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
+
+// Singleton instance to prevent multiple AudioContexts
+let audioContext = null;
 
 export const useUISound = () => {
-  const audioContext = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (audioContext.current) {
-        audioContext.current.close().catch(e => console.error("Error closing AudioContext:", e));
-      }
-    }
-  }, [])
 
   const initAudio = () => {
-    if (!audioContext.current) {
-      audioContext.current = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (audioContext.current.state === 'suspended') {
-      audioContext.current.resume();
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
     }
   };
 
   const play = useCallback((type) => {
     initAudio();
-    const ctx = audioContext.current;
+    const ctx = audioContext;
     if (!ctx) return;
 
     const osc = ctx.createOscillator();
