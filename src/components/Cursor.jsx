@@ -14,6 +14,7 @@ export const Cursor = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
   const [ripples, setRipples] = useState([])
+  const [trail, setTrail] = useState([])
 
   const [isTouch] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
@@ -26,9 +27,11 @@ export const Cursor = () => {
     if (isTouch) return
 
     const moveCursor = (e) => {
-      mouseX.set(e.clientX)
-      mouseY.set(e.clientY)
+      const { clientX, clientY } = e
+      mouseX.set(clientX)
+      mouseY.set(clientY)
       if (!isVisible) setIsVisible(true)
+      setTrail((prev) => [...prev, { x: clientX, y: clientY }].slice(-20))
     }
 
     const checkHover = (e) => {
@@ -77,6 +80,19 @@ export const Cursor = () => {
 
   return (
     <>
+      {/* Trail */}
+      <AnimatePresence>
+        {trail.map((point, index) => (
+          <motion.div
+            key={index}
+            className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9995] mix-blend-exclusion"
+            initial={{ x: point.x - 4, y: point.y - 4, scale: 1, opacity: 1 }}
+            animate={{ scale: 0, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: 'easeOut' }}
+          />
+        ))}
+      </AnimatePresence>
       {/* Glow Effect */}
       <motion.div
         className="fixed top-0 left-0 w-32 h-32 rounded-full pointer-events-none z-[9996] mix-blend-exclusion"
