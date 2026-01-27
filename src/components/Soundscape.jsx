@@ -127,6 +127,7 @@ export const Soundscape = () => {
         onClick={toggleSound}
         className="bg-black/30 backdrop-blur-md text-white p-4 rounded-full border border-white/10 hover:bg-white/10 transition-colors"
         aria-label={isPlaying ? 'Mute Ambient Sound' : 'Play Ambient Sound'}
+        title="Toggle Ambient Sound"
       >
         {isPlaying ? (
           <svg
@@ -141,8 +142,7 @@ export const Soundscape = () => {
             strokeLinejoin="round"
           >
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
           </svg>
         ) : (
           <svg
@@ -157,7 +157,8 @@ export const Soundscape = () => {
             strokeLinejoin="round"
           >
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
           </svg>
         )}
       </button>

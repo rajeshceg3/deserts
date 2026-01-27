@@ -96,7 +96,7 @@ export const Loader = ({ onStarted, started }) => {
                                     whileHover={{ scale: 1.05, letterSpacing: "0.2em" }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={onStarted}
-                                    className="px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30"
+                                    className="px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                                 >
                                     Enter Experience
                                 </motion.button>
