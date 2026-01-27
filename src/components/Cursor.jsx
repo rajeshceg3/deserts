@@ -77,6 +77,21 @@ export const Cursor = () => {
 
   return (
     <>
+      {/* Glow Effect */}
+      <motion.div
+        className="fixed top-0 left-0 w-32 h-32 rounded-full pointer-events-none z-[9996] mix-blend-exclusion"
+        style={{
+          x: springX,
+          y: springY,
+          translateX: '-50%',
+          translateY: '-50%',
+          opacity: isVisible ? 0.4 : 0,
+          background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
+          filter: 'blur(10px)'
+        }}
+        transition={{ opacity: { duration: 0.2 } }}
+      />
+
       {/* Ripples */}
       <AnimatePresence>
           {ripples.map((ripple) => (
