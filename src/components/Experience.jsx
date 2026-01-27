@@ -46,11 +46,11 @@ export const Experience = () => {
     <>
       <EffectComposer disableNormalPass>
         {/* Dreamier, slightly stronger bloom for that magical feel */}
-        <Bloom luminanceThreshold={0.55} mipmapBlur intensity={0.6} radius={0.6} />
+        <Bloom luminanceThreshold={0.55} mipmapBlur intensity={0.8} radius={0.7} />
         {/* Film grain for texture - subtle */}
         <Noise opacity={0.035} />
         {/* Cinematic vignette */}
-        <Vignette eskil={false} offset={0.05} darkness={0.4} />
+        <Vignette eskil={false} offset={0.05} darkness={0.5} />
         {/* TiltShift for miniature/dreamy focus - subtle vertical blur */}
         <TiltShift2 blur={0.1} />
         {/* Chromatic Aberration for that lens imperfection feel */}

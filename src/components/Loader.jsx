@@ -3,16 +3,18 @@ import { useProgress } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const Loader = ({ onStarted, started }) => {
-  const { progress } = useProgress()
+  const { progress, active } = useProgress()
   const [loaded, setLoaded] = useState(false)
   const [showButton, setShowButton] = useState(false)
 
   useEffect(() => {
-    if (progress >= 100) {
-      const timer = setTimeout(() => setLoaded(true), 500)
+    // If progress is 100 or nothing is loading (active is false), we are done.
+    // We also want to ensure a minimum display time for the loader, so we can use a timeout.
+    if (progress >= 100 || (!active && progress === 0)) {
+      const timer = setTimeout(() => setLoaded(true), 1000)
       return () => clearTimeout(timer)
     }
-  }, [progress])
+  }, [progress, active])
 
   useEffect(() => {
     if (loaded) {
@@ -29,14 +31,14 @@ export const Loader = ({ onStarted, started }) => {
               initial={{ opacity: 1 }}
               exit={{
                 opacity: 0,
-                scale: 1.1,
-                filter: 'blur(20px)',
-                transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] }
+                scale: 1.5,
+                filter: 'blur(10px)',
+                transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] }
               }}
               key="loader"
             >
               {/* Noise Overlay */}
-              <div className="absolute inset-0 opacity-10 noise-overlay" />
+              <div className="absolute inset-0 opacity-10 noise-overlay pointer-events-none" />
 
               {/* Circular Progress Structure */}
               <div className="relative z-10 flex flex-col items-center">
@@ -104,6 +106,16 @@ export const Loader = ({ onStarted, started }) => {
                         </AnimatePresence>
                      )}
                   </div>
+
+                  {/* Headphones Recommendation */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: loaded ? 0.5 : 0 }}
+                    transition={{ delay: 1, duration: 1 }}
+                    className="absolute bottom-12 text-[10px] font-mono tracking-[0.3em] uppercase text-white/40"
+                  >
+                    Headphones Recommended
+                  </motion.div>
               </div>
             </motion.div>
         )}

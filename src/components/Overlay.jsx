@@ -170,6 +170,21 @@ export const Overlay = ({ started }) => {
               className="relative"
             >
               <Tilt>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.8 }}
+                    className="mb-4 flex items-center gap-4"
+                  >
+                     <span className="font-serif italic text-2xl text-white/40">
+                       {(currentDesertIndex + 1).toString().padStart(2, '0')}
+                     </span>
+                     <div className="h-[1px] w-12 bg-white/20" />
+                     <span className="font-serif italic text-xl text-white/40">
+                       {deserts.length.toString().padStart(2, '0')}
+                     </span>
+                  </motion.div>
+
                   <div className="overflow-hidden mb-6 py-2">
                     <h1 className="text-8xl md:text-[10rem] font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50 drop-shadow-2xl tracking-tighter font-serif flex flex-wrap gap-x-8 pb-4">
                       {desert.name.split(" ").map((word, wIndex) => (
@@ -177,14 +192,19 @@ export const Overlay = ({ started }) => {
                           {word.split("").map((char, cIndex) => (
                             <motion.span
                               key={`${wIndex}-${cIndex}`}
-                              initial={{ y: 40, opacity: 0, filter: 'blur(10px)' }}
-                              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-                              exit={{ y: -40, opacity: 0, filter: 'blur(10px)' }}
-                              transition={{
-                                duration: 1.0,
-                                ease: [0.2, 0.65, 0.3, 0.9],
+                              variants={{
+                                hidden: { y: 100, opacity: 0, filter: 'blur(20px)' },
+                                visible: { y: 0, opacity: 1, filter: 'blur(0px)' }
                               }}
-                              className="inline-block hover:text-pastel-apricot transition-colors duration-300"
+                              initial="hidden"
+                              animate="visible"
+                              exit="hidden"
+                              transition={{
+                                duration: 1.2,
+                                ease: [0.2, 0.65, 0.3, 0.9],
+                                delay: (wIndex * 5 + cIndex) * 0.03
+                              }}
+                              className="inline-block hover:text-pastel-apricot transition-colors duration-300 cursor-default"
                               onMouseEnter={() => play('hover')}
                             >
                               {char}
@@ -283,7 +303,9 @@ export const Overlay = ({ started }) => {
 
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
-          <Soundscape />
+          <div title="Toggle Ambient Sound" className="hover:scale-105 transition-transform duration-300">
+            <Soundscape />
+          </div>
           <div className="glass-panel p-6 rounded-2xl w-80 shadow-2xl mt-6 border border-white/10 backdrop-blur-2xl">
             <div className="flex justify-between items-end mb-6">
                 <label className="text-xs font-bold tracking-[0.2em] uppercase text-white/60">Time of Day</label>
@@ -295,33 +317,30 @@ export const Overlay = ({ started }) => {
             </div>
 
             <div
-                className="relative h-14 flex items-center group"
+                className="relative h-24 flex items-center group"
                 onMouseEnter={() => play('hover')}
             >
-              {/* Custom Track */}
-              <div className="absolute left-0 right-0 h-2 rounded-full overflow-hidden bg-white/10 border border-white/5">
-                   <div
-                       className="absolute inset-0 opacity-80"
-                       style={{
-                           background: 'linear-gradient(90deg, #1a1a2e 0%, #F0AFA0 25%, #87CEEB 50%, #F0AFA0 75%, #1a1a2e 100%)'
-                       }}
-                   />
-              </div>
+              {/* Custom Track - Horizon */}
+              <div className="absolute left-0 right-0 top-1/2 h-px bg-white/20"></div>
 
-              {/* Draggable Thumb */}
+              {/* Draggable Thumb - Orbiting Sun/Moon */}
               <motion.div
-                  className={`absolute top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center justify-center z-10 pointer-events-none transition-shadow duration-200 ${isTimeFocused ? 'ring-4 ring-pastel-mint ring-opacity-50' : ''}`}
-                  style={{ left: `${dayNightCycle * 100}%`, x: '-50%' }}
+                  className={`absolute top-1/2 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center z-10 pointer-events-none transition-all duration-200 ${isTimeFocused ? 'scale-110 border-white/40' : ''}`}
+                  style={{
+                      left: `${dayNightCycle * 100}%`,
+                      x: '-50%',
+                      y: '-50%'
+                  }}
               >
                    <motion.div
                       animate={{ rotate: dayNightCycle * 360 }}
-                      className="text-black/80"
+                      className="text-white relative"
                    >
                       {/* Icon */}
                       {dayNightCycle > 0.25 && dayNightCycle < 0.75 ? (
-                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1.5" className="drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                       ) : (
-                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#6366F1" stroke="#6366F1" strokeWidth="1.5" className="drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                       )}
                    </motion.div>
               </motion.div>
