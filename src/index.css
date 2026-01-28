@@ -7,6 +7,7 @@
 @layer base {
   body {
     @apply font-sans bg-black overflow-hidden text-white antialiased selection:bg-pastel-rose selection:text-black cursor-none;
+    touch-action: none;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;

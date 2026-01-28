@@ -88,7 +88,7 @@ export const Terrain = () => {
     if (Math.abs(material.roughness - targetRoughness) > 0.01) {
       material.roughness = THREE.MathUtils.lerp(material.roughness, targetRoughness, delta);
     }
-  }, [desert]);
+  });
 
   return (
     <mesh ref={meshRef} geometry={geometry} receiveShadow castShadow>

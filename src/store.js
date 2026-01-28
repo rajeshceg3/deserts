@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { deserts } from './data/deserts'
 
 export const useStore = create((set) => ({
   currentDesertIndex: 0,
@@ -7,11 +8,11 @@ export const useStore = create((set) => ({
   showInfo: false,
 
   nextDesert: () => set((state) => ({
-    currentDesertIndex: (state.currentDesertIndex + 1) % 5
+    currentDesertIndex: (state.currentDesertIndex + 1) % deserts.length
   })),
 
   prevDesert: () => set((state) => ({
-    currentDesertIndex: (state.currentDesertIndex - 1 + 5) % 5
+    currentDesertIndex: (state.currentDesertIndex - 1 + deserts.length) % deserts.length
   })),
 
   setDesert: (index) => set({ currentDesertIndex: index }),
