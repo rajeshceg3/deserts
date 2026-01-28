@@ -6,15 +6,20 @@ export const Loader = ({ onStarted, started }) => {
   const { progress, active } = useProgress()
   const [loaded, setLoaded] = useState(false)
   const [showButton, setShowButton] = useState(false)
+  const [completionDetected, setCompletionDetected] = useState(false)
 
   useEffect(() => {
-    // If progress is 100 or nothing is loading (active is false), we are done.
-    // We also want to ensure a minimum display time for the loader, so we can use a timeout.
-    if (progress >= 100 || (!active && progress === 0)) {
+    if ((progress >= 100 || (!active && progress === 0)) && !completionDetected) {
+      setCompletionDetected(true)
+    }
+  }, [progress, active, completionDetected])
+
+  useEffect(() => {
+    if (completionDetected && !loaded) {
       const timer = setTimeout(() => setLoaded(true), 1000)
       return () => clearTimeout(timer)
     }
-  }, [progress, active])
+  }, [completionDetected, loaded])
 
   useEffect(() => {
     if (loaded) {
@@ -27,6 +32,8 @@ export const Loader = ({ onStarted, started }) => {
     <AnimatePresence mode="wait">
         {!started && (
             <motion.div
+              role="dialog"
+              aria-label="Loading Application"
               className="fixed inset-0 z-[100] flex flex-col items-center justify-center text-white overflow-hidden"
               initial={{ opacity: 1 }}
               exit={{
@@ -55,7 +62,7 @@ export const Loader = ({ onStarted, started }) => {
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="1"
-                              className="text-white/20"
+                              className="text-white/40"
                               animate={{ opacity: [0.2, 0.4, 0.2] }}
                               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                           />

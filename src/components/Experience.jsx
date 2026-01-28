@@ -50,9 +50,11 @@ export const Experience = () => {
         const intensity = Math.max(0, Math.sin(dayNightCycle * Math.PI))
         directionalLightRef.current.intensity = intensity * 1.5 // Brighter sun
 
-        // Color temperature shift?
-        // Noon: White, Dawn/Dusk: Orange
-        tempColor.copy(sunColorStart).lerp(sunColorEnd, 1 - Math.sin(dayNightCycle * Math.PI))
+        // Color temperature shift
+        // Noon: White, Dawn/Dusk: Orange, Midnight: Dark
+        // Use power to keep it orange longer during dawn/dusk
+        const sunMix = Math.pow(Math.sin(dayNightCycle * Math.PI), 2)
+        tempColor.copy(sunColorEnd).lerp(sunColorStart, sunMix)
         directionalLightRef.current.color.copy(tempColor)
     }
   })
