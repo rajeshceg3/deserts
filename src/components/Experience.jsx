@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useEffect } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, Bloom, Noise, Vignette, TiltShift2, ChromaticAberration } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
@@ -6,11 +6,13 @@ import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
 import { Particles } from './Particles'
 import { useStore } from '../store'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { gsap } from 'gsap'
 
 export const Experience = () => {
   const dayNightCycle = useStore((state) => state.dayNightCycle)
+  const currentDesertIndex = useStore((state) => state.currentDesertIndex)
 
   // Ref for lights to animate
   const directionalLightRef = useRef()
@@ -19,6 +21,19 @@ export const Experience = () => {
   const sunColorStart = useMemo(() => new THREE.Color('#FFF5E0'), [])
   const sunColorEnd = useMemo(() => new THREE.Color('#FF8C00'), [])
   const tempColor = useMemo(() => new THREE.Color(), [])
+
+  const { camera } = useThree()
+
+  useEffect(() => {
+    const targetPosition = new THREE.Vector3(0, 5, 10)
+    gsap.to(camera.position, {
+      x: targetPosition.x,
+      y: targetPosition.y,
+      z: targetPosition.z,
+      duration: 2.5,
+      ease: 'power3.inOut',
+    })
+  }, [currentDesertIndex, camera])
 
   useFrame(() => {
     // Simple cycle logic

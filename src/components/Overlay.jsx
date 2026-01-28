@@ -11,7 +11,7 @@ const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaL
   const y = useMotionValue(0)
   const bounds = useRef({ left: 0, top: 0, width: 0, height: 0 })
 
-  const springConfig = { damping: 15, stiffness: 150, mass: 0.1 }
+  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 }
   const springX = useSpring(x, springConfig)
   const springY = useSpring(y, springConfig)
 
@@ -186,7 +186,7 @@ export const Overlay = ({ started }) => {
                   </motion.div>
 
                   <div className="overflow-hidden mb-6 py-2">
-                    <h1 className="text-8xl md:text-[10rem] font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50 drop-shadow-2xl tracking-tighter font-serif flex flex-wrap gap-x-8 pb-4">
+                    <h1 className="text-8xl md:text-10xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50 drop-shadow-text-strong tracking-tighter font-serif flex flex-wrap gap-x-8 pb-4">
                       {desert.name.split(" ").map((word, wIndex) => (
                         <span key={wIndex} className="inline-block whitespace-nowrap">
                           {word.split("").map((char, cIndex) => (
@@ -221,7 +221,7 @@ export const Overlay = ({ started }) => {
                       animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
                       exit={{ x: 20, opacity: 0, filter: 'blur(5px)' }}
                       transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                      className="text-white/90 text-xl md:text-2xl font-sans font-light leading-relaxed drop-shadow-md border-l-2 border-white/20 pl-8 backdrop-blur-sm selection:bg-white/30"
+                      className="text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong border-l-2 border-white/20 pl-8 backdrop-blur-sm selection:bg-white/30"
                     >
                       {desert.description}
                     </motion.p>

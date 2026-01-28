@@ -27,7 +27,7 @@ export const Loader = ({ onStarted, started }) => {
     <AnimatePresence mode="wait">
         {!started && (
             <motion.div
-              className="fixed inset-0 z-[100] flex flex-col items-center justify-center text-white overflow-hidden bg-gradient-to-br from-pastel-rose via-pastel-lilac to-pastel-mint"
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center text-white overflow-hidden"
               initial={{ opacity: 1 }}
               exit={{
                 opacity: 0,
@@ -37,6 +37,9 @@ export const Loader = ({ onStarted, started }) => {
               }}
               key="loader"
             >
+              {/* Animated Gradient Background */}
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-pastel-rose via-pastel-lilac to-pastel-mint loader-background" />
+
               {/* Noise Overlay */}
               <div className="absolute inset-0 opacity-10 noise-overlay pointer-events-none" />
 
