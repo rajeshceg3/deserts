@@ -325,7 +325,7 @@ export const Overlay = ({ started }) => {
 
               {/* Draggable Thumb - Orbiting Sun/Moon */}
               <motion.div
-                  className={`absolute top-1/2 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center z-10 pointer-events-none transition-all duration-200 ${isTimeFocused ? 'scale-110 border-white/40' : ''}`}
+                  className={`absolute top-1/2 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center z-10 pointer-events-none transition-all duration-200 ${isTimeFocused ? 'scale-110 border-white/40 ring-2 ring-white ring-offset-2 ring-offset-transparent' : ''}`}
                   style={{
                       left: `${dayNightCycle * 100}%`,
                       x: '-50%',

@@ -5,6 +5,7 @@ export const Soundscape = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioContext = useRef(null);
   const gainNode = useRef(null);
+  const fadeTimeoutRef = useRef(null);
 
   const initAudio = () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -66,12 +67,13 @@ export const Soundscape = () => {
         initAudio();
       }
 
-      // Resume if suspended (browser policy often suspends initially)
-      if (audioContext.current.state === 'suspended') {
-        audioContext.current.resume();
-      }
+      const ctx = audioContext.current;
+      const currentTime = ctx.currentTime;
 
-      const currentTime = audioContext.current.currentTime;
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
 
       if (isPlaying) {
         // Fade out
@@ -82,8 +84,20 @@ export const Soundscape = () => {
         );
         // Ensure it goes to absolute zero after fade
         gainNode.current.gain.setValueAtTime(0, currentTime + 1.1);
+
+        fadeTimeoutRef.current = setTimeout(() => {
+          if (ctx.state === 'running') {
+            ctx.suspend();
+          }
+        }, 1100);
+
         setIsPlaying(false);
       } else {
+        // Resume if suspended
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+
         // Fade in
         gainNode.current.gain.cancelScheduledValues(currentTime);
         // Exponential ramp requires starting from a non-zero value
