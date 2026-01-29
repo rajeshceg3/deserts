@@ -33,6 +33,9 @@ export const Experience = () => {
       duration: 2.5,
       ease: 'power3.inOut',
     })
+    return () => {
+      gsap.killTweensOf(camera.position)
+    }
   }, [currentDesertIndex, camera])
 
   useFrame(() => {
