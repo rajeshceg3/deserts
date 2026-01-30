@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
 
 export const Cursor = () => {
@@ -14,7 +14,10 @@ export const Cursor = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
   const [ripples, setRipples] = useState([])
-  const [trail, setTrail] = useState([])
+
+  const canvasRef = useRef(null)
+  const trailRef = useRef([])
+  const animationFrameRef = useRef(null)
 
   const [isTouch] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
@@ -31,7 +34,9 @@ export const Cursor = () => {
       mouseX.set(clientX)
       mouseY.set(clientY)
       if (!isVisible) setIsVisible(true)
-      setTrail((prev) => [...prev, { x: clientX, y: clientY }].slice(-20))
+
+      // Add point to trail
+      trailRef.current.push({ x: clientX, y: clientY, age: 0 })
     }
 
     const checkHover = (e) => {
@@ -66,6 +71,60 @@ export const Cursor = () => {
     }
   }, [mouseX, mouseY, isVisible, isTouch])
 
+  // Canvas loop for trail
+  useEffect(() => {
+    if (isTouch || !canvasRef.current) return
+
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    let width = window.innerWidth
+    let height = window.innerHeight
+
+    const resize = () => {
+        width = window.innerWidth
+        height = window.innerHeight
+        canvas.width = width
+        canvas.height = height
+    }
+    window.addEventListener('resize', resize)
+    resize()
+
+    const render = () => {
+        ctx.clearRect(0, 0, width, height)
+
+        // Update and draw trail
+        const newTrail = []
+        ctx.beginPath()
+
+        for (let i = 0; i < trailRef.current.length; i++) {
+            const point = trailRef.current[i]
+            point.age += 1
+
+            if (point.age < 50) { // Max age
+                newTrail.push(point)
+
+                const alpha = 1 - (point.age / 50)
+                const size = (1 - (point.age / 50)) * 4
+
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
+                ctx.beginPath()
+                ctx.arc(point.x, point.y, size, 0, Math.PI * 2)
+                ctx.fill()
+            }
+        }
+
+        trailRef.current = newTrail
+        animationFrameRef.current = requestAnimationFrame(render)
+    }
+
+    render()
+
+    return () => {
+        window.removeEventListener('resize', resize)
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
+    }
+  }, [isTouch])
+
   // Cleanup ripples
   useEffect(() => {
       if (ripples.length > 0) {
@@ -80,19 +139,12 @@ export const Cursor = () => {
 
   return (
     <>
-      {/* Trail */}
-      <AnimatePresence>
-        {trail.map((point, index) => (
-          <motion.div
-            key={index}
-            className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9995] mix-blend-exclusion"
-            initial={{ x: point.x - 4, y: point.y - 4, scale: 1, opacity: 1 }}
-            animate={{ scale: 0, opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-          />
-        ))}
-      </AnimatePresence>
+      {/* Canvas Trail */}
+      <canvas
+        ref={canvasRef}
+        className="fixed top-0 left-0 pointer-events-none z-[9995] mix-blend-exclusion"
+      />
+
       {/* Glow Effect */}
       <motion.div
         className="fixed top-0 left-0 w-32 h-32 rounded-full pointer-events-none z-[9996] mix-blend-exclusion"

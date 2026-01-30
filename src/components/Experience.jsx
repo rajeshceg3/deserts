@@ -51,7 +51,7 @@ export const Experience = () => {
         // Intensity changes: Peak at noon, 0 at midnight
         // dayNightCycle: 0 (midnight) -> 0.25 (dawn) -> 0.5 (noon) -> 0.75 (dusk) -> 1 (midnight)
         const intensity = Math.max(0, Math.sin(dayNightCycle * Math.PI))
-        directionalLightRef.current.intensity = intensity * 1.5 // Brighter sun
+        directionalLightRef.current.intensity = intensity * 1.0 // Normal sun intensity to prevent washout
 
         // Color temperature shift
         // Noon: White, Dawn/Dusk: Orange, Midnight: Dark
@@ -66,7 +66,7 @@ export const Experience = () => {
     <>
       <EffectComposer disableNormalPass>
         {/* Dreamier, slightly stronger bloom for that magical feel */}
-        <Bloom luminanceThreshold={0.55} mipmapBlur intensity={0.8} radius={0.7} />
+        <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.5} radius={0.7} />
         {/* Film grain for texture - subtle */}
         <Noise opacity={0.035} />
         {/* Cinematic vignette */}

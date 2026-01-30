@@ -176,11 +176,11 @@ export const Overlay = ({ started }) => {
                     transition={{ delay: 0.2, duration: 0.8 }}
                     className="mb-4 flex items-center gap-4"
                   >
-                     <span className="font-serif italic text-2xl text-white/40">
+                     <span className="font-serif italic text-2xl text-white/80 drop-shadow-md">
                        {(currentDesertIndex + 1).toString().padStart(2, '0')}
                      </span>
-                     <div className="h-[1px] w-12 bg-white/20" />
-                     <span className="font-serif italic text-xl text-white/40">
+                     <div className="h-[1px] w-12 bg-white/50" />
+                     <span className="font-serif italic text-xl text-white/80 drop-shadow-md">
                        {deserts.length.toString().padStart(2, '0')}
                      </span>
                   </motion.div>
@@ -308,7 +308,7 @@ export const Overlay = ({ started }) => {
           </div>
           <div className="glass-panel p-6 rounded-2xl w-80 shadow-2xl mt-6 border border-white/10 backdrop-blur-2xl">
             <div className="flex justify-between items-end mb-6">
-                <label className="text-xs font-bold tracking-[0.2em] uppercase text-white/60">Time of Day</label>
+                <label className="text-xs font-bold tracking-[0.2em] uppercase text-white/90 drop-shadow-sm">Time of Day</label>
                 <div className="flex flex-col items-end">
                      <span className="text-xl font-mono text-white font-light tracking-wider drop-shadow-lg">
                          {Math.floor(dayNightCycle * 24).toString().padStart(2, '0')}:{(Math.floor((dayNightCycle * 24 * 60) % 60)).toString().padStart(2, '0')}
@@ -360,7 +360,7 @@ export const Overlay = ({ started }) => {
               />
             </div>
 
-            <div className="flex justify-between text-[10px] text-white/40 mt-2 font-mono uppercase tracking-widest">
+            <div className="flex justify-between text-[10px] text-white/70 mt-2 font-mono uppercase tracking-widest drop-shadow-sm">
                 <span>Midnight</span>
                 <span>Noon</span>
                 <span>Midnight</span>
@@ -369,7 +369,7 @@ export const Overlay = ({ started }) => {
         </div>
 
         {/* Footer / Instructions */}
-        <div className={`absolute bottom-8 right-8 text-white/60 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
+        <div className={`absolute bottom-8 right-8 text-white/90 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
         </div>
     </motion.div>
