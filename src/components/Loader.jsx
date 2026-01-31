@@ -19,8 +19,7 @@ export const Loader = ({ onStarted, started }) => {
 
   useEffect(() => {
     if (completionDetected && !loaded) {
-      const timer = setTimeout(() => setLoaded(true), 1000)
-      return () => clearTimeout(timer)
+      setLoaded(true)
     }
   }, [completionDetected, loaded])
 
@@ -125,7 +124,7 @@ export const Loader = ({ onStarted, started }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: loaded ? 0.5 : 0 }}
                     transition={{ delay: 1, duration: 1 }}
-                    className="absolute bottom-12 text-[10px] font-mono tracking-[0.3em] uppercase text-white/40"
+                    className="absolute bottom-12 text-xs font-mono tracking-[0.3em] uppercase text-white/60"
                   >
                     Headphones Recommended
                   </motion.div>

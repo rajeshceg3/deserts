@@ -152,7 +152,7 @@ export const Overlay = ({ started }) => {
              </div>
 
              <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2 pointer-events-none">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
+                <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
                   {zenMode ? "Show UI" : "Zen Mode"}
                 </span>
              </div>
@@ -251,7 +251,7 @@ export const Overlay = ({ started }) => {
                   <div key={index} className="relative flex flex-col items-center group">
                       {/* Tooltip */}
                       <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-1 pointer-events-none">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
+                          <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
                               {d.name}
                           </span>
                       </div>
@@ -360,7 +360,7 @@ export const Overlay = ({ started }) => {
               />
             </div>
 
-            <div className="flex justify-between text-[10px] text-white/70 mt-2 font-mono uppercase tracking-widest drop-shadow-sm">
+            <div className="flex justify-between text-xs text-white/70 mt-2 font-mono uppercase tracking-widest drop-shadow-sm">
                 <span>Midnight</span>
                 <span>Noon</span>
                 <span>Midnight</span>
@@ -369,7 +369,7 @@ export const Overlay = ({ started }) => {
         </div>
 
         {/* Footer / Instructions */}
-        <div className={`absolute bottom-8 right-8 text-white/90 text-[10px] pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
+        <div className={`absolute bottom-8 right-8 text-white/90 text-xs pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
         </div>
     </motion.div>
