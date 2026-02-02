@@ -39,14 +39,16 @@ export const Experience = () => {
   }, [currentDesertIndex, camera])
 
   useFrame(() => {
-    // Simple cycle logic
-    const angle = dayNightCycle * Math.PI * 2
+    // Adjusted cycle logic: 0.5 is Noon (Top), 0/1 is Midnight (Bottom)
+    const angle = (dayNightCycle - 0.25) * Math.PI * 2
     const radius = 50
     const x = Math.cos(angle) * radius
     const y = Math.sin(angle) * radius
+    // Add Z tilt for 3D depth
+    const z = Math.cos(angle) * 15
 
     if (directionalLightRef.current) {
-        directionalLightRef.current.position.set(x, y, 0)
+        directionalLightRef.current.position.set(x, y, z)
 
         // Intensity changes: Peak at noon, 0 at midnight
         // dayNightCycle: 0 (midnight) -> 0.25 (dawn) -> 0.5 (noon) -> 0.75 (dusk) -> 1 (midnight)

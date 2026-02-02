@@ -24,9 +24,10 @@ export const Terrain = () => {
   // Ref for frame counting to throttle expensive operations
   const frameCount = useRef(0)
 
-  // Generate target heights when desert changes
+  // Generate target heights and color when desert changes
   useEffect(() => {
     isAnimating.current = true
+    tempColor.set(desert.colors.ground) // Set target color once per change
     const positions = geometry.attributes.position.array
     const count = geometry.attributes.position.count
 
@@ -38,15 +39,20 @@ export const Terrain = () => {
 
       targetHeights.current[i] = y
     }
-  }, [desert, geometry])
+  }, [desert, geometry, tempColor])
 
   useFrame((state, delta) => {
     if (!meshRef.current) return;
-    frameCount.current += 1;
 
     const material = meshRef.current.material;
-    tempColor.set(desert.colors.ground);
     const targetRoughness = desert.terrainParams.roughness;
+    const colorSettled = material.color.equals(tempColor);
+    const roughnessSettled = Math.abs(material.roughness - targetRoughness) < 0.01;
+
+    // Optimization: Stop entirely if all animations are done
+    if (!isAnimating.current && colorSettled && roughnessSettled) return;
+
+    frameCount.current += 1;
 
     // Animate vertex positions
     if (isAnimating.current) {
