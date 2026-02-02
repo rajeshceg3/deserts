@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect } from 'react'
+import React, { useRef, useMemo, useEffect, Suspense } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
@@ -87,7 +87,9 @@ export const Experience = () => {
         dampingFactor={0.05}
       />
 
-      <Environment preset="sunset" />
+      <Suspense fallback={null}>
+        <Environment preset="sunset" />
+      </Suspense>
 
       <ambientLight intensity={0.2} />
       <directionalLight
@@ -103,7 +105,9 @@ export const Experience = () => {
 
       <Terrain />
       <Atmosphere />
-      <CreatureManager />
+      <Suspense fallback={null}>
+        <CreatureManager />
+      </Suspense>
       <Particles />
 
       {/* Soft floor shadow for grounding */}
