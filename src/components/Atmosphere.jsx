@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Stars, Cloud } from '@react-three/drei'
 import { useStore } from '../store'
@@ -92,14 +92,16 @@ export const Atmosphere = () => {
 
         {/* Subtle clouds for depth */}
         <group position={[0, 15, -20]}>
-            <Cloud
-              opacity={0.3}
-              speed={0.2}
-              width={20}
-              depth={5}
-              segments={10}
-              color={cloudColor}
-            />
+            <Suspense fallback={null}>
+                <Cloud
+                  opacity={0.3}
+                  speed={0.2}
+                  width={20}
+                  depth={5}
+                  segments={10}
+                  color={cloudColor}
+                />
+            </Suspense>
         </group>
     </>
   )
