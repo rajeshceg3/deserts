@@ -45,6 +45,7 @@ export const Atmosphere = () => {
 
   // Calculate cloud color based on time of day
   const cloudColor = useMemo(() => {
+    if (!desert) return new THREE.Color()
     const dayness = Math.sin(dayNightCycle * Math.PI)
     const baseColor = new THREE.Color(desert.colors.sky)
     const sunsetColor = new THREE.Color('#FF9A8B') // Soft sunset pink/orange
@@ -53,9 +54,11 @@ export const Atmosphere = () => {
     // Use a bell curve or specific range for sunset?
     // Simplified: Mixing some sunset color as we approach night
     return baseColor.lerp(sunsetColor, (1 - dayness) * 0.5)
-  }, [dayNightCycle, desert.colors.sky])
+  }, [dayNightCycle, desert])
 
   useFrame((state, delta) => {
+    if (!desert) return
+
     // Determine target sky color based on Day/Night
     const dayness = Math.sin(dayNightCycle * Math.PI)
 
@@ -78,6 +81,8 @@ export const Atmosphere = () => {
         fogRef.current.far = THREE.MathUtils.lerp(60, 120, dayness)
     }
   })
+
+  if (!desert) return null
 
   return (
     <>

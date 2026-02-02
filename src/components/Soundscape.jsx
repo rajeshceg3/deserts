@@ -123,9 +123,15 @@ export const Soundscape = () => {
   // Cleanup
   useEffect(() => {
     return () => {
+        if (fadeTimeoutRef.current) {
+            clearTimeout(fadeTimeoutRef.current);
+        }
         if (audioContext.current) {
             const context = audioContext.current;
-            context.close().catch(e => console.error("Error closing AudioContext:", e));
+            // Check state before closing to avoid errors if already closed
+            if (context.state !== 'closed') {
+                context.close().catch(e => console.error("Error closing AudioContext:", e));
+            }
             audioContext.current = null;
         }
     }

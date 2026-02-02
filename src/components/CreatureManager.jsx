@@ -24,7 +24,7 @@ export const CreatureManager = () => {
     // Clear existing creatures immediately during transition
     setCreatures([])
 
-    if (!desert.creatures) {
+    if (!desert || !desert.creatures) {
         return
     }
 

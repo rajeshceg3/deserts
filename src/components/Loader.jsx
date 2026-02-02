@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useProgress } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -6,22 +6,15 @@ export const Loader = ({ onStarted, started }) => {
   const { progress, active } = useProgress()
   const [loaded, setLoaded] = useState(false)
   const [showButton, setShowButton] = useState(false)
-  const [completionDetected, setCompletionDetected] = useState(false)
-  const completionRef = useRef(false)
 
   useEffect(() => {
-    if ((progress >= 100 || (!active && progress === 0)) && !completionRef.current) {
-      completionRef.current = true
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCompletionDetected(true)
+    if (loaded) return
+    if (progress >= 100 || (!active && progress === 0)) {
+      // Defer state update to avoid synchronous render warning
+      const t = setTimeout(() => setLoaded(true), 0)
+      return () => clearTimeout(t)
     }
-  }, [progress, active])
-
-  useEffect(() => {
-    if (completionDetected && !loaded) {
-      setLoaded(true)
-    }
-  }, [completionDetected, loaded])
+  }, [progress, active, loaded])
 
   useEffect(() => {
     if (loaded) {
