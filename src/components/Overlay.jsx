@@ -11,7 +11,7 @@ const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaL
   const y = useMotionValue(0)
   const bounds = useRef({ left: 0, top: 0, width: 0, height: 0 })
 
-  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 }
+  const springConfig = { damping: 40, stiffness: 300, mass: 0.5 }
   const springX = useSpring(x, springConfig)
   const springY = useSpring(y, springConfig)
 
@@ -37,8 +37,11 @@ const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaL
     const distanceY = clientY - centerY
 
     if (Math.abs(distanceX) < width && Math.abs(distanceY) < height) {
-        x.set(distanceX * 0.2)
-        y.set(distanceY * 0.2)
+        const moveX = distanceX * 0.2
+        const moveY = distanceY * 0.2
+        // Clamp movement to avoid excessive displacement
+        x.set(Math.max(-15, Math.min(15, moveX)))
+        y.set(Math.max(-15, Math.min(15, moveY)))
     } else {
         x.set(0)
         y.set(0)
@@ -122,7 +125,7 @@ export const Overlay = ({ started }) => {
         transition={{ duration: 1.5, ease: "easeOut" }}
     >
         {/* Vignette Overlay */}
-        <div className="pointer-events-none fixed inset-0 z-0 bg-radial-vignette opacity-50" />
+        <div className="pointer-events-none fixed inset-0 z-0 bg-radial-vignette opacity-70" />
 
         {/* Zen Mode Toggle */}
         <div className="absolute top-8 left-8 pointer-events-auto z-50">
@@ -168,6 +171,7 @@ export const Overlay = ({ started }) => {
               animate={{ opacity: 1, transition: { staggerChildren: 0.05 } }}
               exit={{ opacity: 0 }}
               className="relative"
+              aria-live="polite"
             >
               <Tilt>
                   <motion.div
@@ -216,15 +220,17 @@ export const Overlay = ({ started }) => {
                   </div>
 
                   <div className="overflow-hidden max-w-xl">
-                    <motion.p
+                    <motion.div
                       initial={{ x: -20, opacity: 0, filter: 'blur(5px)' }}
                       animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
                       exit={{ x: 20, opacity: 0, filter: 'blur(5px)' }}
                       transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                      className="text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong border-l-2 border-white/20 pl-8 backdrop-blur-sm selection:bg-white/30"
+                      className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20"
                     >
-                      {desert.description}
-                    </motion.p>
+                      <p className="text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong selection:bg-white/30">
+                        {desert.description}
+                      </p>
+                    </motion.div>
                   </div>
               </Tilt>
             </motion.div>
@@ -308,7 +314,7 @@ export const Overlay = ({ started }) => {
           </div>
           <div className="glass-panel p-6 rounded-2xl w-80 shadow-2xl mt-6 border border-white/10 backdrop-blur-2xl">
             <div className="flex justify-between items-end mb-6">
-                <label className="text-xs font-bold tracking-[0.2em] uppercase text-white/90 drop-shadow-sm">Time of Day</label>
+                <label className="text-xs font-bold tracking-[0.2em] uppercase text-white/90 drop-shadow-md">Time of Day</label>
                 <div className="flex flex-col items-end">
                      <span className="text-xl font-mono text-white font-light tracking-wider drop-shadow-lg">
                          {Math.floor(dayNightCycle * 24).toString().padStart(2, '0')}:{(Math.floor((dayNightCycle * 24 * 60) % 60)).toString().padStart(2, '0')}

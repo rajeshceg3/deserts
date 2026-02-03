@@ -39,7 +39,7 @@ export default {
         'glow': '0 0 10px rgba(0, 0, 0, 0.2)',
         'glow-strong': '0 0 20px rgba(255, 255, 255, 0.7)',
         'glow-pastel': '0 0 15px rgba(255, 220, 220, 0.4)',
-        'text-strong': '0 2px 5px rgba(0, 0, 0, 0.3)',
+        'text-strong': '0 4px 8px rgba(0, 0, 0, 0.9)',
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],
