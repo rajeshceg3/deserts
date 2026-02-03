@@ -11,7 +11,7 @@ export const Terrain = () => {
   const desert = deserts[currentDesertIndex]
 
   const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(100, 100, 150, 150) // Increased resolution slightly
+    const geo = new THREE.PlaneGeometry(100, 100, 96, 96) // Optimized resolution for performance
     geo.rotateX(-Math.PI / 2)
     return geo
   }, [])
