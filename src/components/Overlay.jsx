@@ -4,12 +4,14 @@ import { deserts } from '../data/deserts'
 import { Soundscape } from './Soundscape'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { useUISound } from '../hooks/useUISound'
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
 const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaLabel, onMouseEnter }) => {
   const ref = useRef(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const bounds = useRef({ left: 0, top: 0, width: 0, height: 0 })
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const springConfig = { damping: 40, stiffness: 300, mass: 0.5 }
   const springX = useSpring(x, springConfig)
@@ -29,6 +31,8 @@ const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaL
   }
 
   const handleMouseMove = (e) => {
+    if (prefersReducedMotion) return;
+
     const { clientX, clientY } = e
     const { left, top, width, height } = bounds.current
     const centerX = left + width / 2
@@ -75,8 +79,11 @@ const Tilt = ({ children }) => {
     const y = useMotionValue(0)
     const mouseX = useSpring(x, { stiffness: 50, damping: 20 })
     const mouseY = useSpring(y, { stiffness: 50, damping: 20 })
+    const prefersReducedMotion = usePrefersReducedMotion()
 
     useEffect(() => {
+        if (prefersReducedMotion) return;
+
         const handleMouseMove = (e) => {
             const { clientX, clientY } = e
             const { innerWidth, innerHeight } = window
@@ -87,7 +94,11 @@ const Tilt = ({ children }) => {
         }
         window.addEventListener("mousemove", handleMouseMove)
         return () => window.removeEventListener("mousemove", handleMouseMove)
-    }, [x, y])
+    }, [x, y, prefersReducedMotion])
+
+    if (prefersReducedMotion) {
+      return <div>{children}</div>
+    }
 
     return (
         <motion.div style={{ rotateX: mouseY, rotateY: mouseX, perspective: 1000, transformStyle: "preserve-3d" }}>
@@ -103,6 +114,7 @@ export const Overlay = ({ started }) => {
   const setDesert = useStore((state) => state.setDesert)
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const setDayNightCycle = useStore((state) => state.setDayNightCycle)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const { play } = useUISound()
 
@@ -125,7 +137,7 @@ export const Overlay = ({ started }) => {
         transition={{ duration: 1.5, ease: "easeOut" }}
     >
         {/* Vignette Overlay */}
-        <div className="pointer-events-none fixed inset-0 z-0 bg-radial-vignette opacity-70" />
+        <div className="pointer-events-none fixed inset-0 z-0 bg-radial-vignette opacity-70" aria-hidden="true" />
 
         {/* Zen Mode Toggle */}
         <div className="absolute top-8 left-8 pointer-events-auto z-50">
@@ -197,7 +209,7 @@ export const Overlay = ({ started }) => {
                             <motion.span
                               key={`${wIndex}-${cIndex}`}
                               variants={{
-                                hidden: { y: 100, opacity: 0, filter: 'blur(20px)' },
+                                hidden: { y: prefersReducedMotion ? 0 : 100, opacity: 0, filter: 'blur(20px)' },
                                 visible: { y: 0, opacity: 1, filter: 'blur(0px)' }
                               }}
                               initial="hidden"
@@ -221,9 +233,9 @@ export const Overlay = ({ started }) => {
 
                   <div className="overflow-hidden max-w-xl">
                     <motion.div
-                      initial={{ x: -20, opacity: 0, filter: 'blur(5px)' }}
+                      initial={{ x: prefersReducedMotion ? 0 : -20, opacity: 0, filter: 'blur(5px)' }}
                       animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
-                      exit={{ x: 20, opacity: 0, filter: 'blur(5px)' }}
+                      exit={{ x: prefersReducedMotion ? 0 : 20, opacity: 0, filter: 'blur(5px)' }}
                       transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
                       className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20"
                     >
@@ -276,8 +288,8 @@ export const Overlay = ({ started }) => {
                               <motion.div
                                   className="absolute inset-0 rounded-full border border-white/30"
                                   initial={{ scale: 0.8, opacity: 0 }}
-                                  animate={{ scale: 1.8, opacity: [0, 0.5, 0] }}
-                                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                                  animate={prefersReducedMotion ? { scale: 1.2, opacity: 1 } : { scale: 1.8, opacity: [0, 0.5, 0] }}
+                                  transition={prefersReducedMotion ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: "easeOut" }}
                               />
                           )}
 
@@ -339,7 +351,7 @@ export const Overlay = ({ started }) => {
                   }}
               >
                    <motion.div
-                      animate={{ rotate: dayNightCycle * 360 }}
+                      animate={{ rotate: prefersReducedMotion ? 0 : dayNightCycle * 360 }}
                       className="text-white relative"
                    >
                       {/* Icon */}
@@ -361,7 +373,7 @@ export const Overlay = ({ started }) => {
                   onChange={(e) => setDayNightCycle(parseFloat(e.target.value))}
                   onFocus={() => setIsTimeFocused(true)}
                   onBlur={() => setIsTimeFocused(false)}
-                  className="w-full relative z-20 opacity-0 cursor-pointer h-full"
+                  className="w-full relative z-20 opacity-0 cursor-pointer h-full focus-visible:outline-none"
                   aria-label="Time of Day"
               />
             </div>

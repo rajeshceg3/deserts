@@ -26,6 +26,8 @@ export const Terrain = () => {
 
   // Generate target heights and color when desert changes
   useEffect(() => {
+    if (!desert) return
+
     isAnimating.current = true
     tempColor.set(desert.colors.ground) // Set target color once per change
     const positions = geometry.attributes.position.array
@@ -42,7 +44,7 @@ export const Terrain = () => {
   }, [desert, geometry, tempColor])
 
   useFrame((state, delta) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || !desert) return;
 
     const material = meshRef.current.material;
     const targetRoughness = desert.terrainParams.roughness;
@@ -95,6 +97,8 @@ export const Terrain = () => {
       material.roughness = THREE.MathUtils.lerp(material.roughness, targetRoughness, delta);
     }
   });
+
+  if (!desert) return null;
 
   return (
     <mesh ref={meshRef} geometry={geometry} receiveShadow castShadow>
