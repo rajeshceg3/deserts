@@ -335,7 +335,7 @@ export const Overlay = ({ started }) => {
             </div>
 
             <div
-                className="relative h-24 flex items-center group"
+                className={`relative h-24 flex items-center group rounded-xl transition-all duration-300 ${isTimeFocused ? 'bg-white/5 ring-1 ring-white/30' : ''}`}
                 onMouseEnter={() => play('hover')}
             >
               {/* Custom Track - Horizon */}
@@ -343,7 +343,7 @@ export const Overlay = ({ started }) => {
 
               {/* Draggable Thumb - Orbiting Sun/Moon */}
               <motion.div
-                  className={`absolute top-1/2 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center z-10 pointer-events-none transition-all duration-200 ${isTimeFocused ? 'scale-110 border-white/40 ring-2 ring-white ring-offset-2 ring-offset-transparent' : ''}`}
+                  className={`absolute top-1/2 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center z-10 pointer-events-none transition-all duration-200 ${isTimeFocused ? 'scale-110 border-white/40 ring-2 ring-white ring-offset-2 ring-offset-black' : ''}`}
                   style={{
                       left: `${dayNightCycle * 100}%`,
                       x: '-50%',

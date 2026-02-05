@@ -6,6 +6,7 @@ export const Soundscape = () => {
   const audioContext = useRef(null);
   const gainNode = useRef(null);
   const fadeTimeoutRef = useRef(null);
+  const isMounted = useRef(true);
 
   const initAudio = () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -86,6 +87,7 @@ export const Soundscape = () => {
         gainNode.current.gain.setValueAtTime(0, currentTime + 1.1);
 
         fadeTimeoutRef.current = setTimeout(() => {
+          if (!isMounted.current) return;
           if (ctx.state === 'running') {
             ctx.suspend();
           }
@@ -123,6 +125,7 @@ export const Soundscape = () => {
   // Cleanup
   useEffect(() => {
     return () => {
+        isMounted.current = false;
         if (fadeTimeoutRef.current) {
             clearTimeout(fadeTimeoutRef.current);
         }

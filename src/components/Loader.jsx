@@ -129,7 +129,7 @@ export const Loader = ({ onStarted, started }) => {
                   {/* Headphones Recommendation */}
                   <motion.div
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: loaded ? 0.5 : 0 }}
+                    animate={{ opacity: loaded ? 0.9 : 0 }}
                     transition={{ delay: 1, duration: 1 }}
                     className="absolute bottom-12 text-xs font-mono tracking-[0.3em] uppercase text-white/80 drop-shadow-md"
                   >
