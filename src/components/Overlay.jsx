@@ -203,7 +203,7 @@ export const Overlay = ({ started }) => {
 
                   <div className="overflow-hidden mb-6 py-2">
                     <h1 className="text-8xl md:text-10xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50 drop-shadow-text-strong tracking-tighter font-serif flex flex-wrap gap-x-8 pb-4">
-                      {desert.name.split(" ").map((word, wIndex) => (
+                      {(desert?.name?.split(" ") || []).map((word, wIndex) => (
                         <span key={wIndex} className="inline-block whitespace-nowrap">
                           {word.split("").map((char, cIndex) => (
                             <motion.span
@@ -240,7 +240,7 @@ export const Overlay = ({ started }) => {
                       className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20"
                     >
                       <p className="text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong selection:bg-white/30">
-                        {desert.description}
+                        {desert?.description}
                       </p>
                     </motion.div>
                   </div>
@@ -270,7 +270,7 @@ export const Overlay = ({ started }) => {
                       {/* Tooltip */}
                       <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-1 pointer-events-none">
                           <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
-                              {d.name}
+                              {d?.name}
                           </span>
                       </div>
 
@@ -281,7 +281,7 @@ export const Overlay = ({ started }) => {
                           className="relative p-2 focus:outline-none"
                           whileHover={{ scale: 1.2 }}
                           whileTap={{ scale: 0.9 }}
-                          aria-label={`Select ${d.name}`}
+                          aria-label={`Select ${d?.name}`}
                       >
                           {/* Active Ring Pulse */}
                           {index === currentDesertIndex && (

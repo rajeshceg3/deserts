@@ -7,13 +7,14 @@ export const Loader = ({ onStarted, started }) => {
   const { progress, active } = useProgress()
   const [loaded, setLoaded] = useState(false)
   const [showButton, setShowButton] = useState(false)
+  const [slowLoading, setSlowLoading] = useState(false)
   const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
-    // Fallback: If loading takes too long (e.g. asset hang), let user in anyway
+    // Fallback: If loading takes too long (e.g. asset hang), enable slow loading mode
     const fallbackTimer = setTimeout(() => {
         if (!loaded) {
-            setLoaded(true)
+            setSlowLoading(true)
         }
     }, 15000)
 
@@ -98,8 +99,8 @@ export const Loader = ({ onStarted, started }) => {
                       </div>
                   </div>
 
-                  <div className="h-16 flex items-center justify-center">
-                     {!loaded ? (
+                  <div className="h-24 flex flex-col items-center justify-center">
+                     {!loaded && !slowLoading ? (
                          <motion.span
                            initial={{ opacity: 0 }}
                            animate={{ opacity: 1 }}
@@ -110,17 +111,28 @@ export const Loader = ({ onStarted, started }) => {
                          </motion.span>
                      ) : (
                         <AnimatePresence>
-                            {showButton && (
-                                <motion.button
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    whileHover={prefersReducedMotion ? {} : { scale: 1.05, letterSpacing: "0.2em" }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={onStarted}
-                                    className="px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white drop-shadow-md"
-                                >
-                                    Enter Experience
-                                </motion.button>
+                            {(showButton || slowLoading) && (
+                                <div className="flex flex-col items-center gap-2">
+                                    {slowLoading && !loaded && (
+                                        <motion.span
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="text-xs font-mono text-white/70 bg-black/30 px-3 py-1 rounded backdrop-blur-md"
+                                        >
+                                            Loading taking longer than expected...
+                                        </motion.span>
+                                    )}
+                                    <motion.button
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        whileHover={prefersReducedMotion ? {} : { scale: 1.05, letterSpacing: "0.2em" }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={onStarted}
+                                        className="px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white drop-shadow-md"
+                                    >
+                                        {slowLoading && !loaded ? "Enter Anyway" : "Enter Experience"}
+                                    </motion.button>
+                                </div>
                             )}
                         </AnimatePresence>
                      )}

@@ -27,6 +27,15 @@ export const Cursor = () => {
   })
 
   useEffect(() => {
+    if (!isTouch) {
+        document.body.classList.add('custom-cursor-active')
+    }
+    return () => {
+        document.body.classList.remove('custom-cursor-active')
+    }
+  }, [isTouch])
+
+  useEffect(() => {
     if (isTouch) return
 
     const moveCursor = (e) => {
