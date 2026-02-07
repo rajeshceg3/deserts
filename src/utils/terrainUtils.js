@@ -1,12 +1,10 @@
 import { createNoise2D } from 'simplex-noise';
 
 // Create a single instance of noise to be shared or recreated if needed.
-// Ideally, we want the same seed if we want reproducibility, but createNoise2D uses Math.random by default.
-// If the app reloads, terrain changes. That's fine for now.
 const noise2D = createNoise2D();
 
 /**
- * Calculates the height of the terrain at a given x, z coordinate.
+ * Calculates the height of the terrain at a given x, z coordinate using Fractal Brownian Motion (FBM).
  * @param {number} x - The x coordinate.
  * @param {number} z - The z coordinate.
  * @param {object} params - The terrain parameters (height, scale).
@@ -15,10 +13,24 @@ const noise2D = createNoise2D();
 export const getTerrainHeight = (x, z, params) => {
   const { height, scale } = params;
 
-  // Matches logic in Terrain.jsx
-  // noise2D(x / (10 * scale), z / (10 * scale)) * height * 1.5 +
-  // noise2D(x / (3 * scale), z / (3 * scale)) * (height / 2)
+  let total = 0;
+  let frequency = 1 / (10 * scale); // Base frequency
+  let amplitude = height * 1.2; // Base amplitude
+  // Used for normalizing result to 0.0 - 1.0 range if needed, but here we sum directly
 
-  return noise2D(x / (10 * scale), z / (10 * scale)) * height * 1.5 +
-         noise2D(x / (3 * scale), z / (3 * scale)) * (height / 2);
+  const octaves = 4;
+  const persistence = 0.5;
+  const lacunarity = 2.0;
+
+  for(let i=0; i<octaves; i++) {
+      total += noise2D(x * frequency, z * frequency) * amplitude;
+
+      amplitude *= persistence;
+      frequency *= lacunarity;
+  }
+
+  // Optional: Add a subtle twist or second layer for more organic feel if needed.
+  // But FBM usually provides enough "craggy" look.
+
+  return total;
 };

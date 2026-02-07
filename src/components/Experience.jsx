@@ -16,6 +16,7 @@ export const Experience = () => {
 
   // Ref for lights to animate
   const directionalLightRef = useRef()
+  const ambientLightRef = useRef()
 
   // Reusable objects to prevent memory leaks in loop
   const sunColorStart = useMemo(() => new THREE.Color('#FFF5E0'), [])
@@ -41,26 +42,30 @@ export const Experience = () => {
   useFrame(() => {
     // Adjusted cycle logic: 0.5 is Noon (Top), 0/1 is Midnight (Bottom)
     const angle = (dayNightCycle - 0.25) * Math.PI * 2
-    const radius = 50
+    const radius = 60 // Matches Atmosphere.jsx Sun radius
     const x = Math.cos(angle) * radius
     const y = Math.sin(angle) * radius
     // Add Z tilt for 3D depth
     const z = Math.cos(angle) * 15
 
+    const dayness = Math.sin(dayNightCycle * Math.PI)
+
     if (directionalLightRef.current) {
         directionalLightRef.current.position.set(x, y, z)
 
         // Intensity changes: Peak at noon, 0 at midnight
-        // dayNightCycle: 0 (midnight) -> 0.25 (dawn) -> 0.5 (noon) -> 0.75 (dusk) -> 1 (midnight)
-        const intensity = Math.max(0, Math.sin(dayNightCycle * Math.PI))
-        directionalLightRef.current.intensity = intensity * 1.0 // Normal sun intensity to prevent washout
+        const intensity = Math.max(0, dayness)
+        directionalLightRef.current.intensity = intensity * 1.5 // Increased slightly for punchiness
 
         // Color temperature shift
-        // Noon: White, Dawn/Dusk: Orange, Midnight: Dark
-        // Use power to keep it orange longer during dawn/dusk
-        const sunMix = Math.pow(Math.sin(dayNightCycle * Math.PI), 2)
+        const sunMix = Math.pow(dayness, 2)
         tempColor.copy(sunColorEnd).lerp(sunColorStart, sunMix)
         directionalLightRef.current.color.copy(tempColor)
+    }
+
+    if (ambientLightRef.current) {
+        // Ambient light should be brighter during day, dimmer at night but not 0
+        ambientLightRef.current.intensity = 0.1 + dayness * 0.4
     }
   })
 
@@ -91,17 +96,21 @@ export const Experience = () => {
         <Environment preset="sunset" />
       </Suspense>
 
-      <ambientLight intensity={0.2} />
+      <ambientLight ref={ambientLightRef} intensity={0.4} />
       <directionalLight
         ref={directionalLightRef}
         position={[10, 10, 5]}
         intensity={1.0}
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-bias={-0.0001}
-      >
-        <orthographicCamera attach="shadow-camera" args={[-50, 50, 50, -50]} />
-      </directionalLight>
+        shadow-bias={-0.0005} // Tuned to prevent acne
+        shadow-camera-near={0.1}
+        shadow-camera-far={200}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
+      />
 
       <Terrain />
       <Atmosphere />

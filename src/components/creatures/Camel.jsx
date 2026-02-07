@@ -2,13 +2,54 @@ import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group } from 'three'
 
+// Leg geometry helper
+// Pivot is at top (0,0,0 local to group), leg extends down
+const Leg = ({ position, legRef }) => (
+    <group position={position} ref={legRef}>
+        <mesh position={[0, -1, 0]}>
+          <cylinderGeometry args={[0.15, 0.1, 2]} />
+          <meshStandardMaterial color="#C19A6B" />
+        </mesh>
+    </group>
+)
+
 export const Camel = (props) => {
   const group = useRef()
+  const headRef = useRef()
+
+  // Refs for legs
+  const legFL = useRef() // Front Left
+  const legFR = useRef() // Front Right
+  const legBL = useRef() // Back Left
+  const legBR = useRef() // Back Right
 
   useFrame((state, delta) => {
-    // Simple bobbing animation
     if(group.current) {
-        group.current.position.y = props.position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1
+        // Walking speed
+        const t = state.clock.elapsedTime * 4
+
+        // Procedural Walking Animation (Diagonals synced)
+        // Rotate around X axis for legs
+        if (legFL.current) legFL.current.rotation.x = Math.sin(t) * 0.4
+        if (legFR.current) legFR.current.rotation.x = Math.sin(t + Math.PI) * 0.4
+        if (legBL.current) legBL.current.rotation.x = Math.sin(t + Math.PI) * 0.4
+        if (legBR.current) legBR.current.rotation.x = Math.sin(t) * 0.4
+
+        // Body bobbing - synced with steps (2 steps per cycle)
+        // Adjust Y position based on leg extension
+        const bob = Math.abs(Math.sin(t)) * 0.1
+        group.current.position.y = props.position[1] + bob
+
+        // Idle head movement
+        // Slow sine wave + random noise would be better, but simple sine is okay
+        if (headRef.current) {
+             // Head turn
+             headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.2
+             // Head nod
+             headRef.current.rotation.x = 0.5 + Math.sin(state.clock.elapsedTime * 0.3) * 0.1 // 0.5 is base rotation
+        }
+
+        // Rotate whole creature slowly around Y axis
         group.current.rotation.y += delta * 0.1
     }
   })
@@ -25,33 +66,27 @@ export const Camel = (props) => {
         <sphereGeometry args={[0.6, 16, 16]} />
         <meshStandardMaterial color="#C19A6B" />
       </mesh>
-      {/* Neck */}
-      <mesh position={[0, 2, 1.5]} rotation={[0.5, 0, 0]}>
-        <boxGeometry args={[0.4, 1.5, 0.4]} />
-        <meshStandardMaterial color="#C19A6B" />
-      </mesh>
-      {/* Head */}
-      <mesh position={[0, 2.8, 1.8]}>
-        <boxGeometry args={[0.5, 0.5, 0.8]} />
-        <meshStandardMaterial color="#C19A6B" />
-      </mesh>
-      {/* Legs */}
-      <mesh position={[-0.5, 0.5, 1.2]}>
-        <cylinderGeometry args={[0.15, 0.15, 2]} />
-        <meshStandardMaterial color="#C19A6B" />
-      </mesh>
-      <mesh position={[0.5, 0.5, 1.2]}>
-        <cylinderGeometry args={[0.15, 0.15, 2]} />
-        <meshStandardMaterial color="#C19A6B" />
-      </mesh>
-      <mesh position={[-0.5, 0.5, -1.2]}>
-        <cylinderGeometry args={[0.15, 0.15, 2]} />
-        <meshStandardMaterial color="#C19A6B" />
-      </mesh>
-      <mesh position={[0.5, 0.5, -1.2]}>
-        <cylinderGeometry args={[0.15, 0.15, 2]} />
-        <meshStandardMaterial color="#C19A6B" />
-      </mesh>
+
+      {/* Neck & Head Group */}
+      <group position={[0, 2, 1.5]} ref={headRef} rotation={[0.5, 0, 0]}>
+          <mesh position={[0, 0.75, 0]}>
+            <boxGeometry args={[0.4, 1.5, 0.4]} />
+            <meshStandardMaterial color="#C19A6B" />
+          </mesh>
+          <mesh position={[0, 1.55, 0.2]}>
+            <boxGeometry args={[0.5, 0.5, 0.8]} />
+            <meshStandardMaterial color="#C19A6B" />
+          </mesh>
+      </group>
+
+      {/* Legs - Attached at body height (1.5 - 0.5 = 1.0 approx) */}
+      {/* Body is 1.5 high, 1 thick. Bottom is at 1.0. */}
+      {/* Leg pivot should be at 1.0 */}
+
+      <Leg position={[-0.5, 1.0, 1.2]} legRef={legFL} />
+      <Leg position={[0.5, 1.0, 1.2]} legRef={legFR} />
+      <Leg position={[-0.5, 1.0, -1.2]} legRef={legBL} />
+      <Leg position={[0.5, 1.0, -1.2]} legRef={legBR} />
     </group>
   )
 }
