@@ -3,7 +3,7 @@ import { useProgress } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
-export const Loader = ({ onStarted, started }) => {
+export const Loader = ({ onStarted, started, ready }) => {
   const { progress, active } = useProgress()
   const [loaded, setLoaded] = useState(false)
   const [showButton, setShowButton] = useState(false)
@@ -32,11 +32,11 @@ export const Loader = ({ onStarted, started }) => {
   }, [progress, active, loaded])
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && ready) {
        const timer = setTimeout(() => setShowButton(true), 100)
        return () => clearTimeout(timer)
     }
-  }, [loaded])
+  }, [loaded, ready])
 
   return (
     <AnimatePresence mode="wait">
@@ -100,7 +100,7 @@ export const Loader = ({ onStarted, started }) => {
                   </div>
 
                   <div className="h-24 flex flex-col items-center justify-center">
-                     {!loaded && !slowLoading ? (
+                     {!showButton && !slowLoading ? (
                          <motion.span
                            initial={{ opacity: 0 }}
                            animate={{ opacity: 1 }}
