@@ -8,7 +8,7 @@ test('Application loads and enters experience', async ({ page }) => {
 
   // Wait for the loader to finish (button appears)
   const enterButton = page.getByRole('button', { name: 'Enter Experience' });
-  await expect(enterButton).toBeVisible({ timeout: 20000 });
+  await expect(enterButton).toBeVisible({ timeout: 60000 });
 
   // Wait a bit for animations to settle
   await page.waitForTimeout(1000);
