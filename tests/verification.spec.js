@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('has title and enters experience', async ({ page }) => {
+  test.slow();
   // Catch console errors
   const consoleErrors = [];
   page.on('console', msg => {

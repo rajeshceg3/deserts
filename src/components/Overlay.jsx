@@ -121,6 +121,24 @@ export const Overlay = ({ started }) => {
   const desert = deserts[currentDesertIndex]
   const [zenMode, setZenMode] = useState(false)
   const [isTimeFocused, setIsTimeFocused] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  // Keyboard Navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+        if (!started || zenMode) return;
+
+        if (e.key === 'ArrowLeft') {
+            prevDesert();
+            play('click');
+        } else if (e.key === 'ArrowRight') {
+            nextDesert();
+            play('click');
+        }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [started, zenMode, prevDesert, nextDesert, play]);
 
   const handleKeyDown = (e, index) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -128,6 +146,23 @@ export const Overlay = ({ started }) => {
           play('click');
       }
   }
+
+  // Greeting Logic
+  const getGreeting = () => {
+      if (dayNightCycle >= 0.2 && dayNightCycle < 0.45) return "Good Morning";
+      if (dayNightCycle >= 0.45 && dayNightCycle < 0.6) return "Good Afternoon";
+      if (dayNightCycle >= 0.6 && dayNightCycle < 0.8) return "Good Evening";
+      return "Good Night";
+  }
+
+  const handleShare = () => {
+      const text = `Exploring ${desert?.name} in Desert Realms!`;
+      navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          play('click');
+          setTimeout(() => setCopied(false), 2000);
+      }).catch(err => console.error('Failed to copy:', err));
+  };
 
   return (
     <motion.div
@@ -190,15 +225,22 @@ export const Overlay = ({ started }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.8 }}
-                    className="mb-4 flex items-center gap-4"
+                    className="mb-2 flex flex-col gap-2"
                   >
-                     <span className="font-serif italic text-2xl text-white/80 drop-shadow-md">
-                       {(currentDesertIndex + 1).toString().padStart(2, '0')}
+                     {/* Greeting */}
+                     <span className="text-sm font-mono uppercase tracking-[0.2em] text-white/60 drop-shadow-md">
+                        {getGreeting()}
                      </span>
-                     <div className="h-[1px] w-12 bg-white/50" />
-                     <span className="font-serif italic text-xl text-white/80 drop-shadow-md">
-                       {deserts.length.toString().padStart(2, '0')}
-                     </span>
+
+                     <div className="flex items-center gap-4">
+                        <span className="font-serif italic text-2xl text-white/80 drop-shadow-md">
+                        {(currentDesertIndex + 1).toString().padStart(2, '0')}
+                        </span>
+                        <div className="h-[1px] w-12 bg-white/50" />
+                        <span className="font-serif italic text-xl text-white/80 drop-shadow-md">
+                        {deserts.length.toString().padStart(2, '0')}
+                        </span>
+                     </div>
                   </motion.div>
 
                   <div className="overflow-hidden mb-6 py-2">
@@ -231,7 +273,8 @@ export const Overlay = ({ started }) => {
                     </h1>
                   </div>
 
-                  <div className="overflow-hidden max-w-xl">
+                  <div className="overflow-hidden max-w-xl space-y-4">
+                    {/* Lore / Description */}
                     <motion.div
                       initial={{ x: prefersReducedMotion ? 0 : -20, opacity: 0, filter: 'blur(5px)' }}
                       animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
@@ -240,8 +283,37 @@ export const Overlay = ({ started }) => {
                       className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20"
                     >
                       <p className="text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong selection:bg-white/30">
-                        {desert?.description}
+                        {desert?.lore || desert?.description}
                       </p>
+
+                      {/* Factoid */}
+                      {desert?.factoid && (
+                          <div className="mt-4 pt-4 border-t border-white/10">
+                              <p className="italic text-white/70 text-sm">
+                                  <span className="font-bold not-italic text-white/50 uppercase text-xs tracking-wider mr-2">Did You Know?</span>
+                                  {desert.factoid}
+                              </p>
+                          </div>
+                      )}
+                    </motion.div>
+
+                    {/* Features Badges */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8, duration: 0.8 }}
+                        className="flex flex-wrap gap-2"
+                    >
+                        {desert?.climate && (
+                             <span className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm">
+                                🌡️ {desert.climate}
+                             </span>
+                        )}
+                        {desert?.features?.map((feature, i) => (
+                             <span key={i} className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs text-white/90 border border-white/20 shadow-sm">
+                                {feature}
+                             </span>
+                        ))}
                     </motion.div>
                   </div>
               </Tilt>
@@ -321,9 +393,50 @@ export const Overlay = ({ started }) => {
 
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
-          <div title="Toggle Ambient Sound" className="hover:scale-105 transition-transform duration-300">
-            <Soundscape />
+          <div className="flex flex-col gap-4 items-end">
+             {/* Share Button */}
+             <div className="relative group">
+                <button
+                    onClick={handleShare}
+                    onMouseEnter={() => play('hover')}
+                    className="bg-black/30 backdrop-blur-md text-white p-4 rounded-full border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300"
+                    aria-label="Share Location"
+                    title="Copy Link"
+                >
+                    {copied ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                    )}
+                </button>
+                {/* Copied Tooltip */}
+                <AnimatePresence>
+                    {copied && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute right-16 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded border border-white/10 whitespace-nowrap"
+                        >
+                            Copied to clipboard!
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+             </div>
+
+             <div title="Toggle Ambient Sound" className="hover:scale-105 transition-transform duration-300">
+                <Soundscape />
+             </div>
           </div>
+
           <div className="glass-panel p-6 rounded-2xl w-80 shadow-2xl mt-6 border border-white/10 backdrop-blur-2xl">
             <div className="flex justify-between items-end mb-6">
                 <label className="text-xs font-bold tracking-[0.2em] uppercase text-white/90 drop-shadow-md">Time of Day</label>
