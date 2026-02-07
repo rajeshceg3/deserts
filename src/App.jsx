@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
   const [started, setStarted] = useState(false)
+  const [experienceReady, setExperienceReady] = useState(false)
 
   return (
     <div className="w-full h-screen bg-black relative cursor-none overflow-hidden">
@@ -16,7 +17,7 @@ function App() {
         <div className="noise-overlay" />
 
         {/* Loader handles the initial loading state and the 'Enter' interaction */}
-        <Loader started={started} onStarted={() => setStarted(true)} />
+        <Loader started={started} onStarted={() => setStarted(true)} ready={experienceReady} />
 
         {/* UI Overlay appears only after the user has entered */}
         <Overlay started={started} />
@@ -38,7 +39,7 @@ function App() {
           }}
         >
           <Suspense fallback={null}>
-            <Experience />
+            <Experience onReady={() => setExperienceReady(true)} />
           </Suspense>
         </Canvas>
       </ErrorBoundary>

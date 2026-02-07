@@ -10,7 +10,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
 
-export const Experience = () => {
+export const Experience = ({ onReady }) => {
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
 
@@ -38,6 +38,14 @@ export const Experience = () => {
       gsap.killTweensOf(camera.position)
     }
   }, [currentDesertIndex, camera])
+
+  useEffect(() => {
+    if (onReady) {
+      // Small delay to ensure frames are ready
+      const t = setTimeout(() => onReady(), 100)
+      return () => clearTimeout(t)
+    }
+  }, [onReady])
 
   useFrame(() => {
     // Adjusted cycle logic: 0.5 is Noon (Top), 0/1 is Midnight (Bottom)
@@ -72,11 +80,8 @@ export const Experience = () => {
   return (
     <>
       <EffectComposer disableNormalPass multisampling={0}>
-        {/* Dreamier, slightly stronger bloom for that magical feel */}
         <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.5} radius={0.7} />
-        {/* Film grain for texture - subtle */}
         <Noise opacity={0.035} />
-        {/* Cinematic vignette */}
         <Vignette eskil={false} offset={0.05} darkness={0.5} />
       </EffectComposer>
 
