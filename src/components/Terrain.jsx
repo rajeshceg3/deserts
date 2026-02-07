@@ -11,8 +11,27 @@ export const Terrain = () => {
   const desert = deserts[currentDesertIndex]
 
   const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(100, 100, 96, 96) // Optimized resolution for performance
+    // Increased resolution to 128 for smoother FBM terrain
+    const geo = new THREE.PlaneGeometry(100, 100, 128, 128)
     geo.rotateX(-Math.PI / 2)
+
+    // Add Vertex Colors for texture variation (Noise)
+    const count = geo.attributes.position.count
+    const colors = new Float32Array(count * 3)
+
+    for (let i = 0; i < count; i++) {
+        // Simple noise for texture variation (0.85 to 1.05 range)
+        // We use a pseudo-random multiplier so it looks like grain/sand
+        // eslint-disable-next-line
+        const noise = 0.85 + Math.random() * 0.2
+
+        colors[i * 3] = noise
+        colors[i * 3 + 1] = noise
+        colors[i * 3 + 2] = noise
+    }
+
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
     return geo
   }, [])
 
@@ -37,6 +56,7 @@ export const Terrain = () => {
       const x = positions[i * 3]
       const z = positions[i * 3 + 2]
 
+      // Uses the new FBM noise function
       const y = getTerrainHeight(x, z, desert.terrainParams)
 
       targetHeights.current[i] = y
@@ -76,7 +96,7 @@ export const Terrain = () => {
 
       if (stillMoving) {
         meshRef.current.geometry.attributes.position.needsUpdate = true;
-        // Throttle normal computation to every 3rd frame to save performance
+        // Throttle normal computation
         if (frameCount.current % 3 === 0) {
             meshRef.current.geometry.computeVertexNormals();
         }
@@ -87,7 +107,7 @@ export const Terrain = () => {
       }
     }
 
-    // Animate color
+    // Animate color (Material color acts as tint for vertex colors)
     if (!material.color.equals(tempColor)) {
       material.color.lerp(tempColor, delta * 2);
     }
@@ -103,6 +123,7 @@ export const Terrain = () => {
   return (
     <mesh ref={meshRef} geometry={geometry} receiveShadow castShadow>
       <meshPhysicalMaterial
+        vertexColors={true}
         color={desert.colors.ground}
         roughness={desert.terrainParams.roughness}
         metalness={0.05}
