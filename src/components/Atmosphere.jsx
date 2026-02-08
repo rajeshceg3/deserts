@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Stars, Cloud, Float } from '@react-three/drei'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
+import { getSkyColor } from '../utils/colorUtils'
 import * as THREE from 'three'
 
 const NightStars = () => {
@@ -35,53 +36,11 @@ const NightStars = () => {
     )
 }
 
-// Helper to get sky color based on cycle
-const getSkyColor = (cycle, dayColorHex) => {
-    const nightColor = new THREE.Color('#050510')
-    const dawnColor = new THREE.Color('#FF9A8B') // Peach/Orange
-    const dayColor = new THREE.Color(dayColorHex)
-    const duskColor = new THREE.Color('#FD5E53') // Coral/Red
-
-    // Cycle: 0 (Midnight) -> 0.25 (Dawn) -> 0.5 (Noon) -> 0.75 (Dusk) -> 1 (Midnight)
-    // We can use phases.
-    // 0 - 0.2: Night
-    // 0.2 - 0.3: Dawn
-    // 0.3 - 0.7: Day
-    // 0.7 - 0.8: Dusk
-    // 0.8 - 1.0: Night
-
-    // Simple multi-stage lerp
-    const color = new THREE.Color()
-
-    if (cycle < 0.2) {
-        return nightColor
-    } else if (cycle < 0.3) {
-        // Night -> Dawn
-        const t = (cycle - 0.2) / 0.1
-        return color.copy(nightColor).lerp(dawnColor, t)
-    } else if (cycle < 0.4) {
-        // Dawn -> Day
-        const t = (cycle - 0.3) / 0.1
-        return color.copy(dawnColor).lerp(dayColor, t)
-    } else if (cycle < 0.6) {
-        // Day
-        return dayColor
-    } else if (cycle < 0.7) {
-        // Day -> Dusk
-        const t = (cycle - 0.6) / 0.1
-        return color.copy(dayColor).lerp(duskColor, t)
-    } else if (cycle < 0.8) {
-        // Dusk -> Night
-        const t = (cycle - 0.7) / 0.1
-        return color.copy(duskColor).lerp(nightColor, t)
-    } else {
-        return nightColor
-    }
-}
-
 const Sun = () => {
     const meshRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
+
+    const sunColor = useMemo(() => new THREE.Color(10, 8, 1), [])
 
     useFrame(() => {
         if (meshRef.current) {
@@ -92,16 +51,14 @@ const Sun = () => {
              const z = Math.cos(angle) * 15 // Tilt matches Experience.jsx
 
              meshRef.current.position.set(x, y, z)
-
-             // Scale sun near horizon for effect?
-             // meshRef.current.scale.setScalar(1 + Math.abs(Math.cos(angle)) * 0.5)
         }
     })
 
     return (
         <mesh ref={meshRef}>
             <sphereGeometry args={[4, 32, 32]} />
-            <meshBasicMaterial color="#FFD700" toneMapped={false} />
+            {/* High intensity color to trigger bloom */}
+            <meshBasicMaterial color={sunColor} toneMapped={false} />
             {/* Halo */}
             <mesh scale={[1.5, 1.5, 1.5]}>
                  <sphereGeometry args={[4, 32, 32]} />
@@ -134,8 +91,8 @@ export const Atmosphere = () => {
 
     const dayness = Math.sin(dayNightCycle * Math.PI)
 
-    // Improved Sky Color Logic
-    const targetSkyColor = getSkyColor(dayNightCycle, desert.colors.sky)
+    // Improved Sky Color Logic using utility
+    const targetSkyColor = getSkyColor(dayNightCycle, desert.colors)
 
     // Fog Color Logic (matches sky mostly but lighter/foggy)
     const targetFogColor = targetSkyColor.clone().lerp(new THREE.Color('#ffffff'), 0.2)
@@ -143,7 +100,6 @@ export const Atmosphere = () => {
     if (dayness < 0.2) {
         targetFogColor.lerp(new THREE.Color('#000000'), 1 - dayness*5)
     }
-
 
     // Apply to scene elements with smooth transition
     if (colorRef.current) {

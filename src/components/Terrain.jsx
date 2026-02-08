@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getTerrainHeight } from '../utils/terrainUtils'
+import { createNoise2D } from 'simplex-noise'
 import * as THREE from 'three'
 
 export const Terrain = () => {
@@ -13,24 +14,41 @@ export const Terrain = () => {
   const geometry = useMemo(() => {
     // Increased resolution to 128 for smoother FBM terrain
     const geo = new THREE.PlaneGeometry(100, 100, 128, 128)
-    geo.rotateX(-Math.PI / 2)
 
     // Add Vertex Colors for texture variation (Noise)
     const count = geo.attributes.position.count
     const colors = new Float32Array(count * 3)
 
-    for (let i = 0; i < count; i++) {
-        // Simple noise for texture variation (0.85 to 1.05 range)
-        // We use a pseudo-random multiplier so it looks like grain/sand
-        // eslint-disable-next-line
-        const noise = 0.85 + Math.random() * 0.2
+    // Create Simplex noise instance for static texture generation
+    const noise2D = createNoise2D();
 
-        colors[i * 3] = noise
-        colors[i * 3 + 1] = noise
-        colors[i * 3 + 2] = noise
+    for (let i = 0; i < count; i++) {
+        const x = geo.attributes.position.getX(i);
+        const y = geo.attributes.position.getY(i); // Use Y as noise coordinate before rotation
+
+        // Lower frequency to avoid aliasing (Moiré patterns)
+        // 128 segments / 100 units = 1.28 segs/unit.
+        // Frequencies adjusted to match resolution:
+        const grain = noise2D(x * 0.3, y * 0.3);
+        // Low frequency noise for "patches" (variation in ground color)
+        const patch = noise2D(x * 0.05, y * 0.05);
+
+        // Combine noises
+        // Base is ~0.9, grain adds texture, patch adds large scale variation
+        let noiseVal = 0.9 + (grain * 0.1) + (patch * 0.1);
+
+        // Clamp to avoid extreme bright/dark spots
+        noiseVal = Math.max(0.6, Math.min(1.2, noiseVal));
+
+        colors[i * 3] = noiseVal
+        colors[i * 3 + 1] = noiseVal
+        colors[i * 3 + 2] = noiseVal
     }
 
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
+    // Rotate geometry to lie flat (XZ plane)
+    geo.rotateX(-Math.PI / 2)
 
     return geo
   }, [])

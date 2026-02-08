@@ -98,7 +98,7 @@ export const Experience = ({ onReady }) => {
       />
 
       <Suspense fallback={null}>
-        <Environment preset="sunset" />
+        <Environment preset="city" environmentIntensity={0.2} />
       </Suspense>
 
       <ambientLight ref={ambientLightRef} intensity={0.4} />
