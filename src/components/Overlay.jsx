@@ -121,6 +121,7 @@ export const Overlay = ({ started }) => {
 
   const desert = deserts[currentDesertIndex]
   const [zenMode, setZenMode] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [isTimeFocused, setIsTimeFocused] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -185,8 +186,9 @@ export const Overlay = ({ started }) => {
         {/* Vignette Overlay */}
         <div className="pointer-events-none fixed inset-0 z-0 bg-radial-vignette opacity-70" aria-hidden="true" />
 
-        {/* Zen Mode Toggle */}
-        <div className="absolute top-8 left-8 pointer-events-auto z-50">
+        {/* Top Left Controls */}
+        <div className="absolute top-8 left-8 pointer-events-auto z-50 flex flex-col gap-4">
+           {/* Zen Mode Toggle */}
            <MagneticButton
              onClick={() => {
                 setZenMode(!zenMode);
@@ -196,7 +198,11 @@ export const Overlay = ({ started }) => {
              className="group relative"
              aria-label={zenMode ? "Show UI" : "Enable Zen Mode"}
            >
-             <div className="glass-panel p-3 rounded-full hover:bg-white/20 transition-all duration-300">
+             <motion.div
+               className="glass-panel p-3 rounded-full hover:bg-white/20 transition-all duration-300"
+               animate={{ scale: zenMode ? [1, 1.05, 1] : 1 }}
+               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+             >
                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/90">
                  {zenMode ? (
                    <>
@@ -210,11 +216,36 @@ export const Overlay = ({ started }) => {
                    </>
                  )}
                </svg>
-             </div>
+             </motion.div>
 
              <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2 pointer-events-none">
                 <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
                   {zenMode ? "Show UI" : "Zen Mode"}
+                </span>
+             </div>
+           </MagneticButton>
+
+           {/* Help Button */}
+           <MagneticButton
+             onClick={() => {
+                setShowHelp(true);
+                play('click');
+             }}
+             onMouseEnter={() => play('hover')}
+             className={`group relative transition-opacity duration-300 ${zenMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+             aria-label="Help & Controls"
+           >
+             <div className="glass-panel p-3 rounded-full hover:bg-white/20 transition-all duration-300">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/90">
+                 <circle cx="12" cy="12" r="10"></circle>
+                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
+               </svg>
+             </div>
+
+             <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2 pointer-events-none">
+                <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
+                  Help
                 </span>
              </div>
            </MagneticButton>
@@ -308,18 +339,41 @@ export const Overlay = ({ started }) => {
                       )}
                     </motion.div>
 
-                    {/* Features Badges */}
+                    {/* Features & Info Badges */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8, duration: 0.8 }}
-                        className="flex flex-wrap gap-2"
+                        className="flex flex-wrap gap-2 max-w-xl"
                     >
                         {desert?.climate && (
-                             <span className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm">
+                             <span className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm" title="Climate">
                                 🌡️ {desert.climate}
                              </span>
                         )}
+
+                        {/* Sound Profile */}
+                        {desert?.soundProfile && (
+                             <span className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm" title="Soundscape">
+                                🔊 {desert.soundProfile}
+                             </span>
+                        )}
+
+                        {/* Creatures */}
+                         {desert?.creatures?.map((creature, i) => (
+                             <span key={`cr-${i}`} className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm" title="Native Fauna">
+                                🐾 {creature}
+                             </span>
+                        ))}
+
+                        {/* Flora */}
+                        {desert?.flora?.map((plant, i) => (
+                             <span key={`fl-${i}`} className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm" title="Native Flora">
+                                🌿 {plant}
+                             </span>
+                        ))}
+
+                        {/* Standard Features */}
                         {desert?.features?.map((feature, i) => (
                              <span key={i} className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs text-white/90 border border-white/20 shadow-sm">
                                 {feature}
@@ -503,9 +557,9 @@ export const Overlay = ({ started }) => {
             </div>
 
             <div className="flex justify-between text-xs text-white/70 mt-2 font-mono uppercase tracking-widest drop-shadow-sm">
-                <span>Midnight</span>
-                <span>Noon</span>
-                <span>Midnight</span>
+                <span className="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Midnight</span>
+                <span className="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Noon</span>
+                <span className="flex items-center gap-2">Midnight <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
             </div>
           </div>
         </div>
@@ -514,6 +568,86 @@ export const Overlay = ({ started }) => {
         <div className={`absolute bottom-8 right-8 text-white/90 text-xs pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
         </div>
+
+        {/* Help Modal */}
+        <AnimatePresence>
+            {showHelp && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+                    onClick={() => setShowHelp(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        className="glass-panel p-8 md:p-12 rounded-2xl max-w-2xl w-full border border-white/10 shadow-2xl relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowHelp(false)}
+                            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"
+                            aria-label="Close Help"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+
+                        <h2 className="text-3xl font-serif text-white mb-2">Desert Realms</h2>
+                        <p className="text-white/60 font-mono text-sm uppercase tracking-widest mb-8 border-b border-white/10 pb-4">Immersive Exploration Experience</p>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-white/80 font-bold mb-2 flex items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Navigation
+                                    </h3>
+                                    <p className="text-white/60 text-sm leading-relaxed">
+                                        Use <kbd className="bg-white/10 px-1 rounded">Arrow Keys</kbd> or the bottom navigation to travel between deserts.
+                                        <br/>
+                                        <span className="md:hidden">Drag</span><span className="hidden md:inline">Click & Drag</span> to look around.
+                                        <br/>
+                                        Scroll to zoom in/out.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-white/80 font-bold mb-2 flex items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg> Zen Mode
+                                    </h3>
+                                    <p className="text-white/60 text-sm leading-relaxed">
+                                        Toggle the UI off for a purely cinematic experience. Perfect for screenshots or meditation.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-white/80 font-bold mb-2 flex items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Time & Atmosphere
+                                    </h3>
+                                    <p className="text-white/60 text-sm leading-relaxed">
+                                        Drag the sun/moon icon in the top right control panel to change the time of day. The environment, lighting, and soundscape will react dynamically.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="text-white/80 font-bold mb-2 flex items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Soundscape
+                                    </h3>
+                                    <p className="text-white/60 text-sm leading-relaxed">
+                                        Enable audio for procedural wind and ambient effects generated in real-time.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/10 text-center text-white/40 text-xs font-mono">
+                            Designed & Developed for You • {new Date().getFullYear()}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     </motion.div>
   )
 }
