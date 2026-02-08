@@ -40,30 +40,69 @@ const Sun = () => {
     const meshRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
 
-    const sunColor = useMemo(() => new THREE.Color(10, 8, 1), [])
+    // Shader for a glowing sun with corona
+    const shaderArgs = useMemo(() => ({
+        uniforms: {
+            color: { value: new THREE.Color(10, 8, 1) }, // High intensity for bloom
+            haloColor: { value: new THREE.Color('#FF8C00') }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            varying vec2 vUv;
+            uniform vec3 color;
+            uniform vec3 haloColor;
+
+            void main() {
+                // Center is 0.5, 0.5
+                float dist = distance(vUv, vec2(0.5));
+
+                // Core (White hot center) - radius 0.15
+                float core = 1.0 - smoothstep(0.0, 0.15, dist);
+
+                // Glow (Halo) - radius 0.5
+                float glow = 1.0 - smoothstep(0.0, 0.5, dist);
+                // Make glow falloff non-linear for nicer look
+                glow = pow(glow, 2.0);
+
+                // Mix colors
+                vec3 finalColor = mix(haloColor, color, core * 0.8 + 0.2);
+
+                // Alpha: fade out at edges
+                float alpha = smoothstep(0.5, 0.2, dist);
+
+                gl_FragColor = vec4(finalColor * 2.0, alpha); // Boost brightness for bloom
+
+                #include <colorspace_fragment>
+            }
+        `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+    }), [])
 
     useFrame(() => {
         if (meshRef.current) {
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
-             const radius = 60 // Further out
+             const radius = 60
              const x = Math.cos(angle) * radius
              const y = Math.sin(angle) * radius
-             const z = Math.cos(angle) * 15 // Tilt matches Experience.jsx
+             const z = Math.cos(angle) * 15
 
              meshRef.current.position.set(x, y, z)
+             meshRef.current.lookAt(0, 0, 0)
         }
     })
 
     return (
-        <mesh ref={meshRef}>
-            <sphereGeometry args={[4, 32, 32]} />
-            {/* High intensity color to trigger bloom */}
-            <meshBasicMaterial color={sunColor} toneMapped={false} />
-            {/* Halo */}
-            <mesh scale={[1.5, 1.5, 1.5]}>
-                 <sphereGeometry args={[4, 32, 32]} />
-                 <meshBasicMaterial color="#FF8C00" transparent opacity={0.2} side={THREE.BackSide} toneMapped={false} />
-            </mesh>
+        <mesh ref={meshRef} scale={[12, 12, 12]}>
+            <planeGeometry args={[1, 1]} />
+            <shaderMaterial args={[shaderArgs]} toneMapped={false} />
         </mesh>
     )
 }

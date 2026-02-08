@@ -26,16 +26,21 @@ export const Terrain = () => {
         const x = geo.attributes.position.getX(i);
         const y = geo.attributes.position.getY(i); // Use Y as noise coordinate before rotation
 
-        // Lower frequency to avoid aliasing (Moiré patterns)
-        // 128 segments / 100 units = 1.28 segs/unit.
-        // Frequencies adjusted to match resolution:
+        // 1. Medium Grain (Texture)
         const grain = noise2D(x * 0.3, y * 0.3);
-        // Low frequency noise for "patches" (variation in ground color)
+
+        // 2. Large Patches (Color Variation)
         const patch = noise2D(x * 0.05, y * 0.05);
 
+        // 3. Fine Grain (Sand Detail) - High Frequency
+        const fineGrain = noise2D(x * 2.5, y * 2.5);
+
         // Combine noises
-        // Base is ~0.9, grain adds texture, patch adds large scale variation
-        let noiseVal = 0.9 + (grain * 0.1) + (patch * 0.1);
+        // Base: 0.9
+        // Grain: +/- 0.1
+        // Patch: +/- 0.1
+        // Fine: +/- 0.05
+        let noiseVal = 0.9 + (grain * 0.1) + (patch * 0.1) + (fineGrain * 0.05);
 
         // Clamp to avoid extreme bright/dark spots
         noiseVal = Math.max(0.6, Math.min(1.2, noiseVal));
