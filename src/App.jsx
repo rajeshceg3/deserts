@@ -14,7 +14,6 @@ function App() {
     <div className="w-full h-screen bg-black relative cursor-none overflow-hidden">
       <ErrorBoundary>
         <Cursor />
-        <div className="noise-overlay" />
 
         {/* Loader handles the initial loading state and the 'Enter' interaction */}
         <Loader started={started} onStarted={() => setStarted(true)} ready={experienceReady} />

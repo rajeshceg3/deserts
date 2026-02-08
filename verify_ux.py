@@ -26,14 +26,12 @@ def run():
             page.wait_for_selector("text=Headphones Recommended", timeout=30000)
             print("Found 'Headphones Recommended'.")
 
-            # Check Grain Animation
-            grain_overlay = page.locator(".noise-overlay").first
-            # We need to wait for it to be attached
-            grain_overlay.wait_for(state="attached")
-            style = grain_overlay.evaluate("element => window.getComputedStyle(element).animationDuration")
-            print(f"Grain Animation Duration: {style}")
-            if style != "0.5s":
-                 print(f"WARNING: Grain animation duration is {style}, expected 0.5s!")
+            # Check Grain Animation - Should be REMOVED
+            grain_overlay = page.locator(".noise-overlay")
+            if grain_overlay.count() > 0:
+                 print("WARNING: .noise-overlay found! It should be removed.")
+            else:
+                 print("SUCCESS: .noise-overlay not found.")
 
         except Exception as e:
             print(f"Error waiting for loader: {e}")
