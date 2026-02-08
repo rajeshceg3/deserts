@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
+import { getSkyColor } from '../utils/colorUtils'
 import { Soundscape } from './Soundscape'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { useUISound } from '../hooks/useUISound'
@@ -163,6 +164,16 @@ export const Overlay = ({ started }) => {
           setTimeout(() => setCopied(false), 2000);
       }).catch(err => console.error('Failed to copy:', err));
   };
+
+  const sliderGradient = useMemo(() => {
+     if (!desert) return 'linear-gradient(to right, #000, #fff)';
+     const points = [0, 0.25, 0.5, 0.75, 1];
+     const colors = points.map(p => {
+         const c = getSkyColor(p, desert.colors);
+         return '#' + c.getHexString();
+     });
+     return `linear-gradient(to right, ${colors.join(', ')})`;
+  }, [desert]);
 
   return (
     <motion.div
@@ -452,7 +463,7 @@ export const Overlay = ({ started }) => {
                 onMouseEnter={() => play('hover')}
             >
               {/* Custom Track - Horizon */}
-              <div className="absolute left-0 right-0 top-1/2 h-px bg-white/20"></div>
+              <div className="absolute left-0 right-0 top-1/2 h-0.5 rounded-full" style={{ background: sliderGradient, opacity: 0.8 }}></div>
 
               {/* Draggable Thumb - Orbiting Sun/Moon */}
               <motion.div
