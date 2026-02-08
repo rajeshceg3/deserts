@@ -57,9 +57,6 @@ export const Loader = ({ onStarted, started, ready }) => {
               {/* Animated Gradient Background */}
               <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-pastel-rose via-pastel-lilac to-pastel-mint loader-background" />
 
-              {/* Noise Overlay */}
-              <div className="absolute inset-0 opacity-10 noise-overlay pointer-events-none" />
-
               {/* Circular Progress Structure */}
               <div className="relative z-10 flex flex-col items-center">
                   <div className="relative w-32 h-32 mb-8">

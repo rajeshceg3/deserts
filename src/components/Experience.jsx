@@ -81,7 +81,6 @@ export const Experience = ({ onReady }) => {
     <>
       <EffectComposer disableNormalPass multisampling={0}>
         <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.5} radius={0.7} />
-        <Noise opacity={0.035} />
         <Vignette eskil={false} offset={0.05} darkness={0.5} />
       </EffectComposer>
 
