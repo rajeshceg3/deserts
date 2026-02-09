@@ -8,11 +8,38 @@ import * as THREE from 'three'
 
 export const Terrain = () => {
   const meshRef = useRef()
+  const shaderRef = useRef()
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const desert = deserts[currentDesertIndex]
 
+  const onBeforeCompile = useMemo(() => (shader) => {
+    shaderRef.current = shader
+    // Initialize with current desert colors
+    shader.uniforms.uColorLow = { value: new THREE.Color(desert.colors.groundLow) }
+    shader.uniforms.uColorHigh = { value: new THREE.Color(desert.colors.groundHigh) }
+
+    shader.fragmentShader = `
+      uniform vec3 uColorLow;
+      uniform vec3 uColorHigh;
+    ` + shader.fragmentShader
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <color_fragment>',
+      `
+      #include <color_fragment>
+      float noiseVal = vColor.r;
+      // Remap noise 0.6..1.2 to 0..1 for mixing
+      float t = (noiseVal - 0.6) / 0.6;
+      t = clamp(t, 0.0, 1.0);
+
+      vec3 mixedColor = mix(uColorLow, uColorHigh, t);
+      diffuseColor.rgb = mixedColor;
+      `
+    )
+  }, [])
+
   const geometry = useMemo(() => {
-    // Increased resolution to 128 for smoother FBM terrain
+    // Increased resolution to 256 for smoother FBM terrain
     const geo = new THREE.PlaneGeometry(100, 100, 128, 128)
 
     // Add Vertex Colors for texture variation (Noise)
@@ -61,17 +88,15 @@ export const Terrain = () => {
   // Ref to store current heights for animation
   const targetHeights = useRef(new Float32Array(geometry.attributes.position.count))
   const isAnimating = useRef(true)
-  const tempColor = useMemo(() => new THREE.Color(), [])
 
   // Ref for frame counting to throttle expensive operations
   const frameCount = useRef(0)
 
-  // Generate target heights and color when desert changes
+  // Generate target heights when desert changes
   useEffect(() => {
     if (!desert) return
 
     isAnimating.current = true
-    tempColor.set(desert.colors.ground) // Set target color once per change
     const positions = geometry.attributes.position.array
     const count = geometry.attributes.position.count
 
@@ -84,14 +109,27 @@ export const Terrain = () => {
 
       targetHeights.current[i] = y
     }
-  }, [desert, geometry, tempColor])
+  }, [desert, geometry])
 
   useFrame((state, delta) => {
     if (!meshRef.current || !desert) return;
 
     const material = meshRef.current.material;
     const targetRoughness = desert.terrainParams.roughness;
-    const colorSettled = material.color.equals(tempColor);
+
+    // Check if uniforms are settled
+    let colorSettled = true;
+    if (shaderRef.current) {
+        const cLow = shaderRef.current.uniforms.uColorLow.value;
+        const cHigh = shaderRef.current.uniforms.uColorHigh.value;
+        const tLow = new THREE.Color(desert.colors.groundLow);
+        const tHigh = new THREE.Color(desert.colors.groundHigh);
+
+        // Robust check (Manhattan distance approx)
+        if (Math.abs(cLow.r - tLow.r) + Math.abs(cLow.g - tLow.g) + Math.abs(cLow.b - tLow.b) > 0.01) colorSettled = false;
+        if (Math.abs(cHigh.r - tHigh.r) + Math.abs(cHigh.g - tHigh.g) + Math.abs(cHigh.b - tHigh.b) > 0.01) colorSettled = false;
+    }
+
     const roughnessSettled = Math.abs(material.roughness - targetRoughness) < 0.01;
 
     // Optimization: Stop entirely if all animations are done
@@ -130,9 +168,10 @@ export const Terrain = () => {
       }
     }
 
-    // Animate color (Material color acts as tint for vertex colors)
-    if (!material.color.equals(tempColor)) {
-      material.color.lerp(tempColor, delta * 2);
+    // Animate shader uniforms (colors)
+    if (shaderRef.current) {
+        shaderRef.current.uniforms.uColorLow.value.lerp(new THREE.Color(desert.colors.groundLow), delta * 2)
+        shaderRef.current.uniforms.uColorHigh.value.lerp(new THREE.Color(desert.colors.groundHigh), delta * 2)
     }
 
     // Animate roughness
@@ -147,7 +186,7 @@ export const Terrain = () => {
     <mesh ref={meshRef} geometry={geometry} receiveShadow castShadow>
       <meshPhysicalMaterial
         vertexColors={true}
-        color={desert.colors.ground}
+        onBeforeCompile={onBeforeCompile}
         roughness={desert.terrainParams.roughness}
         metalness={0.05}
         flatShading={false}
