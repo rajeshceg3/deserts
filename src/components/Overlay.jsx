@@ -115,13 +115,20 @@ export const Overlay = ({ started }) => {
   const setDesert = useStore((state) => state.setDesert)
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const setDayNightCycle = useStore((state) => state.setDayNightCycle)
+  const visitedDeserts = useStore((state) => state.visitedDeserts)
+  const markVisited = useStore((state) => state.markVisited)
   const prefersReducedMotion = usePrefersReducedMotion()
 
   const { play } = useUISound()
 
+  useEffect(() => {
+    markVisited(currentDesertIndex)
+  }, [currentDesertIndex, markVisited])
+
   const desert = deserts[currentDesertIndex]
   const [zenMode, setZenMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showJournal, setShowJournal] = useState(false)
   const [isTimeFocused, setIsTimeFocused] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -432,7 +439,7 @@ export const Overlay = ({ started }) => {
 
                           {/* Dot */}
                           <motion.div
-                              className={`rounded-full transition-all duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'bg-white/20 group-hover:bg-white/60'}`}
+                              className={`rounded-full transition-all duration-500 ${index === currentDesertIndex ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)]' : (visitedDeserts.includes(index) ? 'bg-white/50 group-hover:bg-white/80' : 'bg-white/20 group-hover:bg-white/40')}`}
                               animate={{
                                   width: index === currentDesertIndex ? 12 : 8,
                                   height: index === currentDesertIndex ? 12 : 8,
@@ -459,6 +466,22 @@ export const Overlay = ({ started }) => {
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
           <div className="flex flex-col gap-4 items-end">
+             {/* Journal Button */}
+             <div className="relative group">
+                <button
+                    onClick={() => { setShowJournal(true); play('click'); }}
+                    onMouseEnter={() => play('hover')}
+                    className="bg-black/30 backdrop-blur-md text-white p-4 rounded-full border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300"
+                    aria-label="Open Journal"
+                    title="Explorer's Journal"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                </button>
+             </div>
+
              {/* Share Button */}
              <div className="relative group">
                 <button
@@ -561,12 +584,24 @@ export const Overlay = ({ started }) => {
                 <span className="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Noon</span>
                 <span className="flex items-center gap-2">Midnight <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
             </div>
+
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+               <button onClick={() => { setDayNightCycle(0.25); play('click'); }} className="text-white/50 hover:text-white text-[10px] md:text-xs uppercase tracking-widest transition-colors font-mono" title="Set time to Sunrise">Sunrise</button>
+               <button onClick={() => { setDayNightCycle(0.5); play('click'); }} className="text-white/50 hover:text-white text-[10px] md:text-xs uppercase tracking-widest transition-colors font-mono" title="Set time to Noon">Noon</button>
+               <button onClick={() => { setDayNightCycle(0.75); play('click'); }} className="text-white/50 hover:text-white text-[10px] md:text-xs uppercase tracking-widest transition-colors font-mono" title="Set time to Sunset">Sunset</button>
+               <button onClick={() => { setDayNightCycle(0); play('click'); }} className="text-white/50 hover:text-white text-[10px] md:text-xs uppercase tracking-widest transition-colors font-mono" title="Set time to Midnight">Night</button>
+            </div>
           </div>
         </div>
 
         {/* Footer / Instructions */}
         <div className={`absolute bottom-8 right-8 text-white/90 text-xs pointer-events-none font-mono tracking-widest uppercase hidden md:block transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
           Drag to explore • Scroll to zoom
+        </div>
+
+        {/* Exploration Progress */}
+        <div className={`absolute bottom-8 left-8 text-white/90 text-xs pointer-events-none font-mono tracking-widest uppercase transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'opacity-0 translate-y-10 blur-sm' : 'opacity-100 translate-y-0 blur-0'}`}>
+          Explored: {visitedDeserts.length} / {deserts.length}
         </div>
 
         {/* Help Modal */}
@@ -643,6 +678,49 @@ export const Overlay = ({ started }) => {
 
                         <div className="mt-8 pt-6 border-t border-white/10 text-center text-white/40 text-xs font-mono">
                             Designed & Developed for You • {new Date().getFullYear()}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* Journal Modal */}
+        <AnimatePresence>
+            {showJournal && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+                    onClick={() => setShowJournal(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, rotate: -2 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, rotate: 2 }}
+                        className="bg-[#Fdfbf7] text-[#2c2c2c] p-8 md:p-12 rounded-sm max-w-lg w-full shadow-2xl relative font-serif"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowJournal(false)}
+                            className="absolute top-4 right-4 text-black/30 hover:text-black/60 transition-colors z-10"
+                            aria-label="Close Journal"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+
+                        <div className="relative z-10">
+                            <h2 className="text-xl font-bold mb-6 italic text-black/80 border-b border-black/10 pb-4">Explorer's Log</h2>
+
+                            <p className="text-lg leading-relaxed mb-6 font-medium">
+                                {desert?.journalEntry}
+                            </p>
+
+                            <div className="flex justify-end mt-8">
+                                <span className="font-handwriting text-sm text-black/50">
+                                    — {desert?.name}
+                                </span>
+                            </div>
                         </div>
                     </motion.div>
                 </motion.div>

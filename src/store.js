@@ -6,6 +6,12 @@ export const useStore = create((set) => ({
   dayNightCycle: 0.5, // 0 to 1, where 0/1 is midnight, 0.5 is noon
   isDay: true,
   showInfo: false,
+  visitedDeserts: [0],
+
+  markVisited: (index) => set((state) => {
+    if (state.visitedDeserts.includes(index)) return {}
+    return { visitedDeserts: [...state.visitedDeserts, index] }
+  }),
 
   nextDesert: () => set((state) => ({
     currentDesertIndex: (state.currentDesertIndex + 1) % deserts.length
