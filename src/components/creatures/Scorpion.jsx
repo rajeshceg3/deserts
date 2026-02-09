@@ -3,11 +3,31 @@ import { useFrame } from '@react-three/fiber'
 
 export const Scorpion = (props) => {
   const tailRef = useRef()
+  const legRefs = useRef([])
+  const offset = React.useMemo(() => Math.random() * 100, [])
 
   useFrame((state) => {
+    const t = state.clock.elapsedTime + offset
+
     if (tailRef.current) {
-        tailRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 5) * 0.2 - 0.5
+        // More menacing tail movement
+        tailRef.current.rotation.x = Math.sin(t * 5) * 0.3 - 0.5
+        tailRef.current.rotation.z = Math.sin(t * 2) * 0.1
     }
+
+    // Animate legs (ripple effect)
+    legRefs.current.forEach((leg, i) => {
+        if (leg) {
+             // Side-specific rotation base
+             // Indices 0-2 are side 1, 3-5 are side -1
+             const side = i < 3 ? 1 : -1
+             const baseRot = side * -0.5
+
+             // Twitch/Walk
+             leg.rotation.z = baseRot + Math.sin(t * 10 + i) * 0.2
+             leg.position.y = 0.1 + Math.max(0, Math.sin(t * 10 + i)) * 0.05
+        }
+    })
   })
 
   return (
@@ -30,14 +50,22 @@ export const Scorpion = (props) => {
         </mesh>
       </group>
 
-      {/* Legs (Simple loop) */}
-      {[1, -1].map((side) =>
-        [0.2, 0, -0.2].map((z, i) => (
-            <mesh key={i} position={[side * 0.6, 0.1, z]} rotation={[0, 0, side * -0.5]}>
-                 <boxGeometry args={[0.6, 0.05, 0.05]} />
-                 <meshStandardMaterial color="#333" />
-            </mesh>
-        ))
+      {/* Legs */}
+      {[1, -1].map((side, sideIndex) =>
+        [0.2, 0, -0.2].map((z, legIndex) => {
+            const index = sideIndex * 3 + legIndex
+            return (
+                <mesh
+                    key={`leg-${index}`}
+                    ref={el => legRefs.current[index] = el}
+                    position={[side * 0.6, 0.1, z]}
+                    rotation={[0, 0, side * -0.5]}
+                >
+                     <boxGeometry args={[0.6, 0.05, 0.05]} />
+                     <meshStandardMaterial color="#333" />
+                </mesh>
+            )
+        })
       )}
     </group>
   )

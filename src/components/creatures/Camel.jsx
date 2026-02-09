@@ -17,6 +17,9 @@ export const Camel = (props) => {
   const group = useRef()
   const headRef = useRef()
 
+  // Random offset for this instance to desynchronize animations
+  const offset = React.useMemo(() => Math.random() * 100, [])
+
   // Refs for legs
   const legFL = useRef() // Front Left
   const legFR = useRef() // Front Right
@@ -25,32 +28,35 @@ export const Camel = (props) => {
 
   useFrame((state, delta) => {
     if(group.current) {
-        // Walking speed
-        const t = state.clock.elapsedTime * 4
+        // Walking speed with offset
+        const t = state.clock.elapsedTime * 4 + offset
+
+        // Add some noise to the walk cycle speed
+        const noise = Math.sin(t * 0.1) * 0.2
+        const walkT = t + noise
 
         // Procedural Walking Animation (Diagonals synced)
         // Rotate around X axis for legs
-        if (legFL.current) legFL.current.rotation.x = Math.sin(t) * 0.4
-        if (legFR.current) legFR.current.rotation.x = Math.sin(t + Math.PI) * 0.4
-        if (legBL.current) legBL.current.rotation.x = Math.sin(t + Math.PI) * 0.4
-        if (legBR.current) legBR.current.rotation.x = Math.sin(t) * 0.4
+        if (legFL.current) legFL.current.rotation.x = Math.sin(walkT) * 0.4
+        if (legFR.current) legFR.current.rotation.x = Math.sin(walkT + Math.PI) * 0.4
+        if (legBL.current) legBL.current.rotation.x = Math.sin(walkT + Math.PI) * 0.4
+        if (legBR.current) legBR.current.rotation.x = Math.sin(walkT) * 0.4
 
         // Body bobbing - synced with steps (2 steps per cycle)
-        // Adjust Y position based on leg extension
-        const bob = Math.abs(Math.sin(t)) * 0.1
+        const bob = Math.abs(Math.sin(walkT)) * 0.1
         group.current.position.y = props.position[1] + bob
 
-        // Idle head movement
-        // Slow sine wave + random noise would be better, but simple sine is okay
+        // Organic head movement using noise-like composition
         if (headRef.current) {
-             // Head turn
-             headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.2
-             // Head nod
-             headRef.current.rotation.x = 0.5 + Math.sin(state.clock.elapsedTime * 0.3) * 0.1 // 0.5 is base rotation
+             const headT = state.clock.elapsedTime + offset
+             // Head turn (slow scan + quick glance)
+             headRef.current.rotation.y = Math.sin(headT * 0.5) * 0.3 + Math.sin(headT * 1.5) * 0.05
+             // Head nod (breathing + attention)
+             headRef.current.rotation.x = 0.5 + Math.sin(headT * 0.3) * 0.1 + Math.sin(headT * 2.1) * 0.02
         }
 
-        // Rotate whole creature slowly around Y axis
-        group.current.rotation.y += delta * 0.1
+        // Rotate whole creature slowly around Y axis with variation
+        group.current.rotation.y += delta * (0.1 + Math.sin(state.clock.elapsedTime * 0.2) * 0.05)
     }
   })
 

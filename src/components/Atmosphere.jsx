@@ -133,24 +133,34 @@ export const Atmosphere = () => {
     // Improved Sky Color Logic using utility
     const targetSkyColor = getSkyColor(dayNightCycle, desert.colors)
 
-    // Fog Color Logic (matches sky mostly but lighter/foggy)
-    const targetFogColor = targetSkyColor.clone().lerp(new THREE.Color('#ffffff'), 0.2)
-    // Darken fog at night
-    if (dayness < 0.2) {
-        targetFogColor.lerp(new THREE.Color('#000000'), 1 - dayness*5)
-    }
+    // Improved Fog Logic: Matches sky at night, adds haze during day
+    // Reuse object or clone
+    const targetFogColor = targetSkyColor.clone()
+
+    // Add subtle haze based on sun height (dayness)
+    // Use easing (quadratic) for smoother onset of haze
+    const hazeIntensity = Math.pow(dayness, 2) * 0.3
+    targetFogColor.lerp(new THREE.Color('#FFFFFF'), hazeIntensity)
 
     // Apply to scene elements with smooth transition
     if (colorRef.current) {
-        colorRef.current.lerp(targetSkyColor, delta * 2)
+        // Slower transition for sky for weight
+        colorRef.current.lerp(targetSkyColor, delta * 1.5)
     }
 
     if (fogRef.current) {
-        fogRef.current.color.lerp(targetFogColor, delta * 2)
-        // More fog at night for mystery, less at day for clarity
-        // Adjusted ranges for better visibility
-        fogRef.current.near = THREE.MathUtils.lerp(0, 10, dayness)
-        fogRef.current.far = THREE.MathUtils.lerp(40, 100, dayness)
+        fogRef.current.color.lerp(targetFogColor, delta * 1.5)
+
+        // Visibility: Clearer at night (stars visible), hazier at day
+        // Night: Near 20, Far 200
+        // Day: Near 10, Far 100
+        const visibility = Math.pow(dayness, 0.5) // Rapid drop in visibility at dawn
+
+        const targetNear = THREE.MathUtils.lerp(20, 10, visibility)
+        const targetFar = THREE.MathUtils.lerp(200, 100, visibility)
+
+        fogRef.current.near = THREE.MathUtils.lerp(fogRef.current.near, targetNear, delta)
+        fogRef.current.far = THREE.MathUtils.lerp(fogRef.current.far, targetFar, delta)
     }
   })
 

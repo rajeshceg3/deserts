@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, Suspense } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
@@ -80,6 +80,7 @@ export const Experience = ({ onReady }) => {
   return (
     <>
       <EffectComposer disableNormalPass multisampling={0}>
+        <SMAA />
         <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.5} radius={0.7} />
         <Vignette eskil={false} offset={0.05} darkness={0.5} />
       </EffectComposer>
