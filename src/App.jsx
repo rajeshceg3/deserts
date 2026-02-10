@@ -5,6 +5,7 @@ import { Overlay } from './components/Overlay'
 import { Cursor } from './components/Cursor'
 import { Loader } from './components/Loader'
 import ErrorBoundary from './components/ErrorBoundary'
+import * as THREE from 'three'
 
 function App() {
   const [started, setStarted] = useState(false)
@@ -34,7 +35,9 @@ function App() {
             antialias: false, // Post-processing handles AA usually, or we want crispness
             stencil: false,
             alpha: false,
-            powerPreference: "high-performance"
+            powerPreference: "high-performance",
+            toneMapping: THREE.ACESFilmicToneMapping,
+            outputColorSpace: THREE.SRGBColorSpace
           }}
         >
           <Suspense fallback={null}>
