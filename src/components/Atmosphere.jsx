@@ -13,23 +13,21 @@ const NightStars = () => {
     useFrame(() => {
         if (starsRef.current?.material) {
             const dayness = Math.sin(dayNightCycle * Math.PI)
-            // Fade out stars during the day.
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
-
             starsRef.current.material.transparent = true
             starsRef.current.material.opacity = opacity
-            starsRef.current.rotation.y += 0.0001 // Slow rotation
+            starsRef.current.rotation.y += 0.00005
         }
     })
 
     return (
         <Stars
             ref={starsRef}
-            radius={120}
+            radius={150}
             depth={50}
-            count={5000}
+            count={7000}
             factor={4}
-            saturation={0}
+            saturation={0.5}
             fade
             speed={1}
         />
@@ -40,11 +38,10 @@ const Sun = () => {
     const meshRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
 
-    // Shader for a glowing sun with corona
     const shaderArgs = useMemo(() => ({
         uniforms: {
-            color: { value: new THREE.Color(10, 8, 1) }, // High intensity for bloom
-            haloColor: { value: new THREE.Color('#FF8C00') }
+            uColor: { value: new THREE.Color('#FFF5E0') },
+            uHalo: { value: new THREE.Color('#FF8C00') }
         },
         vertexShader: `
             varying vec2 vUv;
@@ -55,29 +52,25 @@ const Sun = () => {
         `,
         fragmentShader: `
             varying vec2 vUv;
-            uniform vec3 color;
-            uniform vec3 haloColor;
+            uniform vec3 uColor;
+            uniform vec3 uHalo;
 
             void main() {
-                // Center is 0.5, 0.5
                 float dist = distance(vUv, vec2(0.5));
 
-                // Core (White hot center) - radius 0.15
-                float core = 1.0 - smoothstep(0.0, 0.15, dist);
+                // Sharp intense core
+                float core = smoothstep(0.12, 0.08, dist);
 
-                // Glow (Halo) - radius 0.5
-                float glow = 1.0 - smoothstep(0.0, 0.5, dist);
-                // Make glow falloff non-linear for nicer look
-                glow = pow(glow, 2.0);
+                // Soft glow
+                float glow = exp(-12.0 * dist);
 
-                // Mix colors
-                vec3 finalColor = mix(haloColor, color, core * 0.8 + 0.2);
+                // Mix core and glow
+                vec3 finalColor = mix(uHalo, uColor, core);
+                finalColor += uHalo * glow * 2.0;
 
-                // Alpha: fade out at edges
-                float alpha = smoothstep(0.5, 0.2, dist);
+                float alpha = smoothstep(0.5, 0.0, dist);
 
-                gl_FragColor = vec4(finalColor * 2.0, alpha); // Boost brightness for bloom
-
+                gl_FragColor = vec4(finalColor, alpha);
                 #include <colorspace_fragment>
             }
         `,
@@ -89,78 +82,127 @@ const Sun = () => {
     useFrame(() => {
         if (meshRef.current) {
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
-             const radius = 60
+             const radius = 80
              const x = Math.cos(angle) * radius
              const y = Math.sin(angle) * radius
-             const z = Math.cos(angle) * 15
-
+             const z = Math.cos(angle) * 20
              meshRef.current.position.set(x, y, z)
              meshRef.current.lookAt(0, 0, 0)
         }
     })
 
     return (
-        <mesh ref={meshRef} scale={[12, 12, 12]}>
+        <mesh ref={meshRef} scale={[25, 25, 1]}>
             <planeGeometry args={[1, 1]} />
             <shaderMaterial args={[shaderArgs]} toneMapped={false} />
         </mesh>
     )
 }
 
+const SkyGradient = ({ horizonColor }) => {
+    const meshRef = useRef()
+    const shaderRef = useRef()
+
+    // Zenith color is derived from horizon but darker/bluer
+    const zenithColor = useMemo(() => new THREE.Color(), [])
+
+    useFrame((state, delta) => {
+        if (shaderRef.current) {
+             shaderRef.current.uniforms.uHorizon.value.lerp(horizonColor, delta * 2)
+
+             // Calculate zenith based on horizon: move towards deep blue/black
+             // Simple heuristic: reduce lightness, shift hue slightly
+             const h = horizonColor.getHSL({ h: 0, s: 0, l: 0 })
+             zenithColor.setHSL(h.h, h.s * 0.8, Math.max(0.05, h.l * 0.4))
+
+             shaderRef.current.uniforms.uZenith.value.lerp(zenithColor, delta * 2)
+        }
+    })
+
+    const shaderArgs = useMemo(() => ({
+        uniforms: {
+            uHorizon: { value: new THREE.Color(horizonColor) },
+            uZenith: { value: new THREE.Color(0,0,0) }
+        },
+        vertexShader: `
+            varying vec3 vWorldPosition;
+            void main() {
+                vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                vWorldPosition = worldPosition.xyz;
+                gl_Position = projectionMatrix * viewMatrix * worldPosition;
+            }
+        `,
+        fragmentShader: `
+            varying vec3 vWorldPosition;
+            uniform vec3 uHorizon;
+            uniform vec3 uZenith;
+
+            void main() {
+                vec3 dir = normalize(vWorldPosition);
+                // Map y from -0.2 (below horizon) to 1.0 (zenith)
+                float t = smoothstep(-0.2, 0.8, dir.y);
+                vec3 finalColor = mix(uHorizon, uZenith, t);
+                gl_FragColor = vec4(finalColor, 1.0);
+                #include <colorspace_fragment>
+            }
+        `,
+        side: THREE.BackSide,
+        depthWrite: false
+    }), [])
+
+    return (
+        <mesh ref={meshRef}>
+            <sphereGeometry args={[180, 32, 32]} />
+            <shaderMaterial ref={shaderRef} args={[shaderArgs]} toneMapped={false} />
+        </mesh>
+    )
+}
+
 export const Atmosphere = () => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
-  const dayNightCycle = useStore((state) => state.dayNightCycle) // 0..1
+  const dayNightCycle = useStore((state) => state.dayNightCycle)
   const desert = deserts[currentDesertIndex]
 
-  const colorRef = useRef()
   const fogRef = useRef()
 
-  // Calculate cloud color based on time of day
+  // Calculate cloud color
   const cloudColor = useMemo(() => {
     if (!desert) return new THREE.Color()
     const dayness = Math.sin(dayNightCycle * Math.PI)
     const baseColor = new THREE.Color(desert.colors.sky)
-    const sunsetColor = new THREE.Color('#FF9A8B') // Soft sunset pink/orange
-
+    const sunsetColor = new THREE.Color('#FF9A8B')
     return baseColor.lerp(sunsetColor, (1 - dayness) * 0.5)
   }, [dayNightCycle, desert])
+
+  const currentSkyColor = useMemo(() => new THREE.Color(desert?.colors.sky || '#000'), [desert])
 
   useFrame((state, delta) => {
     if (!desert) return
 
     const dayness = Math.sin(dayNightCycle * Math.PI)
-
-    // Improved Sky Color Logic using utility
     const targetSkyColor = getSkyColor(dayNightCycle, desert.colors)
-
-    // Improved Fog Logic: Matches sky at night, adds haze during day
-    // Reuse object or clone
-    const targetFogColor = targetSkyColor.clone()
-
-    // Add subtle haze based on sun height (dayness)
-    // Use easing (quadratic) for smoother onset of haze
-    const hazeIntensity = Math.pow(dayness, 2) * 0.3
-    targetFogColor.lerp(new THREE.Color('#FFFFFF'), hazeIntensity)
-
-    // Apply to scene elements with smooth transition
-    if (colorRef.current) {
-        // Slower transition for sky for weight
-        colorRef.current.lerp(targetSkyColor, delta * 1.5)
-    }
+    currentSkyColor.copy(targetSkyColor)
 
     if (fogRef.current) {
+        // Fog Color
+        const targetFogColor = targetSkyColor.clone()
+        const hazeIntensity = Math.pow(dayness, 2) * 0.4
+        targetFogColor.lerp(new THREE.Color('#FFFFFF'), hazeIntensity)
+
         fogRef.current.color.lerp(targetFogColor, delta * 1.5)
 
-        // Visibility: Clearer at night (stars visible), hazier at day
-        // Night: Near 20, Far 200
-        // Day: Near 10, Far 100
-        const visibility = Math.pow(dayness, 0.5) // Rapid drop in visibility at dawn
+        // Fog Density (FogExp2)
+        // High visibility = low density
+        // Night (200 units) -> 0.008
+        // Day (80 units) -> 0.02
+        // Dawn (foggy) -> 0.035
+        let targetDensity = 0.008
+        if (dayness > 0.2) targetDensity = 0.012
+        if (dayness < 0.2 && dayness > 0.0) targetDensity = 0.02 // Dawn haze
 
-        const targetNear = THREE.MathUtils.lerp(20, 10, visibility)
-        const targetFar = THREE.MathUtils.lerp(200, 100, visibility)
-
-        fogRef.current.near = THREE.MathUtils.lerp(fogRef.current.near, targetNear, delta)
-        fogRef.current.far = THREE.MathUtils.lerp(fogRef.current.far, targetFar, delta)
+        // Smooth transition for density
+        const currentDensity = fogRef.current.density
+        fogRef.current.density = THREE.MathUtils.lerp(currentDensity, targetDensity, delta * 0.5)
     }
   })
 
@@ -168,26 +210,11 @@ export const Atmosphere = () => {
 
   return (
     <>
-        <color ref={colorRef} attach="background" args={[desert.colors.sky]} />
-        <fog ref={fogRef} attach="fog" args={[desert.colors.fog, 10, 80]} />
+        <SkyGradient horizonColor={currentSkyColor} />
+        <fogExp2 ref={fogRef} attach="fog" args={[desert.colors.fog, 0.01]} />
         <NightStars />
         <Sun />
 
-        {/* Subtle clouds for depth */}
-        <group position={[0, 15, -20]}>
-            <Suspense fallback={null}>
-                <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-                    <Cloud
-                      opacity={0.5}
-                      speed={0.2}
-                      width={30}
-                      depth={5}
-                      segments={20}
-                      color={cloudColor}
-                    />
-                </Float>
-            </Suspense>
-        </group>
     </>
   )
 }

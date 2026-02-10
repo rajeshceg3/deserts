@@ -81,8 +81,8 @@ export const Experience = ({ onReady }) => {
     <>
       <EffectComposer disableNormalPass multisampling={0}>
         <SMAA />
-        <Bloom luminanceThreshold={0.6} mipmapBlur intensity={0.5} radius={0.7} />
-        <Vignette eskil={false} offset={0.05} darkness={0.5} />
+        <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.8} radius={0.6} />
+        <Vignette eskil={false} offset={0.05} darkness={0.6} />
       </EffectComposer>
 
       <OrbitControls
@@ -98,7 +98,7 @@ export const Experience = ({ onReady }) => {
       />
 
       <Suspense fallback={null}>
-        <Environment preset="city" environmentIntensity={0.2} />
+        <Environment preset="sunset" environmentIntensity={0.3} />
       </Suspense>
 
       <ambientLight ref={ambientLightRef} intensity={0.4} />
