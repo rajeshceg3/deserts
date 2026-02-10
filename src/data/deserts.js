@@ -3,6 +3,7 @@ export const deserts = [
     name: 'Ethereal Dunes',
     description: 'A realm where soft peach sands whisper secrets to the morning sun, creating a sanctuary of warmth and tranquility.',
     lore: "Legend says these sands were once the bed of a celestial ocean, dried by the gaze of a falling star. The warmth radiating from the ground is said to heal weary travelers, wrapping them in an eternal embrace of comfort. It is a place where time slows, and the air itself seems to shimmer with ancient magic, echoing the laughter of spirits long departed.",
+    journalEntry: "Day 4: The warmth here is unlike any other. It doesn't just touch the skin; it seeps into the bones, melting away years of fatigue. Last night, I swear the dunes sang—a low, melodic hum that matched the rhythm of my own heartbeat. I woke up feeling lighter, as if the sand itself had absorbed my burdens.",
     features: ['Singing Sands', 'Eternal Sunrise', 'Warm Breezes'],
     factoid: "The temperature here never drops below 20°C, creating a perpetual spring.",
     climate: "Temperate",
@@ -26,6 +27,7 @@ export const deserts = [
     name: 'Glacial Serenity',
     description: 'Crisp, mint-kissed valleys that breathe freshness into the soul, under a sky of infinite possibility.',
     lore: "A frozen wasteland preserving the silence of the ancient world, untouched by the passage of time. Here, the winds carry stories from epochs past, frozen in the very air you breathe. The stillness is profound, broken only by the gentle chime of shifting ice crystals and the distant roar of auroras dancing above.",
+    journalEntry: "Day 12: Silence. Absolute, heavy silence. My breath clouds in front of me, freezing instantly into tiny crystals that drift to the ground. There is no decay here, only preservation. I found a flower encased in ice today—perfectly preserved, as if it bloomed just moments ago. This place is a museum of moments.",
     features: ['Permafrost', 'Aurora Reflections', 'Silent Winds'],
     factoid: "The ice structures here vibrate at a frequency that induces deep relaxation.",
     climate: "Frigid",
@@ -49,6 +51,7 @@ export const deserts = [
     name: 'Velvet Twilight',
     description: 'A dreamscape bathed in lavender hues, where the boundary between earth and mystery dissolves into starlight.',
     lore: "A realm caught in the moment between wakefulness and dreams, where shadows detach and dance on their own. The air is thick with the scent of night-blooming jasmine, and the ground feels soft as velvet underfoot. It is a place for introspection, where the stars seem close enough to touch and the universe whispers its riddles.",
+    journalEntry: "Day 7: I am losing track of when I am awake and when I am asleep. The purple haze confusing the horizon makes everything look like a painting. I saw a shadow move today—my own, I think, but it moved a second after I did. The air smells sweet, intoxicatingly so. I could stay here forever and simply dream.",
     features: ['Purple Haze', 'Starlight Sands', 'Mystic Fog'],
     factoid: "Compass needles spin wildly here due to the magnetic sands.",
     climate: "Cool",
@@ -72,6 +75,7 @@ export const deserts = [
     name: 'Golden Hour',
     description: 'An eternal embrace of amber light, casting long, soft shadows across a landscape of pure nostalgia.',
     lore: "A place where the sun pauses its descent, bathing the land in a nostalgic, amber embrace forever. The shadows here stretch long but never darken, holding the warmth of a day that refuses to end. It feels like a memory you can walk through, a suspended moment of perfect clarity and peace before the night falls.",
+    journalEntry: "Day 21: It feels like 5 PM on a Sunday afternoon, forever. That specific feeling of having done enough, of resting before the week begins. The light is perfect—gold, heavy, and thick. I sat for hours watching a single blade of amber wheat sway in the breeze. I miss home, yet I feel entirely at home here.",
     features: ['Amber Light', 'Long Shadows', 'Warmth'],
     factoid: "Photographers flock here, as the lighting is considered perfect at any angle.",
     climate: "Warm",
@@ -95,6 +99,7 @@ export const deserts = [
     name: 'Rose Horizon',
     description: 'Soft pink waves of sand stretching into forever, painting the world with the gentle blush of a first love.',
     lore: "The sands here are stained by the petals of a billion ancient roses that once bloomed before the great drought. Though the flowers are gone, their spirit remains in the soft, blushing dunes that seem to pulse with a gentle heartbeat. Visitors often report vivid dreams of gardens long lost to time.",
+    journalEntry: "Day 15: The sand is fine, like cosmetic powder. When the wind blows, it looks like pink smoke. I dug into a dune today and found what looked like a fossilized thorn. The legend must be true. At night, the wind sounds like whispering lovers. It is lonely, but a beautiful kind of loneliness.",
     features: ['Pink Sands', 'Floral Scent', 'Soft Light'],
     factoid: "The air here actually smells faintly of rosewater.",
     climate: "Temperate",
@@ -113,5 +118,77 @@ export const deserts = [
       scale: 4.5
     },
     creatures: ['Lizard', 'Fox']
+  },
+  {
+    name: 'Obsidian Rift',
+    description: 'A striking landscape of dark, volcanic glass and ash, where the earth represents raw, unbridled power.',
+    lore: "Forged in the fires of a primordial era, the Obsidian Rift is a testament to the planet's volatile youth. The ground is jagged and sharp, composed of black glass that reflects the sky like a shattered mirror. Beneath the surface, the earth still hums with dormant energy, and steam vents hiss warnings to those who tread too heavily.",
+    journalEntry: "Day 2: The ground is sharp and unforgiving. Walking here requires intention. The black glass reflects the sky so perfectly that it's sometimes hard to tell up from down. It's hot—dry, baking heat that radiates from the stone long after the sun sets. I feel small here, insignificant against the raw power of the earth.",
+    features: ['Volcanic Glass', 'Steam Vents', 'Sharp Terrain'],
+    factoid: "The obsidian shards here are sharper than surgical steel.",
+    climate: "Hot",
+    flora: ['Ash Fern', 'Magma Root', 'Charred Bush'],
+    soundProfile: 'Hissing steam, crunching glass, deep rumble',
+    colors: {
+      ground: '#2D2D2D', // Dark Grey
+      sky: '#FFD1DC',    // Pale Red/Pink (contrast)
+      fog: '#2D2D2D',
+      groundHigh: '#4A4A4A', // Lighter Grey
+      groundLow: '#1A1A1A'   // Black
+    },
+    terrainParams: {
+      roughness: 0.8,
+      height: 3.0,
+      scale: 2.5
+    },
+    creatures: ['Scorpion', 'Lizard']
+  },
+  {
+    name: 'Nebula Plains',
+    description: 'A cosmic expanse where the ground mirrors the galaxy above, blurring the line between planet and space.',
+    lore: "It is said that a piece of the night sky fell here eons ago, infusing the soil with stardust. The flora glows with a bioluminescent pulse, and the sand sparkles with colors not found elsewhere on earth. Gravity feels lighter here, and the horizon seems to curve upward, giving the illusion of walking inside a nebula.",
+    journalEntry: "Day 9: I haven't needed my lantern for days. The plants provide enough light to read by—a soft, pulsing blue. The sand glitters with iridescent specks that stick to my boots like diamond dust. Looking up at the night sky, I feel a strange vertigo, as if I could simply float away into the stars.",
+    features: ['Bioluminescence', 'Starry Ground', 'Low Gravity Feel'],
+    factoid: "The soil samples from this region contain trace elements found only in meteorites.",
+    climate: "Cool",
+    flora: ['Star Lily', 'Glowing Moss', 'Cosmic Vine'],
+    soundProfile: 'Ethereal synth tones, quiet static',
+    colors: {
+      ground: '#2E2B5F', // Deep Blue-Purple
+      sky: '#E0B0FF',    // Mauve
+      fog: '#2E2B5F',
+      groundHigh: '#483D8B', // Dark Slate Blue
+      groundLow: '#191970'   // Midnight Blue
+    },
+    terrainParams: {
+      roughness: 0.3,
+      height: 1.2,
+      scale: 7
+    },
+    creatures: ['Fox']
+  },
+  {
+    name: 'Echo Valley',
+    description: 'A verdant, misty basin hidden within the desert, where sounds loop and layer into haunting melodies.',
+    lore: "Protected by high canyon walls, this valley traps moisture and sound alike. The mist clings to the ground, obscuring the path but nourishing a unique ecosystem of giant succulents. Every sound made here echoes for minutes, layering over itself until speech becomes song and footsteps become thunder.",
+    journalEntry: "Day 6: I have to be careful what I say. A simple 'hello' repeats for minutes, morphing into a choir of my own voice. It's maddening and beautiful. The mist dampens the visual world but amplifies the auditory one. I sat by a rock and listened to the echo of a bird for an hour.",
+    features: ['Eternal Mist', 'Sonic Echoes', 'Giant Succulents'],
+    factoid: "The acoustics of the valley are studied by musicians for their natural reverb.",
+    climate: "Humid",
+    flora: ['Mist Aloe', 'Echo Fern', 'Giant Agave'],
+    soundProfile: 'Water droplets, echoing calls, soft rustle',
+    colors: {
+      ground: '#8FBC8F', // Dark Sea Green
+      sky: '#F0FFF0',    // Honeydew
+      fog: '#8FBC8F',
+      groundHigh: '#90EE90', // Light Green
+      groundLow: '#2F4F4F'   // Dark Slate Gray
+    },
+    terrainParams: {
+      roughness: 0.5,
+      height: 2.8,
+      scale: 3
+    },
+    creatures: ['Camel', 'Lizard']
   }
 ]
