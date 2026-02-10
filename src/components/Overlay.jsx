@@ -129,6 +129,7 @@ export const Overlay = ({ started }) => {
   const [zenMode, setZenMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showJournal, setShowJournal] = useState(false)
+  const [showCollection, setShowCollection] = useState(false)
   const [isTimeFocused, setIsTimeFocused] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -172,6 +173,31 @@ export const Overlay = ({ started }) => {
           setTimeout(() => setCopied(false), 2000);
       }).catch(err => console.error('Failed to copy:', err));
   };
+
+  const handleScreenshot = () => {
+    // Hide UI
+    setZenMode(true)
+    play('click')
+
+    // Wait for transition to complete
+    setTimeout(() => {
+      try {
+        const canvas = document.querySelector('canvas')
+        if (canvas) {
+          const dataURL = canvas.toDataURL('image/png')
+          const link = document.createElement('a')
+          link.download = `DesertRealms_${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.png`
+          link.href = dataURL
+          link.click()
+        }
+      } catch (err) {
+        console.error('Screenshot failed:', err)
+      } finally {
+        // Restore UI
+        setZenMode(false)
+      }
+    }, 600)
+  }
 
   const sliderGradient = useMemo(() => {
      if (!desert) return 'linear-gradient(to right, #000, #fff)';
@@ -466,6 +492,39 @@ export const Overlay = ({ started }) => {
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
           <div className="flex flex-col gap-4 items-end">
+             {/* Photo Mode Button */}
+             <div className="relative group">
+                <button
+                    onClick={handleScreenshot}
+                    onMouseEnter={() => play('hover')}
+                    className="bg-black/30 backdrop-blur-md text-white p-4 rounded-full border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300"
+                    aria-label="Take Photo"
+                    title="Photo Mode"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </button>
+             </div>
+
+             {/* Collection Button */}
+             <div className="relative group">
+                <button
+                    onClick={() => { setShowCollection(true); play('click'); }}
+                    onMouseEnter={() => play('hover')}
+                    className="bg-black/30 backdrop-blur-md text-white p-4 rounded-full border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300"
+                    aria-label="View Collection"
+                    title="Artifact Collection"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </button>
+             </div>
+
              {/* Journal Button */}
              <div className="relative group">
                 <button
@@ -604,6 +663,64 @@ export const Overlay = ({ started }) => {
           Explored: {visitedDeserts.length} / {deserts.length}
         </div>
 
+        {/* Collection Modal */}
+        <AnimatePresence>
+            {showCollection && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+                    onClick={() => setShowCollection(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        className="glass-panel p-8 md:p-10 rounded-2xl max-w-4xl w-full border border-white/10 shadow-2xl relative max-h-[80vh] overflow-y-auto custom-scrollbar"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowCollection(false)}
+                            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"
+                            aria-label="Close Collection"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+
+                        <h2 className="text-3xl font-serif text-white mb-2">Artifact Collection</h2>
+                        <p className="text-white/60 font-mono text-sm uppercase tracking-widest mb-8 border-b border-white/10 pb-4">
+                            Relics Discovered: {visitedDeserts.length} / {deserts.length}
+                        </p>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {deserts.map((d, i) => {
+                                const isUnlocked = visitedDeserts.includes(i);
+                                return (
+                                    <div key={i} className={`relative p-4 rounded-xl border ${isUnlocked ? 'bg-white/10 border-white/20' : 'bg-black/20 border-white/5'} flex flex-col items-center text-center transition-all duration-300 group hover:border-white/30`}>
+                                        <div className={`text-4xl mb-3 transition-all duration-500 ${isUnlocked ? 'grayscale-0 blur-0 scale-100' : 'grayscale blur-sm scale-90 opacity-30'}`}>
+                                            {d.artifact?.icon || '📦'}
+                                        </div>
+                                        <h3 className={`font-serif font-bold mb-1 ${isUnlocked ? 'text-white' : 'text-white/30'}`}>
+                                            {isUnlocked ? d.artifact?.name : '???'}
+                                        </h3>
+                                        <p className={`text-xs ${isUnlocked ? 'text-white/70' : 'text-white/20'}`}>
+                                            {isUnlocked ? d.artifact?.description : 'Explore more to unlock.'}
+                                        </p>
+                                        {!isUnlocked && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/10"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
         {/* Help Modal */}
         <AnimatePresence>
             {showHelp && (
@@ -698,7 +815,7 @@ export const Overlay = ({ started }) => {
                         initial={{ scale: 0.9, opacity: 0, rotate: -2 }}
                         animate={{ scale: 1, opacity: 1, rotate: 0 }}
                         exit={{ scale: 0.9, opacity: 0, rotate: 2 }}
-                        className="bg-[#Fdfbf7] text-[#2c2c2c] p-8 md:p-12 rounded-sm max-w-lg w-full shadow-2xl relative font-serif"
+                        className="bg-[#Fdfbf7] text-[#2c2c2c] p-8 md:p-12 rounded-sm max-w-lg w-full shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5),inset_0_0_60px_rgba(139,115,85,0.1)] relative font-serif border border-[#e6e2d8]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
