@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, Suspense } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, SMAA, DepthOfField, Noise } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
@@ -13,6 +13,14 @@ import { gsap } from 'gsap'
 export const Experience = ({ onReady }) => {
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
+
+  // Detect headless mode for testing optimization
+  const isHeadless = useMemo(() => {
+      if (typeof window !== 'undefined') {
+          return new URLSearchParams(window.location.search).get('headless') === 'true'
+      }
+      return false
+  }, [])
 
   // Ref for lights to animate
   const directionalLightRef = useRef()
@@ -77,13 +85,26 @@ export const Experience = ({ onReady }) => {
     }
   })
 
+  // Calculate environment intensity
+  const dayness = Math.sin(dayNightCycle * Math.PI)
+  const envIntensity = 0.05 + Math.pow(dayness, 2) * 0.4 // Non-linear curve for realistic twilight
+
   return (
     <>
-      <EffectComposer disableNormalPass multisampling={0}>
-        <SMAA />
-        <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.8} radius={0.6} />
-        <Vignette eskil={false} offset={0.05} darkness={0.6} />
-      </EffectComposer>
+      {/* Disable PostProcessing in headless mode to save GPU */}
+      {!isHeadless && (
+          <EffectComposer disableNormalPass multisampling={0}>
+            <SMAA />
+            <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.8} radius={0.6} />
+            <DepthOfField
+                focusDistance={0.025} // Focus around 10-15 units away
+                focalLength={0.02} // 20mm wide angle
+                bokehScale={4} // Strong bokeh
+            />
+            <Noise opacity={0.03} /> {/* Subtle film grain */}
+            <Vignette eskil={false} offset={0.05} darkness={0.5} />
+          </EffectComposer>
+      )}
 
       <OrbitControls
         makeDefault
@@ -98,7 +119,8 @@ export const Experience = ({ onReady }) => {
       />
 
       <Suspense fallback={null}>
-        <Environment preset="sunset" environmentIntensity={0.3} />
+        {/* Use city preset for neutral reflections, modulate intensity */}
+        <Environment preset="city" environmentIntensity={envIntensity} />
       </Suspense>
 
       <ambientLight ref={ambientLightRef} intensity={0.4} />
@@ -106,7 +128,7 @@ export const Experience = ({ onReady }) => {
         ref={directionalLightRef}
         position={[10, 10, 5]}
         intensity={1.0}
-        castShadow
+        castShadow={!isHeadless}
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0005} // Tuned to prevent acne
         shadow-camera-near={0.1}
@@ -117,15 +139,17 @@ export const Experience = ({ onReady }) => {
         shadow-camera-bottom={-50}
       />
 
-      <Terrain />
-      <Atmosphere />
+      <Terrain isHeadless={isHeadless} />
+      <Atmosphere isHeadless={isHeadless} />
       <Suspense fallback={null}>
         <CreatureManager />
       </Suspense>
       <Particles />
 
       {/* Soft floor shadow for grounding */}
-      <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
+      {!isHeadless && (
+        <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
+      )}
     </>
   )
 }

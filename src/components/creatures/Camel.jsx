@@ -1,14 +1,69 @@
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Group } from 'three'
+import * as THREE from 'three'
+
+// Procedural Fur Material using onBeforeCompile
+const FurMaterial = (props) => {
+    const materialRef = useRef()
+
+    const onBeforeCompile = useMemo(() => (shader) => {
+        shader.vertexShader = `
+            varying vec3 vPos;
+            ${shader.vertexShader}
+        `.replace(
+            '#include <begin_vertex>',
+            `
+            #include <begin_vertex>
+            vPos = position;
+            `
+        );
+
+        shader.fragmentShader = `
+            varying vec3 vPos;
+
+            // Simple hash function for noise
+            float hash(vec3 p) {
+                p  = fract( p*0.3183099 + .1 );
+                p *= 17.0;
+                return fract( p.x*p.y*p.z*(p.x+p.y+p.z) );
+            }
+
+            ${shader.fragmentShader}
+        `.replace(
+            '#include <color_fragment>',
+            `
+            #include <color_fragment>
+
+            // High frequency noise for fur
+            float noise = hash(vPos * 200.0);
+
+            // Darken base color with noise to simulate fur depth
+            diffuseColor.rgb *= (0.8 + 0.2 * noise);
+            `
+        ).replace(
+            '#include <roughnessmap_fragment>',
+            `
+            #include <roughnessmap_fragment>
+            roughnessFactor = 0.9 + 0.1 * noise; // Very rough
+            `
+        );
+    }, []);
+
+    return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />
+}
 
 // Leg geometry helper
 // Pivot is at top (0,0,0 local to group), leg extends down
 const Leg = ({ position, legRef }) => (
     <group position={position} ref={legRef}>
-        <mesh position={[0, -1, 0]}>
-          <cylinderGeometry args={[0.15, 0.1, 2]} />
-          <meshStandardMaterial color="#C19A6B" />
+        <mesh position={[0, -0.75, 0]} castShadow receiveShadow>
+          <capsuleGeometry args={[0.12, 1.5, 4, 8]} />
+          <FurMaterial color="#C19A6B" />
+        </mesh>
+        {/* Hoof */}
+        <mesh position={[0, -1.5, 0.05]} castShadow receiveShadow>
+            <boxGeometry args={[0.25, 0.15, 0.25]} />
+            <meshStandardMaterial color="#3E2723" roughness={0.9} />
         </mesh>
     </group>
 )
@@ -37,16 +92,17 @@ export const Camel = (props) => {
 
         // Procedural Walking Animation (Diagonals synced)
         // Rotate around X axis for legs
-        if (legFL.current) legFL.current.rotation.x = Math.sin(walkT) * 0.4
-        if (legFR.current) legFR.current.rotation.x = Math.sin(walkT + Math.PI) * 0.4
-        if (legBL.current) legBL.current.rotation.x = Math.sin(walkT + Math.PI) * 0.4
-        if (legBR.current) legBR.current.rotation.x = Math.sin(walkT) * 0.4
+        // Adjusted amplitude for realistic gait
+        if (legFL.current) legFL.current.rotation.x = Math.sin(walkT) * 0.5
+        if (legFR.current) legFR.current.rotation.x = Math.sin(walkT + Math.PI) * 0.5
+        if (legBL.current) legBL.current.rotation.x = Math.sin(walkT + Math.PI) * 0.5
+        if (legBR.current) legBR.current.rotation.x = Math.sin(walkT) * 0.5
 
         // Body bobbing - synced with steps (2 steps per cycle)
-        const bob = Math.abs(Math.sin(walkT)) * 0.1
+        const bob = Math.abs(Math.sin(walkT)) * 0.05
         group.current.position.y = props.position[1] + bob
 
-        // Organic head movement using noise-like composition
+        // Organic head movement
         if (headRef.current) {
              const headT = state.clock.elapsedTime + offset
              // Head turn (slow scan + quick glance)
@@ -62,37 +118,59 @@ export const Camel = (props) => {
 
   return (
     <group ref={group} {...props}>
-      {/* Body */}
-      <mesh position={[0, 1.5, 0]}>
-        <boxGeometry args={[1.5, 1, 3]} />
-        <meshStandardMaterial color="#C19A6B" />
+      {/* Body Main: Capsule rotated 90deg on Z? No, on X or Z.
+          Capsule default is vertical (Y). We want horizontal (Z).
+          Rotate X 90deg.
+      */}
+      <mesh position={[0, 1.4, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+        <capsuleGeometry args={[0.7, 1.6, 8, 16]} />
+        <FurMaterial color="#C19A6B" />
       </mesh>
-      {/* Hump */}
-      <mesh position={[0, 2.2, 0]}>
-        <sphereGeometry args={[0.6, 16, 16]} />
-        <meshStandardMaterial color="#C19A6B" />
+
+      {/* Hump: Sphere merged into body look */}
+      <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
+        <sphereGeometry args={[0.65, 16, 16]} />
+        <FurMaterial color="#C19A6B" />
       </mesh>
 
       {/* Neck & Head Group */}
-      <group position={[0, 2, 1.5]} ref={headRef} rotation={[0.5, 0, 0]}>
-          <mesh position={[0, 0.75, 0]}>
-            <boxGeometry args={[0.4, 1.5, 0.4]} />
-            <meshStandardMaterial color="#C19A6B" />
+      <group position={[0, 1.8, 1.4]} ref={headRef} rotation={[0.4, 0, 0]}>
+          {/* Neck */}
+          <mesh position={[0, 0.6, 0]} castShadow receiveShadow>
+            <capsuleGeometry args={[0.3, 1.2, 8, 16]} />
+            <FurMaterial color="#C19A6B" />
           </mesh>
-          <mesh position={[0, 1.55, 0.2]}>
-            <boxGeometry args={[0.5, 0.5, 0.8]} />
-            <meshStandardMaterial color="#C19A6B" />
-          </mesh>
+
+          {/* Head */}
+          <group position={[0, 1.3, 0.2]} rotation={[-0.4, 0, 0]}>
+              {/* Skull */}
+              <mesh castShadow receiveShadow>
+                <sphereGeometry args={[0.35, 16, 16]} />
+                <FurMaterial color="#C19A6B" />
+              </mesh>
+              {/* Snout */}
+              <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+                <capsuleGeometry args={[0.2, 0.5, 4, 8]} />
+                <FurMaterial color="#C12A6B" /> {/* Slightly darker nose area? No, keep uniform for now */}
+                <meshStandardMaterial color="#A17A4B" roughness={0.9} />
+              </mesh>
+              {/* Eyes */}
+              <mesh position={[0.2, 0.1, 0.15]}>
+                  <sphereGeometry args={[0.05, 8, 8]} />
+                  <meshStandardMaterial color="#111" roughness={0.2} />
+              </mesh>
+              <mesh position={[-0.2, 0.1, 0.15]}>
+                  <sphereGeometry args={[0.05, 8, 8]} />
+                  <meshStandardMaterial color="#111" roughness={0.2} />
+              </mesh>
+          </group>
       </group>
 
-      {/* Legs - Attached at body height (1.5 - 0.5 = 1.0 approx) */}
-      {/* Body is 1.5 high, 1 thick. Bottom is at 1.0. */}
-      {/* Leg pivot should be at 1.0 */}
-
-      <Leg position={[-0.5, 1.0, 1.2]} legRef={legFL} />
-      <Leg position={[0.5, 1.0, 1.2]} legRef={legFR} />
-      <Leg position={[-0.5, 1.0, -1.2]} legRef={legBL} />
-      <Leg position={[0.5, 1.0, -1.2]} legRef={legBR} />
+      {/* Legs */}
+      <Leg position={[-0.4, 1.3, 1.0]} legRef={legFL} />
+      <Leg position={[0.4, 1.3, 1.0]} legRef={legFR} />
+      <Leg position={[-0.4, 1.3, -1.0]} legRef={legBL} />
+      <Leg position={[0.4, 1.3, -1.0]} legRef={legBR} />
     </group>
   )
 }
