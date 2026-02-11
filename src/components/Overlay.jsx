@@ -117,6 +117,8 @@ export const Overlay = ({ started }) => {
   const setDayNightCycle = useStore((state) => state.setDayNightCycle)
   const visitedDeserts = useStore((state) => state.visitedDeserts)
   const markVisited = useStore((state) => state.markVisited)
+  const isCinematic = useStore((state) => state.isCinematic)
+  const toggleCinematic = useStore((state) => state.toggleCinematic)
   const prefersReducedMotion = usePrefersReducedMotion()
 
   const { play } = useUISound()
@@ -173,6 +175,14 @@ export const Overlay = ({ started }) => {
           setTimeout(() => setCopied(false), 2000);
       }).catch(err => console.error('Failed to copy:', err));
   };
+
+  const handleCinematicToggle = () => {
+      toggleCinematic();
+      if (!isCinematic) {
+          setZenMode(true);
+      }
+      play('click');
+  }
 
   const handleScreenshot = () => {
     // Hide UI
@@ -379,6 +389,22 @@ export const Overlay = ({ started }) => {
                         transition={{ delay: 0.8, duration: 0.8 }}
                         className="flex flex-wrap gap-2 max-w-xl"
                     >
+                        {desert?.difficulty && (
+                             <span className={`px-3 py-1 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/90 border shadow-sm ${
+                                 desert.difficulty === 'Easy' ? 'bg-green-500/20 border-green-500/30' :
+                                 desert.difficulty === 'Moderate' ? 'bg-yellow-500/20 border-yellow-500/30' :
+                                 'bg-red-500/20 border-red-500/30'
+                             }`} title="Traversal Difficulty">
+                                ⛰️ {desert.difficulty}
+                             </span>
+                        )}
+
+                        {desert?.weather && (
+                             <span className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm" title="Current Weather">
+                                🌤️ {desert.weather}
+                             </span>
+                        )}
+
                         {desert?.climate && (
                              <span className="px-3 py-1 bg-white/5 backdrop-blur-md rounded-full text-xs font-mono uppercase tracking-wider text-white/80 border border-white/10 shadow-sm" title="Climate">
                                 🌡️ {desert.climate}
@@ -492,6 +518,29 @@ export const Overlay = ({ started }) => {
         {/* Controls */}
         <div className={`absolute top-8 right-8 pointer-events-auto flex flex-col gap-6 items-end transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-x-20 opacity-0 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 blur-0'}`}>
           <div className="flex flex-col gap-4 items-end">
+             {/* Cinematic Mode Button */}
+             <div className="relative group">
+                <button
+                    onClick={handleCinematicToggle}
+                    onMouseEnter={() => play('hover')}
+                    className={`bg-black/30 backdrop-blur-md text-white p-4 rounded-full border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300 ${isCinematic ? 'bg-white/20 ring-2 ring-white/50' : ''}`}
+                    aria-label="Toggle Cinematic Mode"
+                    title="Cinematic Mode"
+                >
+                    {isCinematic ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                             <rect x="6" y="4" width="4" height="16"></rect>
+                             <rect x="14" y="4" width="4" height="16"></rect>
+                        </svg>
+                    ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                             <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                             <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    )}
+                </button>
+             </div>
+
              {/* Photo Mode Button */}
              <div className="relative group">
                 <button
@@ -837,6 +886,12 @@ export const Overlay = ({ started }) => {
                                 <span className="font-handwriting text-sm text-black/50">
                                     — {desert?.name}
                                 </span>
+                            </div>
+
+                            <div className="mt-8 pt-6 border-t border-black/10 text-center">
+                                <p className="text-black/40 text-xs font-serif italic">
+                                    "The desert tells a different story to every grain of sand."
+                                </p>
                             </div>
                         </div>
                     </motion.div>
