@@ -21,7 +21,12 @@ export const deserts = [
       height: 2.0,
       scale: 4
     },
-    creatures: ['Camel']
+    creatures: ['Camel'],
+    artifact: {
+      name: "Sun-Bleached Hourglass",
+      description: "Sand flows upward within this glass, defying gravity and time.",
+      icon: "⏳"
+    }
   },
   {
     name: 'Glacial Serenity',
@@ -45,7 +50,12 @@ export const deserts = [
       height: 1.5,
       scale: 5
     },
-    creatures: ['Lizard']
+    creatures: ['Lizard'],
+    artifact: {
+      name: "Frost-Fire Gem",
+      description: "Cold to the touch, yet it glows with an inner, smokeless warmth.",
+      icon: "💎"
+    }
   },
   {
     name: 'Velvet Twilight',
@@ -69,7 +79,12 @@ export const deserts = [
       height: 2.2,
       scale: 3.5
     },
-    creatures: ['Scorpion']
+    creatures: ['Scorpion'],
+    artifact: {
+      name: "Moon-Dust Vial",
+      description: "A small vial containing dust that shimmers in sync with the moon's phases.",
+      icon: "🧪"
+    }
   },
   {
     name: 'Golden Hour',
@@ -93,7 +108,12 @@ export const deserts = [
       height: 1.8,
       scale: 6
     },
-    creatures: ['Camel', 'Fox']
+    creatures: ['Camel', 'Fox'],
+    artifact: {
+      name: "Amber Chronometer",
+      description: "A pocket watch that doesn't tick, forever frozen at sunset.",
+      icon: "🕰️"
+    }
   },
   {
     name: 'Rose Horizon',
@@ -117,7 +137,12 @@ export const deserts = [
       height: 2.5,
       scale: 4.5
     },
-    creatures: ['Lizard', 'Fox']
+    creatures: ['Lizard', 'Fox'],
+    artifact: {
+      name: "Petrified Rose",
+      description: "A stone flower that, when warmed by hands, smells faintly of perfume.",
+      icon: "🌹"
+    }
   },
   {
     name: 'Obsidian Rift',
@@ -141,7 +166,12 @@ export const deserts = [
       height: 3.0,
       scale: 2.5
     },
-    creatures: ['Scorpion', 'Lizard']
+    creatures: ['Scorpion', 'Lizard'],
+    artifact: {
+      name: "Volcanic Geode",
+      description: "Pitch black on the outside, but cracking it open reveals burning red crystal.",
+      icon: "🌋"
+    }
   },
   {
     name: 'Nebula Plains',
@@ -165,7 +195,12 @@ export const deserts = [
       height: 1.2,
       scale: 7
     },
-    creatures: ['Fox']
+    creatures: ['Fox'],
+    artifact: {
+      name: "Star-Metal Compass",
+      description: "A compass that points not North, but directly up towards the stars.",
+      icon: "🧭"
+    }
   },
   {
     name: 'Echo Valley',
@@ -189,6 +224,11 @@ export const deserts = [
       height: 2.8,
       scale: 3
     },
-    creatures: ['Camel', 'Lizard']
+    creatures: ['Camel', 'Lizard'],
+    artifact: {
+      name: "Whispering Shell",
+      description: "Hold it to your ear to hear the echoes of conversations from centuries past.",
+      icon: "🐚"
+    }
   }
 ]

@@ -37,7 +37,8 @@ function App() {
             alpha: false,
             powerPreference: "high-performance",
             toneMapping: THREE.ACESFilmicToneMapping,
-            outputColorSpace: THREE.SRGBColorSpace
+            outputColorSpace: THREE.SRGBColorSpace,
+            preserveDrawingBuffer: true
           }}
         >
           <Suspense fallback={null}>
