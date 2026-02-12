@@ -70,9 +70,9 @@ export const Experience = ({ onReady }) => {
     if (directionalLightRef.current) {
         directionalLightRef.current.position.set(x, y, z)
 
-        // Intensity changes: Peak at noon, 0 at midnight
-        const intensity = Math.max(0, dayness)
-        directionalLightRef.current.intensity = intensity * 1.5 // Increased slightly for punchiness
+    // Intensity changes: Peak at noon, min 0.1 at midnight (Moonlight)
+    const intensity = 0.1 + Math.max(0, dayness) * 1.4
+    directionalLightRef.current.intensity = intensity
 
         // Color temperature shift
         const sunMix = Math.pow(dayness, 2)
@@ -82,7 +82,7 @@ export const Experience = ({ onReady }) => {
 
     if (ambientLightRef.current) {
         // Ambient light should be brighter during day, dimmer at night but not 0
-        ambientLightRef.current.intensity = 0.1 + dayness * 0.4
+    ambientLightRef.current.intensity = 0.2 + dayness * 0.4
     }
   })
 
@@ -96,13 +96,13 @@ export const Experience = ({ onReady }) => {
       {!isHeadless && (
           <EffectComposer disableNormalPass multisampling={0}>
             <SMAA />
-            <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.8} radius={0.6} />
+            <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.6} radius={0.6} />
             <DepthOfField
                 focusDistance={0.025} // Focus around 10-15 units away
                 focalLength={0.02} // 20mm wide angle
                 bokehScale={4} // Strong bokeh
             />
-            <Noise opacity={0.03} /> {/* Subtle film grain */}
+            <Noise opacity={0.02} /> {/* Subtle film grain */}
             <Vignette eskil={false} offset={0.05} darkness={0.5} />
           </EffectComposer>
       )}
