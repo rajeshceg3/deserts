@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getTerrainHeight } from '../utils/terrainUtils'
-import { createNoise2D } from 'simplex-noise'
+import { noise2D } from '../utils/noise'
 import * as THREE from 'three'
 
 export const Terrain = ({ isHeadless }) => {
@@ -17,7 +17,6 @@ export const Terrain = ({ isHeadless }) => {
   const noiseMap = useMemo(() => {
       const size = 1024;
       const data = new Uint8Array(size * size * 4);
-      const noise2D = createNoise2D();
 
       for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
@@ -91,8 +90,9 @@ export const Terrain = ({ isHeadless }) => {
 
       // Function to create ripples
       float ripple(vec2 uv, float time) {
-          float wave = sin(uv.x * 40.0 + uv.y * 20.0 + time * 0.5);
-          // Modulate with noise to break regularity
+          // Distort domain with noise for organic look
+          float n = texture2D(uNoiseMap, uv * 2.0).r;
+          float wave = sin(uv.x * 30.0 + uv.y * 15.0 + time * 0.5 + n * 5.0);
           return wave;
       }
     ` + shader.fragmentShader
@@ -144,7 +144,8 @@ export const Terrain = ({ isHeadless }) => {
       float baseRough = roughnessFactor;
 
       // Add variation: some grains are shiny
-      float sparkle = step(0.95, rNoise); // Top 5% brightest noise points are sparkles
+      // Use smoothstep to avoid aliasing artifacts
+      float sparkle = smoothstep(0.94, 0.98, rNoise);
 
       roughnessFactor = mix(baseRough, 0.2, sparkle * 0.5);
 
@@ -186,7 +187,6 @@ export const Terrain = ({ isHeadless }) => {
     const geo = new THREE.PlaneGeometry(100, 100, segments, segments)
     const count = geo.attributes.position.count
     const colors = new Float32Array(count * 3)
-    const noise2D = createNoise2D();
 
     for (let i = 0; i < count; i++) {
         const x = geo.attributes.position.getX(i);
@@ -241,17 +241,9 @@ export const Terrain = ({ isHeadless }) => {
     }
 
     // Check animations...
-    let colorSettled = true;
     if (shaderRef.current) {
-        const cLow = shaderRef.current.uniforms.uColorLow.value;
-        const cHigh = shaderRef.current.uniforms.uColorHigh.value;
-        const tLow = new THREE.Color(desert.colors.groundLow);
-        const tHigh = new THREE.Color(desert.colors.groundHigh);
-        if (Math.abs(cLow.r - tLow.r) + Math.abs(cLow.g - tLow.g) + Math.abs(cLow.b - tLow.b) > 0.01) colorSettled = false;
-        if (Math.abs(cHigh.r - tHigh.r) + Math.abs(cHigh.g - tHigh.g) + Math.abs(cHigh.b - tHigh.b) > 0.01) colorSettled = false;
+        // Just updating uniforms every frame is cheap enough
     }
-
-    const roughnessSettled = Math.abs(material.roughness - targetRoughness) < 0.01;
 
     // Note: We don't stop animating if uTime is updating, but we only calculate vertices if needed
 

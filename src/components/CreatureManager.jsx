@@ -30,15 +30,25 @@ export const CreatureManager = () => {
     creatureRefs.current = creatureRefs.current.slice(0, creatures.length);
   }, [creatures]);
 
-  // Idle animation: bobbing
-  useFrame((state) => {
+  // Idle animation: bobbing & terrain following
+  useFrame((state, delta) => {
+      if (!desert) return
       const time = state.clock.getElapsedTime();
       creatureRefs.current.forEach((ref, i) => {
-          if (ref && ref.userData && ref.userData.baseY !== undefined) {
-              // Gentle bobbing, offset by index to avoid sync
-              // Only bob if we are "settled" (roughly)
-              // Actually, just add sine to base Y
-              ref.position.y = ref.userData.baseY + Math.sin(time * 2 + i) * 0.1;
+          // If creature is exiting (animated by GSAP), don't override Y
+          if (ref && !ref.userData?.isExiting) {
+              // Target height on new terrain
+              const targetY = getTerrainHeight(ref.position.x, ref.position.z, desert.terrainParams)
+
+              // Smoothly interpolate current base height to target height
+              // This prevents snapping and matches terrain morph speed (~delta * 3)
+              const currentBaseY = ref.userData.baseY || ref.position.y;
+              const newBaseY = THREE.MathUtils.lerp(currentBaseY, targetY, delta * 3);
+
+              ref.userData.baseY = newBaseY;
+
+              // Apply height + bobbing
+              ref.position.y = newBaseY + Math.sin(time * 2 + i) * 0.1;
           }
       });
   });
@@ -84,12 +94,15 @@ export const CreatureManager = () => {
     // Animate Out existing creatures
     const activeRefs = creatureRefs.current.filter(Boolean)
     if (activeRefs.length > 0) {
+         // Mark as exiting to disable useFrame updates
+         activeRefs.forEach(ref => { if (ref.userData) ref.userData.isExiting = true })
+
          // Animate each creature down
          const positions = activeRefs.map(r => r.position)
          const scales = activeRefs.map(r => r.scale)
 
          gsap.to(positions, {
-             y: (i, target) => activeRefs[i].userData.baseY - 2,
+             y: (i) => (activeRefs[i].userData.baseY || 0) - 2,
              duration: 0.5,
              ease: "power2.in",
              stagger: 0.05

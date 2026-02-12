@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 /**
  * Calculates the sky color based on the day/night cycle and desert colors.
- * Uses smoothstep interpolation for smoother transitions.
+ * Uses continuous interpolation to avoid static bands.
  * @param {number} cycle - The day/night cycle value (0 to 1).
  * @param {object} colors - The desert colors object (containing at least a 'sky' color hex/string).
  * @returns {THREE.Color} The calculated sky color.
@@ -13,46 +13,47 @@ export const getSkyColor = (cycle, colors) => {
     const dayColor = new THREE.Color(colors?.sky || '#87CEEB')
     const duskColor = new THREE.Color('#FD5E53') // Coral/Red
 
+    // Define keyframes for the sky color cycle
+    // We use a continuous loop: Night -> Dawn -> Day -> Dusk -> Night
+    // To avoid static "dead zones", we ensure color is always shifting.
+
+    // 0.0: Midnight (Deep Night)
+    // 0.25: Sunrise (Dawn)
+    // 0.5: Noon (Peak Day)
+    // 0.75: Sunset (Dusk)
+    // 1.0: Midnight (Deep Night)
+
     const color = new THREE.Color()
 
-    // Smoothstep function
-    const smoothstep = (min, max, value) => {
-        const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
-        return x * x * (3 - 2 * x);
-    };
+    // Helper to blend between two colors
+    const blend = (c1, c2, t) => {
+        return color.copy(c1).lerp(c2, t)
+    }
 
-    // Cycle: 0 (Midnight) -> 0.25 (Dawn) -> 0.5 (Noon) -> 0.75 (Dusk) -> 1 (Midnight)
-
-    // 0.0 - 0.2: Night
-    if (cycle < 0.2) {
-        return color.copy(nightColor)
-    }
-    // 0.2 - 0.3: Dawn (Night to Dawn)
-    else if (cycle < 0.3) {
-        const t = smoothstep(0.2, 0.3, cycle)
-        return color.copy(nightColor).lerp(dawnColor, t)
-    }
-    // 0.3 - 0.4: Day Rise (Dawn to Day)
-    else if (cycle < 0.4) {
-        const t = smoothstep(0.3, 0.4, cycle)
-        return color.copy(dawnColor).lerp(dayColor, t)
-    }
-    // 0.4 - 0.6: Day
-    else if (cycle < 0.6) {
-        return color.copy(dayColor)
-    }
-    // 0.6 - 0.7: Day Set (Day to Dusk)
-    else if (cycle < 0.7) {
-        const t = smoothstep(0.6, 0.7, cycle)
-        return color.copy(dayColor).lerp(duskColor, t)
-    }
-    // 0.7 - 0.8: Dusk (Dusk to Night)
-    else if (cycle < 0.8) {
-        const t = smoothstep(0.7, 0.8, cycle)
-        return color.copy(duskColor).lerp(nightColor, t)
-    }
-    // 0.8 - 1.0: Night
-    else {
-        return color.copy(nightColor)
+    if (cycle < 0.25) {
+        // Night -> Dawn
+        // Normalize 0.0-0.25 to 0-1
+        const t = cycle / 0.25
+        // Use smoothstep for non-linear transition
+        const smoothT = t * t * (3 - 2 * t)
+        return blend(nightColor, dawnColor, smoothT)
+    } else if (cycle < 0.5) {
+        // Dawn -> Day
+        // Normalize 0.25-0.5 to 0-1
+        const t = (cycle - 0.25) / 0.25
+        const smoothT = t * t * (3 - 2 * t)
+        return blend(dawnColor, dayColor, smoothT)
+    } else if (cycle < 0.75) {
+        // Day -> Dusk
+        // Normalize 0.5-0.75 to 0-1
+        const t = (cycle - 0.5) / 0.25
+        const smoothT = t * t * (3 - 2 * t)
+        return blend(dayColor, duskColor, smoothT)
+    } else {
+        // Dusk -> Night
+        // Normalize 0.75-1.0 to 0-1
+        const t = (cycle - 0.75) / 0.25
+        const smoothT = t * t * (3 - 2 * t)
+        return blend(duskColor, nightColor, smoothT)
     }
 }
