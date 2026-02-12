@@ -13,6 +13,7 @@ import { gsap } from 'gsap'
 export const Experience = ({ onReady }) => {
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
+  const isCinematic = useStore((state) => state.isCinematic)
 
   // Ref for lights to animate
   const directionalLightRef = useRef()
@@ -92,7 +93,7 @@ export const Experience = ({ onReady }) => {
         maxDistance={40}
         enablePan={false}
         autoRotate
-        autoRotateSpeed={0.3}
+        autoRotateSpeed={isCinematic ? 0.8 : 0.3}
         enableDamping
         dampingFactor={0.05}
       />

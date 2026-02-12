@@ -26,4 +26,7 @@ export const useStore = create((set) => ({
   setDayNightCycle: (value) => set({ dayNightCycle: value, isDay: value > 0.25 && value < 0.75 }),
 
   toggleInfo: () => set((state) => ({ showInfo: !state.showInfo })),
+
+  isCinematic: false,
+  toggleCinematic: () => set((state) => ({ isCinematic: !state.isCinematic })),
 }))

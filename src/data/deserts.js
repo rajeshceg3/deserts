@@ -7,6 +7,8 @@ export const deserts = [
     features: ['Singing Sands', 'Eternal Sunrise', 'Warm Breezes'],
     factoid: "The temperature here never drops below 20°C, creating a perpetual spring.",
     climate: "Temperate",
+    weather: "Clear",
+    difficulty: "Easy",
     flora: ['Sun-Kissed Ferns', 'Golden Poppy', 'Mirage Grass'],
     soundProfile: 'Soft humming wind, distant chimes',
     colors: {
@@ -36,6 +38,8 @@ export const deserts = [
     features: ['Permafrost', 'Aurora Reflections', 'Silent Winds'],
     factoid: "The ice structures here vibrate at a frequency that induces deep relaxation.",
     climate: "Frigid",
+    weather: "Snowy",
+    difficulty: "Moderate",
     flora: ['Crystal Moss', 'Frost Bloom', 'Ice Willow'],
     soundProfile: 'Crackling ice, deep silence, wind howls',
     colors: {
@@ -65,6 +69,8 @@ export const deserts = [
     features: ['Purple Haze', 'Starlight Sands', 'Mystic Fog'],
     factoid: "Compass needles spin wildly here due to the magnetic sands.",
     climate: "Cool",
+    weather: "Foggy",
+    difficulty: "Easy",
     flora: ['Moonflower', 'Shadow Fern', 'Violet Moss'],
     soundProfile: 'Low rhythmic pulse, insect chirps',
     colors: {
@@ -94,6 +100,8 @@ export const deserts = [
     features: ['Amber Light', 'Long Shadows', 'Warmth'],
     factoid: "Photographers flock here, as the lighting is considered perfect at any angle.",
     climate: "Warm",
+    weather: "Clear",
+    difficulty: "Easy",
     flora: ['Amber Wheat', 'Sunburst Succulent', 'Glow Berry'],
     soundProfile: 'Cicada buzz, warm breeze, rustling grass',
     colors: {
@@ -123,6 +131,8 @@ export const deserts = [
     features: ['Pink Sands', 'Floral Scent', 'Soft Light'],
     factoid: "The air here actually smells faintly of rosewater.",
     climate: "Temperate",
+    weather: "Breezy",
+    difficulty: "Easy",
     flora: ['Petal Grass', 'Blushing Cactus', 'Rosemary Scrub'],
     soundProfile: 'Soft whispers, flutter of wings',
     colors: {
@@ -152,6 +162,8 @@ export const deserts = [
     features: ['Volcanic Glass', 'Steam Vents', 'Sharp Terrain'],
     factoid: "The obsidian shards here are sharper than surgical steel.",
     climate: "Hot",
+    weather: "Ashy",
+    difficulty: "Hard",
     flora: ['Ash Fern', 'Magma Root', 'Charred Bush'],
     soundProfile: 'Hissing steam, crunching glass, deep rumble',
     colors: {
@@ -181,6 +193,8 @@ export const deserts = [
     features: ['Bioluminescence', 'Starry Ground', 'Low Gravity Feel'],
     factoid: "The soil samples from this region contain trace elements found only in meteorites.",
     climate: "Cool",
+    weather: "Clear",
+    difficulty: "Moderate",
     flora: ['Star Lily', 'Glowing Moss', 'Cosmic Vine'],
     soundProfile: 'Ethereal synth tones, quiet static',
     colors: {
@@ -210,6 +224,8 @@ export const deserts = [
     features: ['Eternal Mist', 'Sonic Echoes', 'Giant Succulents'],
     factoid: "The acoustics of the valley are studied by musicians for their natural reverb.",
     climate: "Humid",
+    weather: "Foggy",
+    difficulty: "Moderate",
     flora: ['Mist Aloe', 'Echo Fern', 'Giant Agave'],
     soundProfile: 'Water droplets, echoing calls, soft rustle',
     colors: {
@@ -229,6 +245,68 @@ export const deserts = [
       name: "Whispering Shell",
       description: "Hold it to your ear to hear the echoes of conversations from centuries past.",
       icon: "🐚"
+    }
+  },
+  {
+    name: 'Crystal Canyons',
+    description: 'A sharp, prismatic landscape where giant crystal formations refract light into a thousand rainbows.',
+    lore: "Formed by intense geothermal pressure and rapid cooling, the Crystal Canyons are a geological marvel. The towering spires of quartz and selenite sing when the wind passes through them, creating a natural pipe organ. The light here is dazzling, splitting into spectral colors that dance across the canyon walls.",
+    journalEntry: "Day 18: I need sunglasses even at dawn. The entire world is a prism. I tapped one of the smaller crystals with my walking stick, and it emitted a pure, resonant tone that lasted for nearly a minute. It feels fragile here, like walking inside a chandelier, yet these structures have stood for millennia.",
+    features: ['Prismatic Light', 'Singing Crystals', 'Sharp Geometry'],
+    factoid: "The largest crystal here is over 40 meters tall and flawless.",
+    climate: "Arid",
+    weather: "Radiant",
+    difficulty: "Hard",
+    flora: ['Glass Reed', 'Prism Flower', 'Quartz Lichen'],
+    soundProfile: 'High-pitched ringing, wind chimes, crunching gravel',
+    colors: {
+      ground: '#E0FFFF', // Light Cyan
+      sky: '#F0FFFF',    // Azure Mist
+      fog: '#E0FFFF',
+      groundHigh: '#AFEEEE', // Pale Turquoise
+      groundLow: '#B0E0E6'   // Powder Blue
+    },
+    terrainParams: {
+      roughness: 0.9,
+      height: 3.5,
+      scale: 3
+    },
+    creatures: ['Lizard'],
+    artifact: {
+      name: "Prism Shard",
+      description: "A shard that turns any light passing through it into a solid rainbow bridge.",
+      icon: "💎"
+    }
+  },
+  {
+    name: 'Crimson Waste',
+    description: 'A rust-colored expanse of ancient iron sands, evoking the desolate beauty of a forgotten planet.',
+    lore: "The iron-rich sands of the Crimson Waste have rusted over millions of years, painting the landscape in deep shades of blood and clay. It is a place of ancient ruins, half-buried in the shifting dunes, hinting at a civilization that once thrived before the great oxidation. The wind here carries the scent of metal and old earth.",
+    journalEntry: "Day 25: Everything I own is now covered in red dust. It gets everywhere. But the sunsets... my god, the sunsets. The red dust in the atmosphere turns the sun into a blood-orange orb that consumes half the sky. I found a pottery shard today with markings I didn't recognize. We are not the first to walk here.",
+    features: ['Red Dust', 'Ancient Ruins', 'Metallic Scent'],
+    factoid: "The magnetic field here is strong enough to lift small metallic objects.",
+    climate: "Dry",
+    weather: "Dusty",
+    difficulty: "Moderate",
+    flora: ['Iron Weed', 'Rust Bush', 'Copper Vine'],
+    soundProfile: 'Metallic scraping, low wind drone, shifting sand',
+    colors: {
+      ground: '#8B4513', // Saddle Brown
+      sky: '#FF7F50',    // Coral
+      fog: '#8B4513',
+      groundHigh: '#A0522D', // Sienna
+      groundLow: '#800000'   // Maroon
+    },
+    terrainParams: {
+      roughness: 0.6,
+      height: 2.0,
+      scale: 5
+    },
+    creatures: ['Scorpion', 'Camel'],
+    artifact: {
+      name: "Ancient Gear",
+      description: "A rusted cog that still spins perpetually without any power source.",
+      icon: "⚙️"
     }
   }
 ]
