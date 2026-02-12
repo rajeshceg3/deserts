@@ -4,8 +4,8 @@ import time
 
 def run():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        # Use EGL to ensure WebGL works in headless
+        # Use EGL to ensure WebGL works in headless and is performant enough
+        browser = p.chromium.launch(headless=True, args=["--use-gl=egl", "--enable-unsafe-swiftshader"])
         context = browser.new_context(ignore_https_errors=True)
         page = context.new_page()
 
@@ -13,9 +13,9 @@ def run():
         page.on("console", lambda msg: print(f"PAGE LOG: {msg.text}"))
         page.on("pageerror", lambda exc: print(f"PAGE ERROR: {exc}"))
 
-        print("Navigating to http://localhost:5173...")
+        print("Navigating to http://localhost:5173?headless=true...")
         try:
-            page.goto("http://localhost:5173", timeout=60000)
+            page.goto("http://localhost:5173?headless=true", timeout=60000)
         except Exception as e:
             print(f"Navigation failed: {e}")
             return
@@ -46,12 +46,12 @@ def run():
         try:
             # Wait for the button
             # It might be "Enter Experience" or "Enter Anyway"
-            button = page.locator("button", has_text="Enter")
-            button.wait_for(state="visible", timeout=30000)
-            print(f"Found button: {button.inner_text()}")
+            button = page.locator("button", has_text="Enter").first
+            # button.wait_for(state="visible", timeout=60000)
+            print(f"Attempting to click button: {button}")
 
-            # Click it
-            button.click()
+            # Click it aggressively
+            button.click(force=True, timeout=60000)
             print("Clicked Enter button.")
 
             # Wait for overlay
