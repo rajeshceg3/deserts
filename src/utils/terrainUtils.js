@@ -1,7 +1,4 @@
-import { createNoise2D } from 'simplex-noise';
-
-// Create a single instance of noise to be shared or recreated if needed.
-const noise2D = createNoise2D();
+import { noise2D } from './noise';
 
 /**
  * Calculates the height of the terrain at a given x, z coordinate using Fractal Brownian Motion (FBM).
