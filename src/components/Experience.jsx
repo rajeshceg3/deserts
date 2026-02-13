@@ -6,6 +6,7 @@ import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
 import { Particles } from './Particles'
 import { useStore } from '../store'
+import { deserts } from '../data/deserts'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
@@ -55,6 +56,12 @@ export const Experience = ({ onReady }) => {
       return () => clearTimeout(t)
     }
   }, [onReady])
+
+  useEffect(() => {
+    if (deserts[currentDesertIndex]) {
+        document.title = `${deserts[currentDesertIndex].name} | Desert Realms`;
+    }
+  }, [currentDesertIndex]);
 
   useFrame(() => {
     // Adjusted cycle logic: 0.5 is Noon (Top), 0/1 is Midnight (Bottom)

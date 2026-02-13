@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getSkyColor } from '../utils/colorUtils'
 import { Soundscape } from './Soundscape'
+import { BreathingGuide } from './BreathingGuide'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { useUISound } from '../hooks/useUISound'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
@@ -129,6 +130,7 @@ export const Overlay = ({ started }) => {
 
   const desert = deserts[currentDesertIndex]
   const [zenMode, setZenMode] = useState(false)
+  const [showBreathing, setShowBreathing] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showJournal, setShowJournal] = useState(false)
   const [showCollection, setShowCollection] = useState(false)
@@ -264,6 +266,31 @@ export const Overlay = ({ started }) => {
              <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2 pointer-events-none">
                 <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
                   {zenMode ? "Show UI" : "Zen Mode"}
+                </span>
+             </div>
+           </MagneticButton>
+
+           {/* Breathing Mode Toggle */}
+           <MagneticButton
+             onClick={() => {
+                const newState = !showBreathing;
+                setShowBreathing(newState);
+                if (newState) setZenMode(true);
+                play('click');
+             }}
+             onMouseEnter={() => play('hover')}
+             className={`group relative transition-opacity duration-300 ${zenMode && !showBreathing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+             aria-label={showBreathing ? "Stop Breathing Exercise" : "Start Breathing Exercise"}
+           >
+             <div className={`glass-panel p-3 rounded-full hover:bg-white/20 transition-all duration-300 ${showBreathing ? 'bg-white/20 ring-2 ring-white/50' : ''}`}>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/90">
+                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+               </svg>
+             </div>
+
+             <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2 pointer-events-none">
+                <span className="text-xs font-mono uppercase tracking-widest text-white/90 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded border border-white/10 whitespace-nowrap shadow-xl">
+                  {showBreathing ? "Stop Breathing" : "Breathe"}
                 </span>
              </div>
            </MagneticButton>
@@ -444,6 +471,44 @@ export const Overlay = ({ started }) => {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Breathing Guide Overlay */}
+        <AnimatePresence>
+            {zenMode && showBreathing && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+                >
+                    <BreathingGuide />
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* Constellation Hint (Night Only) */}
+        <AnimatePresence>
+            {!zenMode && (dayNightCycle < 0.2 || dayNightCycle > 0.8) && desert?.constellation && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 1, delay: 1 }}
+                    className="absolute top-8 left-1/2 -translate-x-1/2 pointer-events-none z-0"
+                >
+                    <div className="flex flex-col items-center text-center opacity-80 hover:opacity-100 transition-opacity">
+                        <div className="text-white/40 text-[10px] uppercase tracking-[0.3em] mb-1">Night Sky Observer</div>
+                        <h3 className="text-white/90 font-serif italic text-xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                             ✨ {desert.constellation.name}
+                        </h3>
+                        <p className="text-white/60 text-xs font-mono max-w-xs mt-1">
+                            {desert.constellation.description}
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
 
         {/* Navigation */}
         <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-auto z-20 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none blur-sm' : 'translate-y-0 opacity-100 blur-0'}`}>
@@ -887,6 +952,17 @@ export const Overlay = ({ started }) => {
                                     — {desert?.name}
                                 </span>
                             </div>
+
+                            {desert?.wisdom && (
+                                <div className="mt-8 p-6 bg-[#f4f1ea] border border-[#e6e2d8] rounded italic text-center relative">
+                                    <span className="absolute top-2 left-4 text-4xl text-black/10 font-serif">“</span>
+                                    <p className="text-black/70 font-serif text-lg relative z-10 px-4">
+                                        {desert.wisdom}
+                                    </p>
+                                    <span className="absolute bottom-[-10px] right-4 text-4xl text-black/10 font-serif">”</span>
+                                    <p className="text-black/30 text-[10px] uppercase tracking-widest mt-3 font-sans">Ancient Wisdom</p>
+                                </div>
+                            )}
 
                             <div className="mt-8 pt-6 border-t border-black/10 text-center">
                                 <p className="text-black/40 text-xs font-serif italic">
