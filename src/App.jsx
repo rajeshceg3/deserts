@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react'
+import React, { useState, Suspense, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Experience } from './components/Experience'
 import { Overlay } from './components/Overlay'
@@ -6,13 +6,41 @@ import { Cursor } from './components/Cursor'
 import { Loader } from './components/Loader'
 import ErrorBoundary from './components/ErrorBoundary'
 import * as THREE from 'three'
+import { useStore } from './store'
+import { deserts } from './data/deserts'
+import { getSkyColor } from './utils/colorUtils'
 
 function App() {
   const [started, setStarted] = useState(false)
   const [experienceReady, setExperienceReady] = useState(false)
+  const containerRef = useRef()
+
+  // Optimize Performance: Subscribe to store changes directly to update DOM style
+  // This avoids re-rendering the entire App component (and Canvas) on every frame/drag of the time slider
+  useEffect(() => {
+    const updateBackground = (state) => {
+        if (!containerRef.current) return
+        const desert = deserts[state.currentDesertIndex]
+        if (desert) {
+            const color = getSkyColor(state.dayNightCycle, desert.colors)
+            containerRef.current.style.backgroundColor = '#' + color.getHexString()
+        }
+    }
+
+    // Subscribe to all store changes
+    const unsub = useStore.subscribe(updateBackground)
+
+    // Initial set
+    updateBackground(useStore.getState())
+
+    return unsub
+  }, [])
 
   return (
-    <div className="w-full h-screen bg-black relative cursor-none overflow-hidden">
+    <div
+      ref={containerRef}
+      className="w-full h-screen relative cursor-none overflow-hidden transition-colors duration-500 ease-linear"
+    >
       <ErrorBoundary>
         <Cursor />
 

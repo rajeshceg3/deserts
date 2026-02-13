@@ -10,6 +10,7 @@ import { deserts } from '../data/deserts'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
+import { getSkyColor } from '../utils/colorUtils'
 
 export const Experience = ({ onReady }) => {
   const dayNightCycle = useStore((state) => state.dayNightCycle)
@@ -33,7 +34,7 @@ export const Experience = ({ onReady }) => {
   const sunColorEnd = useMemo(() => new THREE.Color('#FF8C00'), [])
   const tempColor = useMemo(() => new THREE.Color(), [])
 
-  const { camera } = useThree()
+  const { camera, scene } = useThree()
 
   useEffect(() => {
     const targetPosition = new THREE.Vector3(0, 5, 10)
@@ -74,11 +75,19 @@ export const Experience = ({ onReady }) => {
 
     const dayness = Math.sin(dayNightCycle * Math.PI)
 
+    // Update Scene Background for Continuity
+    // This ensures WebGL background matches sky even if geometry is missing
+    if (deserts[currentDesertIndex]) {
+        const skyColor = getSkyColor(dayNightCycle, deserts[currentDesertIndex].colors)
+        scene.background = skyColor
+    }
+
     if (directionalLightRef.current) {
         directionalLightRef.current.position.set(x, y, z)
 
         // Intensity changes: Peak at noon, min 0.1 at midnight (Moonlight)
-        const intensity = 0.1 + Math.max(0, dayness) * 1.4
+        // Ensure it never goes fully black. 0.1 is safe, but let's be explicit with Math.max
+        const intensity = Math.max(0.1, 0.1 + Math.max(0, dayness) * 1.4)
         directionalLightRef.current.intensity = intensity
 
         // Color temperature shift
@@ -89,7 +98,8 @@ export const Experience = ({ onReady }) => {
 
     if (ambientLightRef.current) {
         // Ambient light should be brighter during day, dimmer at night but not 0
-        ambientLightRef.current.intensity = 0.2 + dayness * 0.4
+        // Clamp to min 0.15 to prevent total darkness
+        ambientLightRef.current.intensity = Math.max(0.15, 0.2 + dayness * 0.4)
     }
   })
 
