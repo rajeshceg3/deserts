@@ -11,6 +11,11 @@ export const deserts = [
     weather: "Clear",
     difficulty: "Easy",
     flora: ['Sun-Kissed Ferns', 'Golden Poppy', 'Mirage Grass'],
+    floraDetails: [
+      { name: "Sun-Kissed Ferns", description: "Delicate fronds that turn to face the sun throughout the day, storing warmth to release a gentle glow at night." },
+      { name: "Golden Poppy", description: "A resilient flower with metallic-sheen petals that reflect sunlight, acting as natural beacons for lost travelers." },
+      { name: "Mirage Grass", description: "Tall, swaying grass that seems to vanish when looked at directly, only visible in one's peripheral vision." }
+    ],
     soundProfile: 'Soft humming wind, distant chimes',
     colors: {
       ground: '#F2D1C9', // Soft Apricot
@@ -25,6 +30,9 @@ export const deserts = [
       scale: 4
     },
     creatures: ['Camel'],
+    creatureDetails: [
+      { name: "Camel", description: "The Ethereal Camel is known for its silky, peach-colored fur and ability to sense water sources from miles away." }
+    ],
     artifact: {
       name: "Sun-Bleached Hourglass",
       description: "Sand flows upward within this glass, defying gravity and time.",
@@ -32,7 +40,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Wandering Camel",
-      description: "A trail of stars that guides lost travelers back to safety."
+      description: "A trail of stars that guides lost travelers back to safety.",
+      myth: "It is said that the First Camel walked across the sky to carry the sun to its resting place, leaving a trail of hoofprints that became the stars."
     }
   },
   {
@@ -47,6 +56,11 @@ export const deserts = [
     weather: "Snowy",
     difficulty: "Moderate",
     flora: ['Crystal Moss', 'Frost Bloom', 'Ice Willow'],
+    floraDetails: [
+      { name: "Crystal Moss", description: "A hardy lichen that grows in geometric patterns on the permafrost, crunching like glass underfoot." },
+      { name: "Frost Bloom", description: "A flower made entirely of ice that never melts, blooming only during the coldest nights." },
+      { name: "Ice Willow", description: "A weeping tree whose branches are heavy with icicles, creating a natural wind chime in the breeze." }
+    ],
     soundProfile: 'Crackling ice, deep silence, wind howls',
     colors: {
       ground: '#D4F1F4', // Icy Mint
@@ -61,6 +75,9 @@ export const deserts = [
       scale: 5
     },
     creatures: ['Lizard'],
+    creatureDetails: [
+      { name: "Lizard", description: "The Frost-Scale Lizard moves slowly to conserve heat, its blue scales perfectly camouflaging it against the ice." }
+    ],
     artifact: {
       name: "Frost-Fire Gem",
       description: "Cold to the touch, yet it glows with an inner, smokeless warmth.",
@@ -68,7 +85,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Frost Wyrm",
-      description: "A winding serpent of blue stars said to guard the secrets of the ice."
+      description: "A winding serpent of blue stars said to guard the secrets of the ice.",
+      myth: "The Wyrm was a guardian of the north who breathed the first winter into existence to preserve the world's beauty from decay."
     }
   },
   {
@@ -83,6 +101,11 @@ export const deserts = [
     weather: "Foggy",
     difficulty: "Easy",
     flora: ['Moonflower', 'Shadow Fern', 'Violet Moss'],
+    floraDetails: [
+      { name: "Moonflower", description: "Large, white blossoms that open rapidly at dusk, releasing a potent, sleep-inducing fragrance." },
+      { name: "Shadow Fern", description: "Dark, semi-translucent fronds that seem to absorb light rather than reflect it." },
+      { name: "Violet Moss", description: "Soft, velvet-like ground cover that cushions footsteps, making travel nearly silent." }
+    ],
     soundProfile: 'Low rhythmic pulse, insect chirps',
     colors: {
       ground: '#DCD6F7', // Dusty Lilac
@@ -97,6 +120,9 @@ export const deserts = [
       scale: 3.5
     },
     creatures: ['Scorpion'],
+    creatureDetails: [
+      { name: "Scorpion", description: "The Twilight Scorpion glows faintly in the dark, using its bioluminescence to lure curious prey." }
+    ],
     artifact: {
       name: "Moon-Dust Vial",
       description: "A small vial containing dust that shimmers in sync with the moon's phases.",
@@ -104,7 +130,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Dream Weaver",
-      description: "A complex web of faint stars that is said to catch nightmares."
+      description: "A complex web of faint stars that is said to catch nightmares.",
+      myth: "The Weaver sits at the edge of the universe, spinning the threads of fate and dreams into the tapestry of the night sky."
     }
   },
   {
@@ -119,6 +146,11 @@ export const deserts = [
     weather: "Clear",
     difficulty: "Easy",
     flora: ['Amber Wheat', 'Sunburst Succulent', 'Glow Berry'],
+    floraDetails: [
+      { name: "Amber Wheat", description: "Tall, golden stalks that yield a grain tasting faintly of honey and sunshine." },
+      { name: "Sunburst Succulent", description: "Fleshy leaves arranged in a radial pattern that store heat, remaining warm even in the shade." },
+      { name: "Glow Berry", description: "Small, tart fruits that emit a faint, warm light when ripe." }
+    ],
     soundProfile: 'Cicada buzz, warm breeze, rustling grass',
     colors: {
       ground: '#FBE7C6', // Muted Gold
@@ -133,6 +165,10 @@ export const deserts = [
       scale: 6
     },
     creatures: ['Camel', 'Fox'],
+    creatureDetails: [
+      { name: "Camel", description: "Golden-hued Camels that move with a slow, deliberate grace, perfectly adapted to the eternal afternoon." },
+      { name: "Fox", description: "The Amber Fox is playful and curious, often seen chasing the long shadows cast by the setting sun." }
+    ],
     artifact: {
       name: "Amber Chronometer",
       description: "A pocket watch that doesn't tick, forever frozen at sunset.",
@@ -140,7 +176,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Golden Scythe",
-      description: "A curved line of bright stars symbolizing the harvest of time."
+      description: "A curved line of bright stars symbolizing the harvest of time.",
+      myth: "The Scythe reminds us that all things must end, but the harvest—the memories we gather—sustains us through the winter."
     }
   },
   {
@@ -155,6 +192,11 @@ export const deserts = [
     weather: "Breezy",
     difficulty: "Easy",
     flora: ['Petal Grass', 'Blushing Cactus', 'Rosemary Scrub'],
+    floraDetails: [
+      { name: "Petal Grass", description: "Soft, pink-tinged blades that feel like flower petals to the touch." },
+      { name: "Blushing Cactus", description: "A spine-free cactus that turns a deeper shade of red when approached." },
+      { name: "Rosemary Scrub", description: "Low-lying bushes that release a scent similar to rosemary and rose when stepped on." }
+    ],
     soundProfile: 'Soft whispers, flutter of wings',
     colors: {
       ground: '#FBC4AB', // Millennial Pink
@@ -169,6 +211,10 @@ export const deserts = [
       scale: 4.5
     },
     creatures: ['Lizard', 'Fox'],
+    creatureDetails: [
+      { name: "Lizard", description: "A small, pinkish lizard that mimics the appearance of a fallen petal to hide from predators." },
+      { name: "Fox", description: "The Rosy Fox has incredibly soft fur and is known to be surprisingly affectionate if approached slowly." }
+    ],
     artifact: {
       name: "Petrified Rose",
       description: "A stone flower that, when warmed by hands, smells faintly of perfume.",
@@ -176,7 +222,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Blooming Rose",
-      description: "A cluster of red-tinted stars that resembles an opening flower."
+      description: "A cluster of red-tinted stars that resembles an opening flower.",
+      myth: "A celestial gift from a star-crossed lover, placed in the sky so their beauty would never wilt."
     }
   },
   {
@@ -191,6 +238,11 @@ export const deserts = [
     weather: "Ashy",
     difficulty: "Hard",
     flora: ['Ash Fern', 'Magma Root', 'Charred Bush'],
+    floraDetails: [
+      { name: "Ash Fern", description: "Grey, brittle-looking fronds that thrive in sulfur-rich soil." },
+      { name: "Magma Root", description: "A plant with deep roots that tap into geothermal heat; its veins glow faint orange at night." },
+      { name: "Charred Bush", description: "Looks like dead wood, but is actually alive and fire-resistant, producing small, hard berries." }
+    ],
     soundProfile: 'Hissing steam, crunching glass, deep rumble',
     colors: {
       ground: '#2D2D2D', // Dark Grey
@@ -205,6 +257,10 @@ export const deserts = [
       scale: 2.5
     },
     creatures: ['Scorpion', 'Lizard'],
+    creatureDetails: [
+      { name: "Scorpion", description: "Armor-plated scorpions with obsidian-black shells that blend perfectly with the glass terrain." },
+      { name: "Lizard", description: "Fast-moving lizards with toughened skin capable of withstanding the sharp rocks and intense heat." }
+    ],
     artifact: {
       name: "Volcanic Geode",
       description: "Pitch black on the outside, but cracking it open reveals burning red crystal.",
@@ -212,7 +268,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Obsidian Shield",
-      description: "A rigid square of stars that stands guard against the void."
+      description: "A rigid square of stars that stands guard against the void.",
+      myth: "The Shield was raised by the Earth Titan to protect the young world from the scouring winds of the cosmos."
     }
   },
   {
@@ -227,6 +284,11 @@ export const deserts = [
     weather: "Clear",
     difficulty: "Moderate",
     flora: ['Star Lily', 'Glowing Moss', 'Cosmic Vine'],
+    floraDetails: [
+      { name: "Star Lily", description: "A flower with five pointed petals that emits a steady white light." },
+      { name: "Glowing Moss", description: "Covers rocks in a carpet of neon blue and purple, pulsing slowly like a heartbeat." },
+      { name: "Cosmic Vine", description: "Climbs upward with no support, reaching towards the sky as if trying to return home." }
+    ],
     soundProfile: 'Ethereal synth tones, quiet static',
     colors: {
       ground: '#2E2B5F', // Deep Blue-Purple
@@ -241,6 +303,9 @@ export const deserts = [
       scale: 7
     },
     creatures: ['Fox'],
+    creatureDetails: [
+      { name: "Fox", description: "The Nebula Fox has fur that shifts color with the angle of light, resembling a walking aurora." }
+    ],
     artifact: {
       name: "Star-Metal Compass",
       description: "A compass that points not North, but directly up towards the stars.",
@@ -248,7 +313,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Cosmic Navigator",
-      description: "A pointer of stars that always aligns with the galactic center."
+      description: "A pointer of stars that always aligns with the galactic center.",
+      myth: "The Navigator was a lost god who turned himself into stars to ensure no traveler would ever be without a guide."
     }
   },
   {
@@ -263,6 +329,11 @@ export const deserts = [
     weather: "Foggy",
     difficulty: "Moderate",
     flora: ['Mist Aloe', 'Echo Fern', 'Giant Agave'],
+    floraDetails: [
+      { name: "Mist Aloe", description: "Broad leaves that collect dew from the fog, providing a source of fresh water." },
+      { name: "Echo Fern", description: "Its leaves vibrate sympathetically with nearby sounds, creating a soft rustling chorus." },
+      { name: "Giant Agave", description: "Massive succulents that tower over travelers, their spires piercing the mist layer." }
+    ],
     soundProfile: 'Water droplets, echoing calls, soft rustle',
     colors: {
       ground: '#8FBC8F', // Dark Sea Green
@@ -277,6 +348,10 @@ export const deserts = [
       scale: 3
     },
     creatures: ['Camel', 'Lizard'],
+    creatureDetails: [
+      { name: "Camel", description: "Green-tinged Camels that feed on the abundant moisture in the giant succulents." },
+      { name: "Lizard", description: "The Echo Lizard communicates by drumming its tail on hollow logs, utilizing the valley's acoustics." }
+    ],
     artifact: {
       name: "Whispering Shell",
       description: "Hold it to your ear to hear the echoes of conversations from centuries past.",
@@ -284,7 +359,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Echoing Horn",
-      description: "A spiraling arrangement of stars resembling a great horn."
+      description: "A spiraling arrangement of stars resembling a great horn.",
+      myth: "Legend says the Horn was blown at the creation of the world, and its sound is still echoing through the universe."
     }
   },
   {
@@ -299,6 +375,11 @@ export const deserts = [
     weather: "Radiant",
     difficulty: "Hard",
     flora: ['Glass Reed', 'Prism Flower', 'Quartz Lichen'],
+    floraDetails: [
+      { name: "Glass Reed", description: "Translucent stalks that are brittle to the touch but sharp as razors." },
+      { name: "Prism Flower", description: "Geometric petals that refract light, creating mini-rainbows around the plant." },
+      { name: "Quartz Lichen", description: "A hard, crusty organism that slowly eats away at the crystal formations." }
+    ],
     soundProfile: 'High-pitched ringing, wind chimes, crunching gravel',
     colors: {
       ground: '#E0FFFF', // Light Cyan
@@ -313,6 +394,9 @@ export const deserts = [
       scale: 3
     },
     creatures: ['Lizard'],
+    creatureDetails: [
+      { name: "Lizard", description: "The Crystalback Lizard has translucent skin, making it nearly invisible against the quartz." }
+    ],
     artifact: {
       name: "Prism Shard",
       description: "A shard that turns any light passing through it into a solid rainbow bridge.",
@@ -320,7 +404,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Prism Key",
-      description: "A geometric shape of stars that looks like a keyhole."
+      description: "A geometric shape of stars that looks like a keyhole.",
+      myth: "The Key unlocks the door to the realm of light, where thoughts become visible and colors can be heard."
     }
   },
   {
@@ -335,6 +420,11 @@ export const deserts = [
     weather: "Dusty",
     difficulty: "Moderate",
     flora: ['Iron Weed', 'Rust Bush', 'Copper Vine'],
+    floraDetails: [
+      { name: "Iron Weed", description: "Tough, wire-like plants that extract iron from the soil, making them magnetic." },
+      { name: "Rust Bush", description: "Its leaves are coated in a fine red powder that stains anything it touches." },
+      { name: "Copper Vine", description: "Glows with a metallic green sheen, often found wrapping around ancient ruins." }
+    ],
     soundProfile: 'Metallic scraping, low wind drone, shifting sand',
     colors: {
       ground: '#8B4513', // Saddle Brown
@@ -349,6 +439,10 @@ export const deserts = [
       scale: 5
     },
     creatures: ['Scorpion', 'Camel'],
+    creatureDetails: [
+      { name: "Scorpion", description: "Large, red scorpions with heavy pincers designed to crush the tough beetles of the wastes." },
+      { name: "Camel", description: "The Crimson Camel has thick, coarse fur to protect against sandstorms and carries heavy loads with ease." }
+    ],
     artifact: {
       name: "Ancient Gear",
       description: "A rusted cog that still spins perpetually without any power source.",
@@ -356,7 +450,8 @@ export const deserts = [
     },
     constellation: {
       name: "The Ancient Gear",
-      description: "A circular formation of stars with 'teeth' pointing outward."
+      description: "A circular formation of stars with 'teeth' pointing outward.",
+      myth: "Remnants of the Great Machine that once turned the world, now broken and scattered across the sky."
     }
   }
 ]

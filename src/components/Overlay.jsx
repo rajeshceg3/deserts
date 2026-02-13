@@ -7,6 +7,7 @@ import { BreathingGuide } from './BreathingGuide'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 import { useUISound } from '../hooks/useUISound'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
+import { Journal } from './Journal'
 
 const MagneticButton = ({ children, onClick, className = "", "aria-label": ariaLabel, onMouseEnter }) => {
   const ref = useRef(null)
@@ -196,9 +197,43 @@ export const Overlay = ({ started }) => {
       try {
         const canvas = document.querySelector('canvas')
         if (canvas) {
-          const dataURL = canvas.toDataURL('image/png')
+          // Create a new canvas to composite the image
+          const compositeCanvas = document.createElement('canvas');
+          compositeCanvas.width = canvas.width;
+          compositeCanvas.height = canvas.height;
+          const ctx = compositeCanvas.getContext('2d');
+
+          // Draw the WebGL canvas
+          ctx.drawImage(canvas, 0, 0);
+
+          // Add Postcard Overlay
+          // Border
+          const borderSize = Math.max(20, canvas.width * 0.03);
+          ctx.lineWidth = borderSize;
+          ctx.strokeStyle = '#fff';
+          ctx.strokeRect(borderSize/2, borderSize/2, canvas.width - borderSize, canvas.height - borderSize);
+
+          // Text Overlay
+          const fontSize = Math.max(24, canvas.width * 0.04);
+          ctx.font = `bold italic ${fontSize}px serif`;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.textAlign = 'right';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 10;
+
+          const textX = canvas.width - borderSize - 20;
+          const textY = canvas.height - borderSize - 20;
+
+          ctx.fillText(desert?.name || 'Desert Realms', textX, textY);
+
+          // Date
+          const dateSize = fontSize * 0.4;
+          ctx.font = `${dateSize}px monospace`;
+          ctx.fillText(new Date().toLocaleDateString(), textX, textY - fontSize * 1.2);
+
+          const dataURL = compositeCanvas.toDataURL('image/png')
           const link = document.createElement('a')
-          link.download = `DesertRealms_${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.png`
+          link.download = `DesertRealms_${desert?.name.replace(/\s+/g, '')}_${new Date().toISOString().slice(0,10)}.png`
           link.href = dataURL
           link.click()
         }
@@ -916,64 +951,11 @@ export const Overlay = ({ started }) => {
         </AnimatePresence>
 
         {/* Journal Modal */}
-        <AnimatePresence>
-            {showJournal && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
-                    onClick={() => setShowJournal(false)}
-                >
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0, rotate: -2 }}
-                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                        exit={{ scale: 0.9, opacity: 0, rotate: 2 }}
-                        className="bg-[#Fdfbf7] text-[#2c2c2c] p-8 md:p-12 rounded-sm max-w-lg w-full shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5),inset_0_0_60px_rgba(139,115,85,0.1)] relative font-serif border border-[#e6e2d8]"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button
-                            onClick={() => setShowJournal(false)}
-                            className="absolute top-4 right-4 text-black/30 hover:text-black/60 transition-colors z-10"
-                            aria-label="Close Journal"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
-
-                        <div className="relative z-10">
-                            <h2 className="text-xl font-bold mb-6 italic text-black/80 border-b border-black/10 pb-4">Explorer's Log</h2>
-
-                            <p className="text-lg leading-relaxed mb-6 font-medium">
-                                {desert?.journalEntry}
-                            </p>
-
-                            <div className="flex justify-end mt-8">
-                                <span className="font-handwriting text-sm text-black/50">
-                                    — {desert?.name}
-                                </span>
-                            </div>
-
-                            {desert?.wisdom && (
-                                <div className="mt-8 p-6 bg-[#f4f1ea] border border-[#e6e2d8] rounded italic text-center relative">
-                                    <span className="absolute top-2 left-4 text-4xl text-black/10 font-serif">“</span>
-                                    <p className="text-black/70 font-serif text-lg relative z-10 px-4">
-                                        {desert.wisdom}
-                                    </p>
-                                    <span className="absolute bottom-[-10px] right-4 text-4xl text-black/10 font-serif">”</span>
-                                    <p className="text-black/30 text-[10px] uppercase tracking-widest mt-3 font-sans">Ancient Wisdom</p>
-                                </div>
-                            )}
-
-                            <div className="mt-8 pt-6 border-t border-black/10 text-center">
-                                <p className="text-black/40 text-xs font-serif italic">
-                                    "The desert tells a different story to every grain of sand."
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+        <Journal
+            isOpen={showJournal}
+            onClose={() => setShowJournal(false)}
+            desert={{ ...desert, index: currentDesertIndex + 1 }}
+        />
     </motion.div>
   )
 }
