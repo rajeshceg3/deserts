@@ -1,56 +1,7 @@
 import React, { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { FurMaterial } from '../../utils/proceduralMaterials'
 import * as THREE from 'three'
-
-// Procedural Fur Material using onBeforeCompile
-const FurMaterial = (props) => {
-    const materialRef = useRef()
-
-    const onBeforeCompile = useMemo(() => (shader) => {
-        shader.vertexShader = `
-            varying vec3 vPos;
-            ${shader.vertexShader}
-        `.replace(
-            '#include <begin_vertex>',
-            `
-            #include <begin_vertex>
-            vPos = position;
-            `
-        );
-
-        shader.fragmentShader = `
-            varying vec3 vPos;
-
-            // Simple hash function for noise
-            float hash(vec3 p) {
-                p  = fract( p*0.3183099 + .1 );
-                p *= 17.0;
-                return fract( p.x*p.y*p.z*(p.x+p.y+p.z) );
-            }
-
-            ${shader.fragmentShader}
-        `.replace(
-            '#include <color_fragment>',
-            `
-            #include <color_fragment>
-
-            // High frequency noise for fur
-            float noise = hash(vPos * 200.0);
-
-            // Darken base color with noise to simulate fur depth
-            diffuseColor.rgb *= (0.8 + 0.2 * noise);
-            `
-        ).replace(
-            '#include <roughnessmap_fragment>',
-            `
-            #include <roughnessmap_fragment>
-            roughnessFactor = 0.9 + 0.1 * noise; // Very rough
-            `
-        );
-    }, []);
-
-    return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />
-}
 
 // Leg geometry helper
 // Pivot is at top (0,0,0 local to group), leg extends down
@@ -151,8 +102,7 @@ export const Camel = (props) => {
               {/* Snout */}
               <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
                 <capsuleGeometry args={[0.2, 0.5, 4, 8]} />
-                <FurMaterial color="#C12A6B" /> {/* Slightly darker nose area? No, keep uniform for now */}
-                <meshStandardMaterial color="#A17A4B" roughness={0.9} />
+                <FurMaterial color="#A17A4B" />
               </mesh>
               {/* Eyes */}
               <mesh position={[0.2, 0.1, 0.15]}>
