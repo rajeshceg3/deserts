@@ -86,8 +86,9 @@ export const Camel = (props) => {
         // Walking speed with offset
         const t = state.clock.elapsedTime * 4 + offset
 
-        // Add some noise to the walk cycle speed
-        const noise = Math.sin(t * 0.1) * 0.2
+        // Add layered noise for organic gait speed variation
+        // Primary low-frequency sway + secondary higher-frequency jitter
+        const noise = Math.sin(t * 0.1) * 0.2 + Math.sin(t * 0.5) * 0.15
         const walkT = t + noise
 
         // Procedural Walking Animation (Diagonals synced)
@@ -105,10 +106,16 @@ export const Camel = (props) => {
         // Organic head movement
         if (headRef.current) {
              const headT = state.clock.elapsedTime + offset
-             // Head turn (slow scan + quick glance)
-             headRef.current.rotation.y = Math.sin(headT * 0.5) * 0.3 + Math.sin(headT * 1.5) * 0.05
-             // Head nod (breathing + attention)
-             headRef.current.rotation.x = 0.5 + Math.sin(headT * 0.3) * 0.1 + Math.sin(headT * 2.1) * 0.02
+             // Head turn (slow scan + quick glance + subtle jitter)
+             headRef.current.rotation.y = Math.sin(headT * 0.5) * 0.3
+                + Math.sin(headT * 1.5) * 0.05
+                + Math.sin(headT * 3.7) * 0.02; // Micro-movements
+
+             // Head nod (breathing + attention + step impact)
+             headRef.current.rotation.x = 0.5
+                + Math.sin(headT * 0.3) * 0.1
+                + Math.sin(headT * 2.1) * 0.02
+                + Math.cos(walkT * 2) * 0.03; // Sync subtle nod with steps
         }
 
         // Rotate whole creature slowly around Y axis with variation
