@@ -115,9 +115,9 @@ export const Experience = ({ onReady }) => {
             <SMAA />
             <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.6} radius={0.6} />
             <DepthOfField
-                focusDistance={0.025} // Focus around 10-15 units away
+                focusDistance={0.05} // Focus around 10 units away (0.05 * 200 = 10)
                 focalLength={0.02} // 20mm wide angle
-                bokehScale={4} // Strong bokeh
+                bokehScale={3} // Moderate bokeh
             />
             <Noise opacity={0.02} /> {/* Subtle film grain */}
             <Vignette eskil={false} offset={0.05} darkness={0.5} />

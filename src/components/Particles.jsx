@@ -10,8 +10,8 @@ export const Particles = () => {
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-        // Rotate group to simulate wind drift
-        groupRef.current.rotation.y += delta * 0.05
+        // Gentle vertical float instead of rotation
+        groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.2) * 2
     }
   })
 

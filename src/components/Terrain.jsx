@@ -92,8 +92,12 @@ export const Terrain = ({ isHeadless }) => {
       float ripple(vec2 uv, float time) {
           // Distort domain with noise for organic look
           float n = texture2D(uNoiseMap, uv * 2.0).r;
-          float wave = sin(uv.x * 30.0 + uv.y * 15.0 + time * 0.5 + n * 5.0);
-          return wave;
+
+          // Dual wave system for cross-hatch/wind pattern
+          float w1 = sin(uv.x * 20.0 + uv.y * 10.0 + time * 0.5 + n * 5.0);
+          float w2 = sin(uv.y * 25.0 - uv.x * 5.0 + time * 0.6 + n * 3.0);
+
+          return (w1 + w2) * 0.5;
       }
     ` + shader.fragmentShader
 
