@@ -1,4 +1,5 @@
 import { noise2D } from './noise';
+import * as THREE from 'three';
 
 /**
  * Calculates the height of the terrain at a given x, z coordinate using Fractal Brownian Motion (FBM).
@@ -26,8 +27,24 @@ export const getTerrainHeight = (x, z, params) => {
       frequency *= lacunarity;
   }
 
-  // Optional: Add a subtle twist or second layer for more organic feel if needed.
-  // But FBM usually provides enough "craggy" look.
+  // Apply Edge Falloff (Skirt) to hide plane edges
+  // Plane is typically 100x100, so radius ~50
+  const dist = Math.sqrt(x * x + z * z);
+  const falloffStart = 40.0;
+  const falloffEnd = 48.0;
+
+  if (dist > falloffStart) {
+      if (dist > falloffEnd) {
+          total = -20.0;
+      } else {
+          // Normalized distance within falloff zone (0 to 1)
+          const t = (dist - falloffStart) / (falloffEnd - falloffStart);
+          // Smoothstep interpolation
+          const smoothT = t * t * (3 - 2 * t);
+          // Drop the terrain down significantly at the edges
+          total = THREE.MathUtils.lerp(total, -20.0, smoothT);
+      }
+  }
 
   return total;
 };

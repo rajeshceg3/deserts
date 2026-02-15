@@ -110,6 +110,31 @@ const Tilt = ({ children }) => {
     )
 }
 
+const ArtifactIcon = ({ name, className }) => {
+    // Default generic icon
+    const Generic = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4M8 12h8"/></svg>
+
+    if (!name) return Generic;
+
+    if (name.includes('Hourglass')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>;
+
+    if (name.includes('Gem') || name.includes('Shard') || name.includes('Crystal') || name.includes('Geode')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/></svg>;
+
+    if (name.includes('Vial') || name.includes('Dust')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2z"/><path d="M14 2h8"/><path d="M4 2v4a2 2 0 0 1-2 2H0a2 2 0 0 1-2-2V2z"/><path d="M4 2H0"/><path d="M7 10h10v12H7z"/></svg>;
+
+    if (name.includes('Chronometer') || name.includes('Clock')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+
+    if (name.includes('Gear')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+
+    if (name.includes('Rose') || name.includes('Flower')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5z"/><path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/><path d="M8 8l1.5 1.5"/><path d="M16 16l-1.5-1.5"/><path d="M8 16l1.5-1.5"/><path d="M16 8l-1.5 1.5"/></svg>;
+
+    if (name.includes('Shell')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 12h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M5 18H3a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2"/><path d="M12 2a8 8 0 0 1 8 8v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a8 8 0 0 1 8-8z"/></svg>;
+
+    if (name.includes('Compass')) return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>;
+
+    return Generic;
+}
+
 export const Overlay = ({ started }) => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const nextDesert = useStore((state) => state.nextDesert)
@@ -847,8 +872,8 @@ export const Overlay = ({ started }) => {
                                 const isUnlocked = visitedDeserts.includes(i);
                                 return (
                                     <div key={i} className={`relative p-4 rounded-xl border ${isUnlocked ? 'bg-white/10 border-white/20' : 'bg-black/20 border-white/5'} flex flex-col items-center text-center transition-all duration-300 group hover:border-white/30`}>
-                                        <div className={`text-4xl mb-3 transition-all duration-500 ${isUnlocked ? 'grayscale-0 blur-0 scale-100' : 'grayscale blur-sm scale-90 opacity-30'}`}>
-                                            {d.artifact?.icon || '📦'}
+                                        <div className={`mb-3 transition-all duration-500 ${isUnlocked ? 'opacity-100 scale-100 text-pastel-apricot' : 'opacity-30 scale-90 blur-sm text-white/20'}`}>
+                                            <ArtifactIcon name={d.artifact?.name} className="w-12 h-12" />
                                         </div>
                                         <h3 className={`font-serif font-bold mb-1 ${isUnlocked ? 'text-white' : 'text-white/30'}`}>
                                             {isUnlocked ? d.artifact?.name : '???'}
