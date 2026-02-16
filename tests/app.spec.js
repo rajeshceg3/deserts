@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test('Application loads and enters experience', async ({ page }) => {
   test.slow(); // Mark test as slow (triples timeout)
 
-  // Navigate to root
-  await page.goto('/');
+  // Navigate to root with headless param
+  await page.goto('/?headless=true');
 
   // Wait for the loader to finish (button appears)
   const enterButton = page.getByRole('button', { name: 'Enter Experience' });

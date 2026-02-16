@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, Suspense } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette, SMAA, DepthOfField, Noise } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, SMAA, DepthOfField, Noise, ToneMapping } from '@react-three/postprocessing'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
@@ -25,11 +25,9 @@ export const Experience = ({ onReady }) => {
       return false
   }, [])
 
-  // Ref for lights to animate
   const directionalLightRef = useRef()
   const ambientLightRef = useRef()
 
-  // Reusable objects to prevent memory leaks in loop
   const sunColorStart = useMemo(() => new THREE.Color('#FFF5E0'), [])
   const sunColorEnd = useMemo(() => new THREE.Color('#FF8C00'), [])
   const tempColor = useMemo(() => new THREE.Color(), [])
@@ -52,7 +50,6 @@ export const Experience = ({ onReady }) => {
 
   useEffect(() => {
     if (onReady) {
-      // Small delay to ensure frames are ready
       const t = setTimeout(() => onReady(), 100)
       return () => clearTimeout(t)
     }
@@ -65,18 +62,16 @@ export const Experience = ({ onReady }) => {
   }, [currentDesertIndex]);
 
   useFrame(() => {
-    // Adjusted cycle logic: 0.5 is Noon (Top), 0/1 is Midnight (Bottom)
     const angle = (dayNightCycle - 0.25) * Math.PI * 2
-    const radius = 60 // Matches Atmosphere.jsx Sun radius
+    const radius = 60
     const x = Math.cos(angle) * radius
     const y = Math.sin(angle) * radius
-    // Add Z tilt for 3D depth
     const z = Math.cos(angle) * 15
 
     const dayness = Math.sin(dayNightCycle * Math.PI)
+    // More accurate sun elevation factor (0 at horizon, 1 at zenith)
+    const sunElevation = Math.max(0, y / radius);
 
-    // Update Scene Background for Continuity
-    // This ensures WebGL background matches sky even if geometry is missing
     if (deserts[currentDesertIndex]) {
         const skyColor = getSkyColor(dayNightCycle, deserts[currentDesertIndex].colors)
         scene.background = skyColor
@@ -85,41 +80,56 @@ export const Experience = ({ onReady }) => {
     if (directionalLightRef.current) {
         directionalLightRef.current.position.set(x, y, z)
 
-        // Intensity changes: Peak at noon, min 0.1 at midnight (Moonlight)
-        // Ensure it never goes fully black. 0.1 is safe, but let's be explicit with Math.max
-        const intensity = Math.max(0.1, 0.1 + Math.max(0, dayness) * 1.4)
+        // Non-linear intensity:
+        // Dawn/Dusk (low elevation): rapidly drops
+        // Noon: Peak brightness
+        // Night: Moonlight (low)
+        let intensity = 0.1; // Base moonlight
+        if (sunElevation > 0) {
+            // Power curve for realistic lux falloff
+            intensity += Math.pow(sunElevation, 0.5) * 2.5;
+        }
         directionalLightRef.current.intensity = intensity
 
-        // Color temperature shift
-        const sunMix = Math.pow(dayness, 2)
+        // Color temperature shift based on elevation
+        // Low elevation = warm/orange. High = white/blue-ish.
+        const sunMix = Math.pow(sunElevation, 0.5);
         tempColor.copy(sunColorEnd).lerp(sunColorStart, sunMix)
         directionalLightRef.current.color.copy(tempColor)
     }
 
     if (ambientLightRef.current) {
-        // Ambient light should be brighter during day, dimmer at night but not 0
-        // Clamp to min 0.15 to prevent total darkness
-        ambientLightRef.current.intensity = Math.max(0.15, 0.2 + dayness * 0.4)
+        // Ambient light follows sun but simpler
+        ambientLightRef.current.intensity = Math.max(0.1, 0.1 + sunElevation * 0.5)
     }
   })
 
-  // Calculate environment intensity
+  // Environment Intensity
   const dayness = Math.sin(dayNightCycle * Math.PI)
-  const envIntensity = 0.05 + Math.pow(dayness, 2) * 0.4 // Non-linear curve for realistic twilight
+  // Non-linear curve for realistic twilight reflection falloff
+  const envIntensity = 0.1 + Math.pow(Math.max(0, dayness), 3) * 0.5
 
   return (
     <>
-      {/* Disable PostProcessing in headless mode to save GPU */}
       {!isHeadless && (
           <EffectComposer disableNormalPass multisampling={0}>
             <SMAA />
-            <Bloom luminanceThreshold={0.9} mipmapBlur intensity={0.6} radius={0.6} />
-            <DepthOfField
-                focusDistance={0.05} // Focus around 10 units away (0.05 * 200 = 10)
-                focalLength={0.02} // 20mm wide angle
-                bokehScale={3} // Moderate bokeh
+            <Bloom
+                luminanceThreshold={1.1} // Only very bright things bloom (sun, specular)
+                mipmapBlur
+                intensity={0.4}
+                radius={0.5}
             />
-            <Noise opacity={0.02} /> {/* Subtle film grain */}
+            <ToneMapping
+                mode={THREE.ACESFilmicToneMapping} // Cinematic tone mapping
+                exposure={1.0}
+            />
+            <DepthOfField
+                focusDistance={0.05}
+                focalLength={0.02}
+                bokehScale={3}
+            />
+            <Noise opacity={0.02} />
             <Vignette eskil={false} offset={0.05} darkness={0.5} />
           </EffectComposer>
       )}
@@ -137,7 +147,6 @@ export const Experience = ({ onReady }) => {
       />
 
       <Suspense fallback={null}>
-        {/* Use city preset for neutral reflections, modulate intensity */}
         <Environment preset="city" environmentIntensity={envIntensity} />
       </Suspense>
 
@@ -148,7 +157,7 @@ export const Experience = ({ onReady }) => {
         intensity={1.0}
         castShadow={!isHeadless}
         shadow-mapSize={[2048, 2048]}
-        shadow-bias={-0.0005} // Tuned to prevent acne
+        shadow-bias={-0.0005}
         shadow-camera-near={0.1}
         shadow-camera-far={200}
         shadow-camera-left={-50}
@@ -164,7 +173,6 @@ export const Experience = ({ onReady }) => {
       </Suspense>
       <Particles />
 
-      {/* Soft floor shadow for grounding */}
       {!isHeadless && (
         <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
       )}

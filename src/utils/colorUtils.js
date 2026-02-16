@@ -2,58 +2,66 @@ import * as THREE from 'three'
 
 /**
  * Calculates the sky color based on the day/night cycle and desert colors.
- * Uses continuous interpolation to avoid static bands.
+ * Uses multi-stage interpolation to create realistic transitions including Golden Hour and Blue Hour.
  * @param {number} cycle - The day/night cycle value (0 to 1).
  * @param {object} colors - The desert colors object (containing at least a 'sky' color hex/string).
  * @returns {THREE.Color} The calculated sky color.
  */
 export const getSkyColor = (cycle, colors) => {
-    const nightColor = new THREE.Color('#050510')
+    // Define palette based on the desert's base sky color
+    const baseSky = new THREE.Color(colors?.sky || '#87CEEB')
+
+    // Key Colors
+    const nightColor = new THREE.Color('#02020a') // Deep space black/blue
     const dawnColor = new THREE.Color('#FF9A8B') // Peach/Orange
-    const dayColor = new THREE.Color(colors?.sky || '#87CEEB')
+    const goldenHourColor = new THREE.Color('#FFD700').lerp(baseSky, 0.3) // Gold mixed with sky
+    const dayColor = baseSky
     const duskColor = new THREE.Color('#FD5E53') // Coral/Red
+    const blueHourColor = new THREE.Color('#4169E1').multiplyScalar(0.4) // Royal Blue, darkened
 
-    // Define keyframes for the sky color cycle
-    // We use a continuous loop: Night -> Dawn -> Day -> Dusk -> Night
-    // To avoid static "dead zones", we ensure color is always shifting.
-
-    // 0.0: Midnight (Deep Night)
-    // 0.25: Sunrise (Dawn)
-    // 0.5: Noon (Peak Day)
-    // 0.75: Sunset (Dusk)
-    // 1.0: Midnight (Deep Night)
+    // Cycle Map:
+    // 0.00 - 0.15: Night
+    // 0.15 - 0.20: Night -> Blue Hour
+    // 0.20 - 0.25: Blue Hour -> Dawn
+    // 0.25 - 0.30: Dawn -> Golden Hour
+    // 0.30 - 0.40: Golden Hour -> Day
+    // 0.40 - 0.60: Day (Noon at 0.5)
+    // 0.60 - 0.70: Day -> Golden Hour
+    // 0.70 - 0.75: Golden Hour -> Dusk
+    // 0.75 - 0.85: Dusk -> Blue Hour
+    // 0.85 - 1.00: Blue Hour -> Night
 
     const color = new THREE.Color()
 
-    // Helper to blend between two colors
+    // Helper to blend
     const blend = (c1, c2, t) => {
-        return color.copy(c1).lerp(c2, t)
+        // Smoothstep for organic transition
+        const smoothT = t * t * (3 - 2 * t)
+        return color.copy(c1).lerp(c2, smoothT)
     }
 
-    if (cycle < 0.25) {
-        // Night -> Dawn
-        // Normalize 0.0-0.25 to 0-1
-        const t = cycle / 0.25
-        // Use smoothstep for non-linear transition
-        const smoothT = t * t * (3 - 2 * t)
-        return blend(nightColor, dawnColor, smoothT)
-    } else if (cycle < 0.5) {
-        // Dawn -> Day
-        // Normalize 0.25-0.5 to 0-1
-        const t = (cycle - 0.25) / 0.25
-        const smoothT = t * t * (3 - 2 * t)
-        return blend(dawnColor, dayColor, smoothT)
+    // Helper to normalize range
+    const range = (start, end) => (cycle - start) / (end - start)
+
+    if (cycle < 0.15) {
+        return color.copy(nightColor)
+    } else if (cycle < 0.20) {
+        return blend(nightColor, blueHourColor, range(0.15, 0.20))
+    } else if (cycle < 0.25) {
+        return blend(blueHourColor, dawnColor, range(0.20, 0.25))
+    } else if (cycle < 0.30) {
+        return blend(dawnColor, goldenHourColor, range(0.25, 0.30))
+    } else if (cycle < 0.40) {
+        return blend(goldenHourColor, dayColor, range(0.30, 0.40))
+    } else if (cycle < 0.60) {
+        return color.copy(dayColor)
+    } else if (cycle < 0.70) {
+        return blend(dayColor, goldenHourColor, range(0.60, 0.70))
     } else if (cycle < 0.75) {
-        // Day -> Dusk
-        // Normalize 0.5-0.75 to 0-1
-        const t = (cycle - 0.5) / 0.25
-        const smoothT = t * t * (3 - 2 * t)
-        return blend(dayColor, duskColor, smoothT)
+        return blend(goldenHourColor, duskColor, range(0.70, 0.75))
+    } else if (cycle < 0.85) {
+        return blend(duskColor, blueHourColor, range(0.75, 0.85))
     } else {
-        // Dusk -> Night
-        // Normalize 0.75-1.0 to 0-1
-        const t = (cycle - 0.75) / 0.25
-        const smoothT = t * t * (3 - 2 * t)
-        return blend(duskColor, nightColor, smoothT)
+        return blend(blueHourColor, nightColor, range(0.85, 1.0))
     }
 }
