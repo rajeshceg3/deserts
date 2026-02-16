@@ -7,41 +7,117 @@ import { getSkyColor } from '../utils/colorUtils'
 import * as THREE from 'three'
 
 const NightStars = () => {
-    const starsRef = useRef()
+    const pointsRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
 
-    useFrame(() => {
-        if (starsRef.current?.material) {
+    // Generate random stars
+    const [positions, sizes] = useMemo(() => {
+        const count = 5000
+        const pos = new Float32Array(count * 3)
+        const sz = new Float32Array(count)
+        for(let i=0; i<count; i++) {
+            const r = 100 + Math.random() * 50 // Distance
+            const theta = Math.random() * Math.PI * 2
+            const phi = Math.acos(2 * Math.random() - 1)
+            pos[i*3] = r * Math.sin(phi) * Math.cos(theta)
+            pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta)
+            pos[i*3+2] = r * Math.cos(phi)
+            sz[i] = Math.random()
+        }
+        return [pos, sz]
+    }, [])
+
+    const shaderArgs = useMemo(() => ({
+        uniforms: {
+            uTime: { value: 0 },
+            uOpacity: { value: 1.0 }
+        },
+        vertexShader: `
+            attribute float size;
+            varying float vSize;
+            uniform float uTime;
+            void main() {
+                vSize = size;
+                vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                gl_Position = projectionMatrix * mvPosition;
+                // Size attenuation
+                gl_PointSize = size * (300.0 / -mvPosition.z);
+            }
+        `,
+        fragmentShader: `
+            varying float vSize;
+            uniform float uTime;
+            uniform float uOpacity;
+
+            // Random hash
+            float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+
+            void main() {
+                // Circular star
+                vec2 center = gl_PointCoord - 0.5;
+                float dist = length(center);
+                if (dist > 0.5) discard;
+
+                // Soft edge
+                float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+
+                // Twinkle
+                float twinkle = sin(uTime * 2.0 + vSize * 20.0) * 0.5 + 0.5;
+                alpha *= (0.5 + 0.5 * twinkle);
+
+                gl_FragColor = vec4(1.0, 1.0, 1.0, alpha * uOpacity);
+                #include <colorspace_fragment>
+            }
+        `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+    }), [])
+
+    useFrame((state) => {
+        if (pointsRef.current) {
             const dayness = Math.sin(dayNightCycle * Math.PI)
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
-            starsRef.current.material.transparent = true
-            starsRef.current.material.opacity = opacity
-            starsRef.current.rotation.y += 0.00005
+
+            pointsRef.current.material.uniforms.uOpacity.value = opacity;
+            pointsRef.current.material.uniforms.uTime.value = state.clock.elapsedTime;
+
+            // Slow rotation
+            pointsRef.current.rotation.y = state.clock.elapsedTime * 0.02;
         }
     })
 
     return (
-        <Stars
-            ref={starsRef}
-            radius={150}
-            depth={50}
-            count={7000}
-            factor={4}
-            saturation={0.5}
-            fade
-            speed={1}
-        />
+        <points ref={pointsRef}>
+            <bufferGeometry>
+                <bufferAttribute
+                    attach="attributes-position"
+                    count={positions.length / 3}
+                    array={positions}
+                    itemSize={3}
+                />
+                <bufferAttribute
+                    attach="attributes-size"
+                    count={sizes.length}
+                    array={sizes}
+                    itemSize={1}
+                />
+            </bufferGeometry>
+            <shaderMaterial args={[shaderArgs]} />
+        </points>
     )
 }
 
 const Sun = () => {
     const meshRef = useRef()
+    const materialRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
 
     const shaderArgs = useMemo(() => ({
         uniforms: {
             uColor: { value: new THREE.Color('#FFF5E0') },
-            uHalo: { value: new THREE.Color('#FF8C00') }
+            uHalo: { value: new THREE.Color('#FF8C00') },
+            uTime: { value: 0 }
         },
         vertexShader: `
             varying vec2 vUv;
@@ -54,26 +130,56 @@ const Sun = () => {
             varying vec2 vUv;
             uniform vec3 uColor;
             uniform vec3 uHalo;
+            uniform float uTime;
+
+            // Simplex noise function
+            vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+            float snoise(vec2 v){
+              const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                       -0.577350269189626, 0.024390243902439);
+              vec2 i  = floor(v + dot(v, C.yy) );
+              vec2 x0 = v -   i + dot(i, C.xx);
+              vec2 i1;
+              i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+              vec4 x12 = x0.xyxy + C.xxzz;
+              x12.xy -= i1;
+              i = mod(i, 289.0);
+              vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+              + i.x + vec3(0.0, i1.x, 1.0 ));
+              vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+              m = m*m ;
+              m = m*m ;
+              vec3 x = 2.0 * fract(p * C.www) - 1.0;
+              vec3 h = abs(x) - 0.5;
+              vec3 ox = floor(x + 0.5);
+              vec3 a0 = x - ox;
+              m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+              vec3 g;
+              g.x  = a0.x  * x0.x  + h.x  * x0.y;
+              g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+              return 130.0 * dot(m, g);
+            }
 
             void main() {
                 vec2 center = vec2(0.5);
                 float dist = distance(vUv, center);
 
-                // Core sun disk (sharp edge but anti-aliased)
-                float coreRadius = 0.1;
+                // Organic Core
+                float noise = snoise(vUv * 20.0 + uTime * 0.5);
+                float coreRadius = 0.1 + noise * 0.005;
                 float core = smoothstep(coreRadius + 0.01, coreRadius - 0.01, dist);
 
-                // Corona / Glow
-                // Physically based bloom approximation
-                float glow = 1.0 / (dist * 15.0 + 0.1) - 0.1;
+                // Corona / Glow with flowing noise
+                float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
+                float rayNoise = snoise(vec2(angle * 5.0, uTime * 0.2 + dist * 5.0));
+
+                float glow = 1.0 / (dist * 12.0 + 0.1) - 0.1;
                 glow = max(0.0, glow);
 
-                // Add rays/glare using angular noise
-                float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
-                float rays = sin(angle * 20.0) * 0.1 + sin(angle * 45.0) * 0.05;
-                glow += rays * (1.0 - smoothstep(0.0, 0.4, dist)) * 0.2;
+                // Add turbulent rays
+                glow += rayNoise * (1.0 - smoothstep(0.0, 0.45, dist)) * 0.3;
 
-                vec3 finalColor = uColor * core * 2.0; // HDR core
+                vec3 finalColor = uColor * core * 2.5; // HDR core
                 finalColor += uHalo * glow * 1.5;
 
                 // Soft fade out at edges of quad
@@ -89,7 +195,7 @@ const Sun = () => {
     }), [])
 
     useFrame(() => {
-        if (meshRef.current) {
+        if (meshRef.current && materialRef.current) {
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
              const radius = 80
              const x = Math.cos(angle) * radius
@@ -97,13 +203,15 @@ const Sun = () => {
              const z = Math.cos(angle) * 20
              meshRef.current.position.set(x, y, z)
              meshRef.current.lookAt(0, 0, 0)
+
+             materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
         }
     })
 
     return (
         <mesh ref={meshRef} scale={[30, 30, 1]}>
             <planeGeometry args={[1, 1]} />
-            <shaderMaterial args={[shaderArgs]} toneMapped={false} />
+            <shaderMaterial ref={materialRef} args={[shaderArgs]} toneMapped={false} />
         </mesh>
     )
 }
@@ -158,23 +266,27 @@ const SkyGradient = ({ horizonColor, sunPosition }) => {
             uniform vec3 uZenith;
             uniform vec3 uSunDir;
 
+            // Random hash for dithering
+            float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+
             void main() {
                 vec3 dir = normalize(vWorldPosition);
 
-                // Rayleigh scattering approximation
-                float zenithFactor = pow(max(0.0, dir.y), 0.7); // Non-linear gradient
+                // Non-linear gradient approximating atmosphere density
+                float zenithFactor = sqrt(max(0.0, dir.y));
 
-                // Horizon band
-                float horizonFactor = 1.0 - zenithFactor;
+                // Add dithering to prevent banding
+                float noise = hash(gl_FragCoord.xy) * 0.01;
+                zenithFactor = clamp(zenithFactor + noise, 0.0, 1.0);
 
                 vec3 sky = mix(uHorizon, uZenith, zenithFactor);
 
                 // Add sun scattering glow (Mie scattering approximation)
                 float sunDist = distance(dir, uSunDir);
-                float sunGlow = exp(-sunDist * 4.0) * 0.5; // Wide glow
+                float sunGlow = exp(-sunDist * 3.5) * 0.6; // Soft glow
 
                 // Combine
-                vec3 finalColor = sky + uHorizon * sunGlow * 0.3;
+                vec3 finalColor = sky + uHorizon * sunGlow * 0.2;
 
                 gl_FragColor = vec4(finalColor, 1.0);
                 #include <colorspace_fragment>

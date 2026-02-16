@@ -88,16 +88,42 @@ export const Terrain = ({ isHeadless }) => {
       uniform sampler2D uNoiseMap;
       uniform float uTime;
 
-      // Function to create ripples
+      // Gradient Noise 2D
+      vec2 hash(vec2 x) {
+          const vec2 k = vec2(0.3183099, 0.3678794);
+          x = x * k + k.yx;
+          return -1.0 + 2.0 * fract(16.0 * k * fract(x.x * x.y * (x.x + x.y)));
+      }
+
+      float gnoise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(mix(dot(hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
+                         dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
+                     mix(dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
+                         dot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x), u.y);
+      }
+
+      // Organic Ripple Function
       float ripple(vec2 uv, float time) {
-          // Distort domain with noise for organic look
-          float n = texture2D(uNoiseMap, uv * 2.0).r;
+          // Sample noise texture for domain distortion
+          float n = texture2D(uNoiseMap, uv * 1.5).r;
 
-          // Dual wave system for cross-hatch/wind pattern
-          float w1 = sin(uv.x * 20.0 + uv.y * 10.0 + time * 0.5 + n * 5.0);
-          float w2 = sin(uv.y * 25.0 - uv.x * 5.0 + time * 0.6 + n * 3.0);
+          // Domain warping: distort the coordinate space
+          vec2 distortedUV = uv + vec2(n * 0.1, n * 0.15);
 
-          return (w1 + w2) * 0.5;
+          // Primary wind direction wave
+          float wave1 = sin(distortedUV.x * 40.0 + distortedUV.y * 20.0 - time * 0.4);
+
+          // Secondary interference wave (simulating wind gusts/changes)
+          float wave2 = sin(distortedUV.y * 30.0 - distortedUV.x * 10.0 - time * 0.5);
+
+          // Sharpen the waves to look like sand dunes (peaks)
+          float w = (wave1 + wave2 * 0.5);
+          w = pow(0.5 + 0.5 * w, 2.0); // Sharpen peaks
+
+          return w;
       }
     ` + shader.fragmentShader
 
@@ -270,9 +296,10 @@ export const Terrain = ({ isHeadless }) => {
       if (stillMoving) {
         meshRef.current.geometry.attributes.position.needsUpdate = true;
         frameCount.current += 1;
-        // Optimization: Don't recompute normals every frame for 256x256
-        if (frameCount.current % 5 === 0) {
-            meshRef.current.geometry.computeVertexNormals();
+        // Optimization: Throttle normal updates but keep it frequent enough to avoid visual popping
+        // Or better, only update if the change was significant
+        if (frameCount.current % 3 === 0) {
+             meshRef.current.geometry.computeVertexNormals();
         }
       } else {
         isAnimating.current = false;
