@@ -10,7 +10,7 @@ test('has title and enters experience', async ({ page }) => {
     }
   });
 
-  await page.goto('/');
+  await page.goto('/?headless=true');
 
   // Check title matches the updated one
   await expect(page).toHaveTitle(/Desert Realms/);

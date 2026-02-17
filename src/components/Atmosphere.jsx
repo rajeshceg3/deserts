@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Stars, Cloud, Float } from '@react-three/drei'
+import { Stars, Cloud } from '@react-three/drei'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getSkyColor } from '../utils/colorUtils'
@@ -10,13 +10,12 @@ const NightStars = () => {
     const pointsRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
 
-    // Generate random stars
     const [positions, sizes] = useMemo(() => {
         const count = 5000
         const pos = new Float32Array(count * 3)
         const sz = new Float32Array(count)
         for(let i=0; i<count; i++) {
-            const r = 100 + Math.random() * 50 // Distance
+            const r = 100 + Math.random() * 50
             const theta = Math.random() * Math.PI * 2
             const phi = Math.acos(2 * Math.random() - 1)
             pos[i*3] = r * Math.sin(phi) * Math.cos(theta)
@@ -40,7 +39,6 @@ const NightStars = () => {
                 vSize = size;
                 vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
                 gl_Position = projectionMatrix * mvPosition;
-                // Size attenuation
                 gl_PointSize = size * (300.0 / -mvPosition.z);
             }
         `,
@@ -49,22 +47,13 @@ const NightStars = () => {
             uniform float uTime;
             uniform float uOpacity;
 
-            // Random hash
-            float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
-
             void main() {
-                // Circular star
                 vec2 center = gl_PointCoord - 0.5;
                 float dist = length(center);
                 if (dist > 0.5) discard;
-
-                // Soft edge
                 float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
-
-                // Twinkle
                 float twinkle = sin(uTime * 2.0 + vSize * 20.0) * 0.5 + 0.5;
                 alpha *= (0.5 + 0.5 * twinkle);
-
                 gl_FragColor = vec4(1.0, 1.0, 1.0, alpha * uOpacity);
                 #include <colorspace_fragment>
             }
@@ -78,30 +67,17 @@ const NightStars = () => {
         if (pointsRef.current) {
             const dayness = Math.sin(dayNightCycle * Math.PI)
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
-
             pointsRef.current.material.uniforms.uOpacity.value = opacity;
             pointsRef.current.material.uniforms.uTime.value = state.clock.elapsedTime;
-
-            // Slow rotation
-            pointsRef.current.rotation.y = state.clock.elapsedTime * 0.02;
+            pointsRef.current.rotation.y = state.clock.elapsedTime * 0.01;
         }
     })
 
     return (
         <points ref={pointsRef}>
             <bufferGeometry>
-                <bufferAttribute
-                    attach="attributes-position"
-                    count={positions.length / 3}
-                    array={positions}
-                    itemSize={3}
-                />
-                <bufferAttribute
-                    attach="attributes-size"
-                    count={sizes.length}
-                    array={sizes}
-                    itemSize={1}
-                />
+                <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
+                <bufferAttribute attach="attributes-size" count={sizes.length} array={sizes} itemSize={1} />
             </bufferGeometry>
             <shaderMaterial args={[shaderArgs]} />
         </points>
@@ -132,11 +108,9 @@ const Sun = () => {
             uniform vec3 uHalo;
             uniform float uTime;
 
-            // Simplex noise function
             vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
             float snoise(vec2 v){
-              const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                       -0.577350269189626, 0.024390243902439);
+              const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
               vec2 i  = floor(v + dot(v, C.yy) );
               vec2 x0 = v -   i + dot(i, C.xx);
               vec2 i1;
@@ -144,8 +118,7 @@ const Sun = () => {
               vec4 x12 = x0.xyxy + C.xxzz;
               x12.xy -= i1;
               i = mod(i, 289.0);
-              vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-              + i.x + vec3(0.0, i1.x, 1.0 ));
+              vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
               vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
               m = m*m ;
               m = m*m ;
@@ -164,25 +137,23 @@ const Sun = () => {
                 vec2 center = vec2(0.5);
                 float dist = distance(vUv, center);
 
-                // Organic Core
-                float noise = snoise(vUv * 20.0 + uTime * 0.5);
-                float coreRadius = 0.1 + noise * 0.005;
-                float core = smoothstep(coreRadius + 0.01, coreRadius - 0.01, dist);
+                // Intense HDR Core
+                float core = smoothstep(0.12, 0.08, dist);
 
-                // Corona / Glow with flowing noise
+                // Turbulent Corona
                 float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
-                float rayNoise = snoise(vec2(angle * 5.0, uTime * 0.2 + dist * 5.0));
+                float rayNoise = snoise(vec2(angle * 8.0, uTime * 0.3 + dist * 8.0));
 
-                float glow = 1.0 / (dist * 12.0 + 0.1) - 0.1;
+                // Glow falloff
+                float glow = 1.0 / (dist * 16.0 + 0.2) - 0.05;
                 glow = max(0.0, glow);
+                glow += rayNoise * (1.0 - smoothstep(0.0, 0.5, dist)) * 0.2; // Add turbulence
 
-                // Add turbulent rays
-                glow += rayNoise * (1.0 - smoothstep(0.0, 0.45, dist)) * 0.3;
+                // Combine: Core is extremely bright (HDR)
+                vec3 finalColor = uColor * core * 10.0;
+                finalColor += uHalo * glow * 2.0;
 
-                vec3 finalColor = uColor * core * 2.5; // HDR core
-                finalColor += uHalo * glow * 1.5;
-
-                // Soft fade out at edges of quad
+                // Soft edge for quad
                 float alpha = smoothstep(0.5, 0.2, dist);
 
                 gl_FragColor = vec4(finalColor, alpha);
@@ -194,7 +165,7 @@ const Sun = () => {
         blending: THREE.AdditiveBlending
     }), [])
 
-    useFrame(() => {
+    useFrame((state) => {
         if (meshRef.current && materialRef.current) {
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
              const radius = 80
@@ -203,7 +174,6 @@ const Sun = () => {
              const z = Math.cos(angle) * 20
              meshRef.current.position.set(x, y, z)
              meshRef.current.lookAt(0, 0, 0)
-
              materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
         }
     })
@@ -216,32 +186,35 @@ const Sun = () => {
     )
 }
 
-const SkyGradient = ({ horizonColor, sunPosition }) => {
+const SkyGradient = ({ horizonColor }) => {
     const meshRef = useRef()
     const shaderRef = useRef()
 
-    // Zenith color is derived from horizon but darker/bluer
+    const midColor = useMemo(() => new THREE.Color(), [])
     const zenithColor = useMemo(() => new THREE.Color(), [])
 
     useFrame((state, delta) => {
         if (shaderRef.current) {
              shaderRef.current.uniforms.uHorizon.value.lerp(horizonColor, delta * 2)
 
-             // Calculate zenith based on horizon: move towards deep blue/black
+             // Mid color: Horizon shifted towards blue, slightly darker
              const h = horizonColor.getHSL({ h: 0, s: 0, l: 0 })
-             // Shift hue slightly blue-ward for zenith
-             zenithColor.setHSL((h.h + 0.05) % 1.0, h.s * 0.8, Math.max(0.02, h.l * 0.3))
+             midColor.setHSL((h.h + 0.05) % 1.0, h.s * 0.9, Math.max(0.05, h.l * 0.6))
+             shaderRef.current.uniforms.uMid.value.lerp(midColor, delta * 2)
 
+             // Zenith color: Deep blue/black
+             zenithColor.setHSL((h.h + 0.1) % 1.0, h.s * 0.8, Math.max(0.01, h.l * 0.2))
              shaderRef.current.uniforms.uZenith.value.lerp(zenithColor, delta * 2)
 
-             // Update Sun position for scattering
+             // Sync Sun Direction
              const dayNightCycle = useStore.getState().dayNightCycle
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
-             // Normalized sun direction
+             const radius = 80
+             // Matches Sun component logic
              shaderRef.current.uniforms.uSunDir.value.set(
-                 Math.cos(angle),
-                 Math.sin(angle),
-                 Math.cos(angle) * 0.2 // Approximate Z
+                 Math.cos(angle) * radius,
+                 Math.sin(angle) * radius,
+                 Math.cos(angle) * 20
              ).normalize();
         }
     })
@@ -249,6 +222,7 @@ const SkyGradient = ({ horizonColor, sunPosition }) => {
     const shaderArgs = useMemo(() => ({
         uniforms: {
             uHorizon: { value: new THREE.Color(horizonColor) },
+            uMid: { value: new THREE.Color(0,0,0) },
             uZenith: { value: new THREE.Color(0,0,0) },
             uSunDir: { value: new THREE.Vector3(0, 1, 0) }
         },
@@ -263,30 +237,47 @@ const SkyGradient = ({ horizonColor, sunPosition }) => {
         fragmentShader: `
             varying vec3 vWorldPosition;
             uniform vec3 uHorizon;
+            uniform vec3 uMid;
             uniform vec3 uZenith;
             uniform vec3 uSunDir;
 
-            // Random hash for dithering
             float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
             void main() {
                 vec3 dir = normalize(vWorldPosition);
+                float y = max(0.0, dir.y);
 
-                // Non-linear gradient approximating atmosphere density
-                float zenithFactor = sqrt(max(0.0, dir.y));
+                // 3-stop gradient
+                // 0.0 - 0.5: Horizon -> Mid
+                // 0.5 - 1.0: Mid -> Zenith
 
-                // Add dithering to prevent banding
-                float noise = hash(gl_FragCoord.xy) * 0.01;
-                zenithFactor = clamp(zenithFactor + noise, 0.0, 1.0);
+                vec3 sky;
+                float noise = hash(gl_FragCoord.xy) * 0.015; // Dithering
 
-                vec3 sky = mix(uHorizon, uZenith, zenithFactor);
+                if (y < 0.5) {
+                    float t = y / 0.5;
+                    t += noise;
+                    sky = mix(uHorizon, uMid, clamp(t, 0.0, 1.0));
+                } else {
+                    float t = (y - 0.5) / 0.5;
+                    t += noise;
+                    sky = mix(uMid, uZenith, clamp(t, 0.0, 1.0));
+                }
 
-                // Add sun scattering glow (Mie scattering approximation)
-                float sunDist = distance(dir, uSunDir);
-                float sunGlow = exp(-sunDist * 3.5) * 0.6; // Soft glow
+                // Mie Scattering (Sun Halo)
+                // Physically-based approximation
+                // Phase function for Mie scattering is peaked forward
+                float sunDot = dot(dir, uSunDir);
+                float sunGlow = 0.0;
 
-                // Combine
-                vec3 finalColor = sky + uHorizon * sunGlow * 0.2;
+                if(sunDot > 0.0) {
+                     // Sharp peak near sun
+                     sunGlow += pow(sunDot, 64.0) * 0.5;
+                     // Broader glow
+                     sunGlow += pow(sunDot, 8.0) * 0.2;
+                }
+
+                vec3 finalColor = sky + uHorizon * sunGlow;
 
                 gl_FragColor = vec4(finalColor, 1.0);
                 #include <colorspace_fragment>
@@ -307,30 +298,9 @@ const SkyGradient = ({ horizonColor, sunPosition }) => {
 const VolumetricClouds = ({ color }) => {
     return (
       <group position={[0, 10, 0]}>
-        <Cloud
-            position={[-20, 5, -20]}
-            speed={0.2}
-            opacity={0.5}
-            segments={20}
-            bounds={[10, 2, 10]}
-            color={color}
-        />
-        <Cloud
-            position={[20, 8, -15]}
-            speed={0.2}
-            opacity={0.4}
-            segments={20}
-            bounds={[10, 2, 10]}
-            color={color}
-        />
-        <Cloud
-            position={[0, 15, -5]}
-            speed={0.1}
-            opacity={0.3}
-            segments={20}
-            bounds={[15, 2, 5]}
-            color={color}
-        />
+        <Cloud position={[-20, 5, -20]} speed={0.2} opacity={0.5} segments={20} bounds={[10, 2, 10]} color={color} />
+        <Cloud position={[20, 8, -15]} speed={0.2} opacity={0.4} segments={20} bounds={[10, 2, 10]} color={color} />
+        <Cloud position={[0, 15, -5]} speed={0.1} opacity={0.3} segments={20} bounds={[15, 2, 5]} color={color} />
       </group>
     )
 }
@@ -339,26 +309,20 @@ export const Atmosphere = ({ isHeadless }) => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const dayNightCycle = useStore((state) => state.dayNightCycle)
   const desert = deserts[currentDesertIndex]
-
   const fogRef = useRef()
 
-  // Calculate cloud color
   const cloudColor = useMemo(() => {
     if (!desert) return new THREE.Color('#fff')
     const dayness = Math.sin(dayNightCycle * Math.PI)
     const baseColor = new THREE.Color(desert.colors.sky)
-    // Clouds catch sunset colors
     const sunsetColor = new THREE.Color('#FF9A8B')
-    // At night, clouds are dark
     const nightColor = new THREE.Color('#1a1a2e')
 
     const c = baseColor.clone().lerp(sunsetColor, (1 - dayness) * 0.7)
     if (dayness < 0.2) {
         c.lerp(nightColor, 1 - dayness * 5)
     }
-    // Boost brightness slightly
     c.multiplyScalar(1.2)
-
     return c
   }, [dayNightCycle, desert])
 
@@ -372,23 +336,14 @@ export const Atmosphere = ({ isHeadless }) => {
     currentSkyColor.copy(targetSkyColor)
 
     if (fogRef.current) {
-        // Fog Color
         const targetFogColor = targetSkyColor.clone()
         const hazeIntensity = Math.pow(dayness, 2) * 0.4
         targetFogColor.lerp(new THREE.Color('#FFFFFF'), hazeIntensity)
-
         fogRef.current.color.lerp(targetFogColor, delta * 1.5)
 
-        // Fog Density (FogExp2)
-        // High visibility = low density
-        // Night (200 units) -> 0.008
-        // Day (80 units) -> 0.02
-        // Dawn (foggy) -> 0.035
         let targetDensity = 0.008
         if (dayness > 0.2) targetDensity = 0.012
-        if (dayness < 0.2 && dayness > 0.0) targetDensity = 0.02 // Dawn haze
-
-        // Smooth transition for density
+        if (dayness < 0.2 && dayness > 0.0) targetDensity = 0.02
         const currentDensity = fogRef.current.density
         fogRef.current.density = THREE.MathUtils.lerp(currentDensity, targetDensity, delta * 0.5)
     }
