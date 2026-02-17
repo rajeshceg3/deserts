@@ -24,7 +24,7 @@ export const Camel = (props) => {
   const headRef = useRef()
 
   // Random offset for this instance to desynchronize animations
-  const offset = React.useMemo(() => Math.random() * 100, [])
+  const [offset] = React.useState(() => Math.random() * 100)
 
   // Refs for legs
   const legFL = useRef() // Front Left

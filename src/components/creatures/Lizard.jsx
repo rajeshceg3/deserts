@@ -8,7 +8,7 @@ export const Lizard = (props) => {
   const legRefs = useRef([])
 
   // Random offset
-  const offset = React.useMemo(() => Math.random() * 100, [])
+  const [offset] = React.useState(() => Math.random() * 100)
 
   useFrame((state) => {
     if(group.current) {

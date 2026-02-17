@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
 
 // --- Shared Shader Chunks ---
 const noiseChunk = `
@@ -61,11 +62,13 @@ export const FurMaterial = (props) => {
   const materialRef = useRef();
 
   const onBeforeCompile = useMemo(() => (shader) => {
+    materialRef.current.userData.shader = shader;
     shader.uniforms.uTime = { value: 0 };
 
     shader.vertexShader = `
       varying vec3 vPos;
       varying vec2 vUv;
+      uniform float uTime;
       ${noiseChunk}
       ${shader.vertexShader}
     `.replace(
@@ -74,15 +77,23 @@ export const FurMaterial = (props) => {
       #include <begin_vertex>
       vPos = position;
       vUv = uv;
-      // Subtle vertex displacement for "fluff"
-      float n = snoise(position.xy * 20.0);
-      transformed += normal * n * 0.02;
+      // Organic wind/breathing displacement
+      // Low freq breathing + High freq wind flutter
+      float breath = sin(uTime * 2.0) * 0.005;
+      float wind = snoise(position.xy * 10.0 + uTime * 3.0) * 0.015;
+
+      // Directional bias for wind (assuming Z forward)
+      float windDir = snoise(vec2(uTime * 0.5, position.z * 0.1));
+
+      transformed += normal * (breath + wind);
+      transformed.x += wind * windDir * 0.5; // Slight sway
       `
     );
 
     shader.fragmentShader = `
       varying vec3 vPos;
       varying vec2 vUv;
+      uniform float uTime;
       ${noiseChunk}
       ${shader.fragmentShader}
     `.replace(
@@ -94,10 +105,16 @@ export const FurMaterial = (props) => {
       float n1 = snoise(vPos.xy * 50.0); // Base coat
       float n2 = snoise(vPos.xz * 100.0); // Fine hairs
 
+      // Animate sheen slightly
+      float sheen = snoise(vPos.xy * 20.0 + uTime * 0.5);
+
       float fur = n1 * 0.5 + n2 * 0.5;
 
       // Darken roots (low values)
       vec3 furColor = diffuseColor.rgb * (0.8 + 0.4 * fur);
+
+      // Add subtle sheen
+      furColor += vec3(0.05) * sheen;
 
       diffuseColor.rgb = furColor;
       `
@@ -112,6 +129,12 @@ export const FurMaterial = (props) => {
     );
   }, []);
 
+  useFrame((state) => {
+    if (materialRef.current?.userData?.shader) {
+        materialRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
+    }
+  });
+
   return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />;
 };
 
@@ -121,9 +144,13 @@ export const ScaleMaterial = (props) => {
     const materialRef = useRef();
 
     const onBeforeCompile = useMemo(() => (shader) => {
+      materialRef.current.userData.shader = shader;
+      shader.uniforms.uTime = { value: 0 };
+
       shader.vertexShader = `
         varying vec2 vUv;
         varying vec3 vPos;
+        uniform float uTime;
         ${shader.vertexShader}
       `.replace(
         '#include <begin_vertex>',
@@ -131,12 +158,17 @@ export const ScaleMaterial = (props) => {
         #include <begin_vertex>
         vUv = uv;
         vPos = position;
+
+        // Slight breathing for lizard skin
+        float breath = sin(uTime * 4.0 + position.x * 5.0) * 0.002;
+        transformed += normal * breath;
         `
       );
 
       shader.fragmentShader = `
         varying vec2 vUv;
         varying vec3 vPos;
+        uniform float uTime;
         ${voronoiChunk}
         ${shader.fragmentShader}
       `.replace(
@@ -157,6 +189,10 @@ export const ScaleMaterial = (props) => {
 
         vec3 scaleColor = diffuseColor.rgb;
         scaleColor *= (0.8 + 0.4 * colorVar); // Macro variation
+
+        // Iridescence shift
+        float shift = sin(uTime + vUv.x * 10.0) * 0.05;
+        scaleColor += vec3(shift, 0.0, -shift) * 0.1;
 
         // Darken edges (interstitial tissue)
         scaleColor *= edge;
@@ -179,22 +215,31 @@ export const ScaleMaterial = (props) => {
         #include <normal_fragment_maps>
         // Perturb normal based on scale shape
         float v = voronoi(vUv * 30.0);
-        // Gradient of voronoi gives us "bump"
-        // Simple approximation: normal up in center, down at edges
-        // Actually voronoi returns distance to center, so 0 at center, 1 at edge
-        // But Voronoi implementation above returns min distance, so 0 at center, max at edge?
-        // Wait, standard voronoi is distance to closest point. So 0 at center of cell.
 
-        // To make a dome shape: 1.0 - v
-        float dome = sqrt(1.0 - v); // Simulates rounded scale
+        // To make a dome shape: 1.0 - v (v is distance from center 0 to edge 1 approx)
+        // Actually voronoi implementation returns distance to feature point.
+        // Min distance. So 0 at center, max at edge.
+        float dome = sqrt(clamp(1.0 - v, 0.0, 1.0));
 
-        // Calculate derivatives
+        // Calculate derivatives for bump mapping
         vec3 bumpGrad = vec3(dFdx(dome), dFdy(dome), 0.0);
 
-        normal = normalize(normal + bumpGrad * 1.0);
+        // Apply bump to normal
+        // Transform bumpGrad to view space normal perturbation?
+        // Simple hack: add to normal in tangent space (but we are in view space here mostly)
+        // Actually fragment shader 'normal' is view space normal.
+
+        // Factor controls depth
+        normal = normalize(normal + bumpGrad * 2.0);
         `
       );
     }, []);
+
+    useFrame((state) => {
+        if (materialRef.current?.userData?.shader) {
+            materialRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
+        }
+    });
 
     return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />;
 };
@@ -205,23 +250,31 @@ export const ChitinMaterial = (props) => {
     const materialRef = useRef();
 
     const onBeforeCompile = useMemo(() => (shader) => {
+      materialRef.current.userData.shader = shader;
+      shader.uniforms.uTime = { value: 0 };
+
+      // Need view position for Fresnel
       shader.vertexShader = `
         varying vec3 vPos;
-        varying vec3 vNormal;
         varying vec3 vViewPosition;
+        uniform float uTime;
         ${shader.vertexShader}
       `.replace(
         '#include <begin_vertex>',
         `
         #include <begin_vertex>
         vPos = position;
-        vNormal = normal;
+        // vViewPosition is calculated in 'project_vertex' chunk usually,
+        // but let's ensure we have what we need.
+        // Three.js Standard material usually has vViewPosition.
+        // But to be safe let's rely on standard chunks.
         `
       );
 
       shader.fragmentShader = `
         varying vec3 vPos;
-        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        uniform float uTime;
         ${noiseChunk}
         ${shader.fragmentShader}
       `.replace(
@@ -232,13 +285,27 @@ export const ChitinMaterial = (props) => {
         // Organic Noise
         float n = snoise(vPos.xyz * 5.0);
 
-        // Slight iridescence / color shift based on viewing angle (Fresnel-ish) not easily accessible here
-        // But we can vary color
+        // Fresnel Effect for Chitin Iridescence
+        // normal is the varying from normal_fragment_maps (view space normal)
+        // vViewPosition is -viewSpacePosition.
+        // View direction is normalize(vViewPosition).
+
+        vec3 viewDir = normalize(vViewPosition);
+        vec3 viewNormal = normalize(normal);
+
+        float fresnel = pow(1.0 - clamp(dot(viewDir, viewNormal), 0.0, 1.0), 3.0);
+
+        // Iridescent colors (Blue/Green/Purple shift)
+        vec3 iridColor = vec3(0.0, 0.5, 1.0); // Cyan base
+        iridColor = mix(iridColor, vec3(0.5, 0.0, 1.0), sin(uTime * 0.5) * 0.5 + 0.5); // Shift to purple
 
         vec3 base = diffuseColor.rgb;
-        vec3 highlight = base + vec3(0.1, 0.1, 0.2); // Blue-ish tint
 
-        diffuseColor.rgb = mix(base, highlight, n * 0.5 + 0.5);
+        // Add fresnel glow
+        diffuseColor.rgb = mix(base, iridColor, fresnel * 0.6);
+
+        // Add noise variation
+        diffuseColor.rgb += (n - 0.5) * 0.1;
         `
       ).replace(
         '#include <roughnessmap_fragment>',
@@ -253,6 +320,12 @@ export const ChitinMaterial = (props) => {
         `
       );
     }, []);
+
+    useFrame((state) => {
+        if (materialRef.current?.userData?.shader) {
+            materialRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
+        }
+    });
 
     return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />;
 };

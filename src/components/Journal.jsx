@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
 export const Journal = ({ isOpen, onClose, desert }) => {
   const [activeTab, setActiveTab] = useState('log') // 'log', 'guide', 'stars'
-  const prefersReducedMotion = usePrefersReducedMotion()
 
   const tabs = [
     { id: 'log', label: 'Logbook' },
@@ -180,7 +178,7 @@ export const Journal = ({ isOpen, onClose, desert }) => {
                                            {desert.constellation.myth && (
                                                <p className="text-black/70 text-sm italic leading-relaxed border-t border-black/5 pt-4 mt-4">
                                                    <strong className="text-black/90 block mb-1 font-sans text-xs uppercase tracking-wide not-italic">Mythology:</strong>
-                                                   "{desert.constellation.myth}"
+                                                   &quot;{desert.constellation.myth}&quot;
                                                </p>
                                            )}
                                        </div>

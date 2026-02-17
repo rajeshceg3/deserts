@@ -74,6 +74,7 @@ export const Experience = ({ onReady }) => {
 
     if (deserts[currentDesertIndex]) {
         const skyColor = getSkyColor(dayNightCycle, deserts[currentDesertIndex].colors)
+        // eslint-disable-next-line react-hooks/immutability
         scene.background = skyColor
     }
 
