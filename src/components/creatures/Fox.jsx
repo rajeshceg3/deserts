@@ -33,7 +33,7 @@ export const Fox = (props) => {
   const group = useRef()
   const headRef = useRef()
   const tailRef = useRef()
-  const offset = React.useMemo(() => Math.random() * 100, [])
+  const [offset] = React.useState(() => Math.random() * 100)
 
   useFrame((state) => {
     if(group.current) {

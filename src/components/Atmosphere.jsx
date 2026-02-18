@@ -137,24 +137,24 @@ const Sun = () => {
                 vec2 center = vec2(0.5);
                 float dist = distance(vUv, center);
 
-                // Intense HDR Core
-                float core = smoothstep(0.12, 0.08, dist);
+                // Intense HDR Core - Smoother transition
+                float core = smoothstep(0.12, 0.02, dist);
 
                 // Turbulent Corona
                 float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
                 float rayNoise = snoise(vec2(angle * 8.0, uTime * 0.3 + dist * 8.0));
 
                 // Glow falloff
-                float glow = 1.0 / (dist * 16.0 + 0.2) - 0.05;
+                float glow = 1.0 / (dist * 12.0 + 0.2) - 0.1;
                 glow = max(0.0, glow);
-                glow += rayNoise * (1.0 - smoothstep(0.0, 0.5, dist)) * 0.2; // Add turbulence
+                glow += rayNoise * (1.0 - smoothstep(0.0, 0.6, dist)) * 0.15; // Add turbulence
 
                 // Combine: Core is extremely bright (HDR)
-                vec3 finalColor = uColor * core * 10.0;
-                finalColor += uHalo * glow * 2.0;
+                vec3 finalColor = uColor * core * 12.0;
+                finalColor += uHalo * glow * 2.5;
 
-                // Soft edge for quad
-                float alpha = smoothstep(0.5, 0.2, dist);
+                // Soft edge for quad - Smoother fade out
+                float alpha = smoothstep(0.5, 0.1, dist);
 
                 gl_FragColor = vec4(finalColor, alpha);
                 #include <colorspace_fragment>
@@ -241,40 +241,47 @@ const SkyGradient = ({ horizonColor }) => {
             uniform vec3 uZenith;
             uniform vec3 uSunDir;
 
-            float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+            // Triangular Dithering for smoother gradients
+            float random(vec2 uv) {
+                return fract(sin(dot(uv.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+            }
+            float dither(vec2 uv) {
+                return (random(uv) - 0.5) / 128.0; // Minimal noise to break banding
+            }
 
             void main() {
                 vec3 dir = normalize(vWorldPosition);
                 float y = max(0.0, dir.y);
 
-                // 3-stop gradient
+                // 3-stop gradient with dithering
                 // 0.0 - 0.5: Horizon -> Mid
                 // 0.5 - 1.0: Mid -> Zenith
 
                 vec3 sky;
-                float noise = hash(gl_FragCoord.xy) * 0.015; // Dithering
+                float noise = dither(gl_FragCoord.xy);
 
                 if (y < 0.5) {
                     float t = y / 0.5;
-                    t += noise;
-                    sky = mix(uHorizon, uMid, clamp(t, 0.0, 1.0));
+                    t = clamp(t + noise, 0.0, 1.0);
+                    sky = mix(uHorizon, uMid, t);
                 } else {
                     float t = (y - 0.5) / 0.5;
-                    t += noise;
-                    sky = mix(uMid, uZenith, clamp(t, 0.0, 1.0));
+                    t = clamp(t + noise, 0.0, 1.0);
+                    sky = mix(uMid, uZenith, t);
                 }
 
                 // Mie Scattering (Sun Halo)
                 // Physically-based approximation
-                // Phase function for Mie scattering is peaked forward
                 float sunDot = dot(dir, uSunDir);
                 float sunGlow = 0.0;
 
                 if(sunDot > 0.0) {
-                     // Sharp peak near sun
-                     sunGlow += pow(sunDot, 64.0) * 0.5;
-                     // Broader glow
-                     sunGlow += pow(sunDot, 8.0) * 0.2;
+                     // Very sharp peak near sun disk
+                     sunGlow += pow(sunDot, 128.0) * 0.8;
+                     // Broader atmospheric glow
+                     sunGlow += pow(sunDot, 16.0) * 0.3;
+                     // Very broad haze
+                     sunGlow += pow(sunDot, 4.0) * 0.1;
                 }
 
                 vec3 finalColor = sky + uHorizon * sunGlow;

@@ -161,7 +161,7 @@ const Pincer = ({ side, offset }) => {
 
 export const Scorpion = (props) => {
   const group = useRef()
-  const offset = React.useMemo(() => Math.random() * 100, [])
+  const [offset] = React.useState(() => Math.random() * 100)
 
   useFrame((state) => {
       if (group.current) {
