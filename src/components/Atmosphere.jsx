@@ -10,10 +10,12 @@ const NightStars = () => {
     const pointsRef = useRef()
     const dayNightCycle = useStore((state) => state.dayNightCycle)
 
-    const [positions, sizes] = useMemo(() => {
+    const [positions, sizes, colors] = useMemo(() => {
         const count = 5000
         const pos = new Float32Array(count * 3)
         const sz = new Float32Array(count)
+        const col = new Float32Array(count * 3)
+
         for(let i=0; i<count; i++) {
             const r = 100 + Math.random() * 50
             const theta = Math.random() * Math.PI * 2
@@ -21,9 +23,21 @@ const NightStars = () => {
             pos[i*3] = r * Math.sin(phi) * Math.cos(theta)
             pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta)
             pos[i*3+2] = r * Math.cos(phi)
-            sz[i] = Math.random()
+            sz[i] = Math.random() * 1.5 + 0.5 // Varied sizes
+
+            // Star Colors (Temperature)
+            // 0: Blue, 1: White, 2: Orange/Red
+            const type = Math.random();
+            const starColor = new THREE.Color();
+            if (type > 0.9) starColor.setHex(0xffccaa); // Red Giant
+            else if (type > 0.7) starColor.setHex(0xaaccff); // Blue
+            else starColor.setHex(0xffffff); // White
+
+            col[i*3] = starColor.r;
+            col[i*3+1] = starColor.g;
+            col[i*3+2] = starColor.b;
         }
-        return [pos, sz]
+        return [pos, sz, col]
     }, [])
 
     const shaderArgs = useMemo(() => ({
@@ -33,17 +47,22 @@ const NightStars = () => {
         },
         vertexShader: `
             attribute float size;
+            attribute vec3 color;
             varying float vSize;
+            varying vec3 vColor;
             uniform float uTime;
             void main() {
                 vSize = size;
+                vColor = color;
                 vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
                 gl_Position = projectionMatrix * mvPosition;
+                // Size attenuation
                 gl_PointSize = size * (300.0 / -mvPosition.z);
             }
         `,
         fragmentShader: `
             varying float vSize;
+            varying vec3 vColor;
             uniform float uTime;
             uniform float uOpacity;
 
@@ -51,10 +70,18 @@ const NightStars = () => {
                 vec2 center = gl_PointCoord - 0.5;
                 float dist = length(center);
                 if (dist > 0.5) discard;
+
+                // Soft circle
                 float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
-                float twinkle = sin(uTime * 2.0 + vSize * 20.0) * 0.5 + 0.5;
-                alpha *= (0.5 + 0.5 * twinkle);
-                gl_FragColor = vec4(1.0, 1.0, 1.0, alpha * uOpacity);
+
+                // Twinkle effect (based on position and time)
+                // Use vSize as a random seed effectively
+                float twinkle = sin(uTime * 3.0 + vSize * 20.0) * 0.5 + 0.5;
+
+                // Twinkle affects alpha and brightness
+                alpha *= (0.3 + 0.7 * twinkle);
+
+                gl_FragColor = vec4(vColor, alpha * uOpacity);
                 #include <colorspace_fragment>
             }
         `,
@@ -69,7 +96,7 @@ const NightStars = () => {
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
             pointsRef.current.material.uniforms.uOpacity.value = opacity;
             pointsRef.current.material.uniforms.uTime.value = state.clock.elapsedTime;
-            pointsRef.current.rotation.y = state.clock.elapsedTime * 0.01;
+            pointsRef.current.rotation.y = state.clock.elapsedTime * 0.005; // Slower rotation
         }
     })
 
@@ -78,6 +105,7 @@ const NightStars = () => {
             <bufferGeometry>
                 <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
                 <bufferAttribute attach="attributes-size" count={sizes.length} array={sizes} itemSize={1} />
+                <bufferAttribute attach="attributes-color" count={colors.length / 3} array={colors} itemSize={3} />
             </bufferGeometry>
             <shaderMaterial args={[shaderArgs]} />
         </points>
@@ -137,23 +165,30 @@ const Sun = () => {
                 vec2 center = vec2(0.5);
                 float dist = distance(vUv, center);
 
-                // Intense HDR Core - Smoother transition
+                // Intense HDR Core
                 float core = smoothstep(0.12, 0.02, dist);
 
                 // Turbulent Corona
                 float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
-                float rayNoise = snoise(vec2(angle * 8.0, uTime * 0.3 + dist * 8.0));
+                float rayNoise = snoise(vec2(angle * 10.0, uTime * 0.2 + dist * 5.0));
+
+                // Starburst Rays
+                float rays = sin(angle * 20.0 + uTime * 0.1) * sin(angle * 13.0 - uTime * 0.2);
+                rays = smoothstep(0.5, 1.0, rays) * 0.2;
 
                 // Glow falloff
                 float glow = 1.0 / (dist * 12.0 + 0.2) - 0.1;
                 glow = max(0.0, glow);
-                glow += rayNoise * (1.0 - smoothstep(0.0, 0.6, dist)) * 0.15; // Add turbulence
 
-                // Combine: Core is extremely bright (HDR)
-                vec3 finalColor = uColor * core * 12.0;
-                finalColor += uHalo * glow * 2.5;
+                // Combine details
+                glow += rayNoise * (1.0 - smoothstep(0.0, 0.6, dist)) * 0.1;
+                glow += rays * (1.0 - smoothstep(0.1, 0.5, dist));
 
-                // Soft edge for quad - Smoother fade out
+                // Combine colors
+                vec3 finalColor = uColor * core * 15.0; // HDR Burst
+                finalColor += uHalo * glow * 2.0;
+
+                // Soft edge for quad
                 float alpha = smoothstep(0.5, 0.1, dist);
 
                 gl_FragColor = vec4(finalColor, alpha);
@@ -246,7 +281,7 @@ const SkyGradient = ({ horizonColor }) => {
                 return fract(sin(dot(uv.xy, vec2(12.9898, 78.233))) * 43758.5453123);
             }
             float dither(vec2 uv) {
-                return (random(uv) - 0.5) / 128.0; // Minimal noise to break banding
+                return (random(uv) - 0.5) / 64.0; // Stronger dither
             }
 
             void main() {
