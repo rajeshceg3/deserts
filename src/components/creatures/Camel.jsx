@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { FurMaterial } from '../../utils/proceduralMaterials'
+import { noise2D } from '../../utils/noise'
 
 // Leg geometry helper
 // Pivot is at top (0,0,0 local to group), leg extends down
@@ -34,43 +35,52 @@ export const Camel = (props) => {
 
   useFrame((state, delta) => {
     if(group.current) {
+        const t = state.clock.elapsedTime;
         // Walking speed with offset
-        const t = state.clock.elapsedTime * 4 + offset
-
         // Add layered noise for organic gait speed variation
         // Primary low-frequency sway + secondary higher-frequency jitter
-        const noise = Math.sin(t * 0.1) * 0.2 + Math.sin(t * 0.5) * 0.15
-        const walkT = t + noise
+
+        // Simplex Noise usage: noise2D(x, y) returns -1 to 1
+        const gaitVar = noise2D(t * 0.2, offset) * 0.5;
+        const walkSpeed = 4.0 + gaitVar;
+        const walkT = t * walkSpeed + offset;
 
         // Procedural Walking Animation (Diagonals synced)
         // Rotate around X axis for legs
         // Adjusted amplitude for realistic gait
-        if (legFL.current) legFL.current.rotation.x = Math.sin(walkT) * 0.5
-        if (legFR.current) legFR.current.rotation.x = Math.sin(walkT + Math.PI) * 0.5
-        if (legBL.current) legBL.current.rotation.x = Math.sin(walkT + Math.PI) * 0.5
-        if (legBR.current) legBR.current.rotation.x = Math.sin(walkT) * 0.5
+        const legAmp = 0.5;
+        if (legFL.current) legFL.current.rotation.x = Math.sin(walkT) * legAmp
+        if (legFR.current) legFR.current.rotation.x = Math.sin(walkT + Math.PI) * legAmp
+        if (legBL.current) legBL.current.rotation.x = Math.sin(walkT + Math.PI) * legAmp
+        if (legBR.current) legBR.current.rotation.x = Math.sin(walkT) * legAmp
 
         // Body bobbing - synced with steps (2 steps per cycle)
         const bob = Math.abs(Math.sin(walkT)) * 0.05
         group.current.position.y = props.position[1] + bob
 
-        // Organic head movement
+        // Organic head movement using Noise
         if (headRef.current) {
-             const headT = state.clock.elapsedTime + offset
-             // Head turn (slow scan + quick glance + subtle jitter)
-             headRef.current.rotation.y = Math.sin(headT * 0.5) * 0.3
-                + Math.sin(headT * 1.5) * 0.05
-                + Math.sin(headT * 3.7) * 0.02; // Micro-movements
+             const headT = t + offset
 
-             // Head nod (breathing + attention + step impact)
-             headRef.current.rotation.x = 0.5
-                + Math.sin(headT * 0.3) * 0.1
-                + Math.sin(headT * 2.1) * 0.02
-                + Math.cos(walkT * 2) * 0.03; // Sync subtle nod with steps
+             // Slow exploratory look
+             const lookX = noise2D(headT * 0.3, 10.0) * 0.5; // Yaw
+             const lookY = noise2D(headT * 0.4, 20.0) * 0.3; // Pitch
+
+             // Sudden attention twitch
+             const twitch = noise2D(headT * 5.0, 30.0);
+             const twitchFactor = twitch > 0.7 ? (twitch - 0.7) * 0.5 : 0;
+
+             // Walking bob integration (delayed for weight)
+             const walkBob = Math.cos(walkT * 2 - 0.5) * 0.05;
+
+             headRef.current.rotation.y = THREE.MathUtils.lerp(headRef.current.rotation.y, lookX + twitchFactor, delta * 2.0);
+             headRef.current.rotation.x = 0.5 + THREE.MathUtils.lerp(headRef.current.rotation.x - 0.5, lookY * 0.5 + walkBob, delta * 5.0);
         }
 
         // Rotate whole creature slowly around Y axis with variation
-        group.current.rotation.y += delta * (0.1 + Math.sin(state.clock.elapsedTime * 0.2) * 0.05)
+        // Use noise for path wandering
+        const wander = noise2D(t * 0.05, offset * 2.0) * 0.5;
+        group.current.rotation.y += delta * (0.1 + wander * 0.1);
     }
   })
 

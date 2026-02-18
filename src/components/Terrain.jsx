@@ -77,24 +77,28 @@ export const Terrain = ({ isHeadless }) => {
       uniform sampler2D uNoiseMap;
       uniform float uTime;
 
+      // Better organic ripple with domain warping
       float ripple(vec2 uv, float time) {
-          float n = texture2D(uNoiseMap, uv * 1.5).r;
-          vec2 distortedUV = uv + vec2(n * 0.1, n * 0.15);
+          // Sample noise map for warping
+          float warp = texture2D(uNoiseMap, uv * 0.5).r;
 
-          // Layer 1: Large Dunes (Wind direction A)
-          float wave1 = sin(distortedUV.x * 20.0 + distortedUV.y * 10.0 - time * 0.15);
+          vec2 distortedUV = uv + vec2(warp * 0.2, warp * 0.1);
 
-          // Layer 2: Medium Ripples (Wind direction B - Cross wind)
-          float wave2 = sin(distortedUV.y * 50.0 - distortedUV.x * 15.0 - time * 0.25);
+          // Layer 1: Main dunes (wind direction A)
+          float wave1 = sin(distortedUV.x * 15.0 + distortedUV.y * 5.0 - time * 0.1);
 
-          // Layer 3: Fine Micro-ripples (Turbulence)
-          float wave3 = sin(distortedUV.x * 120.0 + distortedUV.y * 90.0 - time * 0.4);
+          // Layer 2: Cross patterns
+          float wave2 = sin(distortedUV.y * 30.0 - distortedUV.x * 10.0 - time * 0.15);
 
-          // Mix layers with dominance on wave1/wave2
-          float w = (wave1 * 0.5 + wave2 * 0.35 + wave3 * 0.15);
+          // Layer 3: Micro surface noise
+          float wave3 = sin(distortedUV.x * 80.0 + distortedUV.y * 80.0);
 
-          // Non-linear sharpen for dune crests
-          w = pow(0.5 + 0.5 * w, 2.5); // Sharper crests
+          // Combine with non-linear mixing
+          float w = wave1 * 0.6 + wave2 * 0.3 + wave3 * 0.1;
+
+          // Sharpen crests (Sand dunes are sharp at top)
+          w = pow(0.5 + 0.5 * w, 4.0);
+
           return w;
       }
     ` + shader.fragmentShader
@@ -109,22 +113,30 @@ export const Terrain = ({ isHeadless }) => {
       float n2 = noiseSample.g;
       float n3 = noiseSample.b;
 
+      // Base color variation based on vertex color (height noise)
       float t = (vColor.r - 0.5) / 0.5;
       t = clamp(t, 0.0, 1.0);
 
       float r = ripple(vTerrainUv, uTime);
-      float rippleFactor = r * 0.12 * n2; // Increased ripple influence
 
-      vec3 mixedColor = mix(uColorLow, uColorHigh, t + rippleFactor);
-      float grain = (n3 - 0.5) * 0.15; // Grain contrast
+      // Ripple adds to height perception in color mix (crests are lighter/drier)
+      float mixFactor = t + r * 0.15;
+
+      // Add some "wetness" or mineral variation via noise
+      mixFactor += (n2 - 0.5) * 0.1;
+
+      vec3 mixedColor = mix(uColorLow, uColorHigh, smoothstep(0.2, 0.8, mixFactor));
+
+      // Fine grain noise
+      float grain = (n3 - 0.5) * 0.08;
       mixedColor += grain;
-      mixedColor += (n - 0.5) * 0.05;
 
-      // Edge Fade: Darken/Fog out edges beyond radius 45 (matches skirt)
+      // Distance fogging logic (Edge Fade)
+      // Matches the skirt radius approx 45
       float edgeFade = smoothstep(40.0, 48.0, vDist);
-      // Mix towards a neutral "shadow" or fog color to hide the geo drop
-      // Better: mix to the low ground color to reduce contrast at edges
-      mixedColor = mix(mixedColor, uColorLow * 0.5, edgeFade * 0.8);
+
+      // Fade to ground low color to blend with background
+      mixedColor = mix(mixedColor, uColorLow * 0.8, edgeFade);
 
       diffuseColor.rgb = mixedColor;
       `
@@ -134,26 +146,33 @@ export const Terrain = ({ isHeadless }) => {
       '#include <roughnessmap_fragment>',
       `
       #include <roughnessmap_fragment>
-      float rNoise = texture2D(uNoiseMap, noiseUV * 3.0).b;
+      float rNoise = texture2D(uNoiseMap, noiseUV * 4.0).b;
 
-      // View dependent sparkle (Mica)
       vec3 viewDir = normalize(vCustomViewPos);
 
-      // Improve sparkle logic:
-      // Sparkle vector based on noise map normal
-      vec3 sparkleVec = normalize(vec3(n - 0.5, 1.0, n2 - 0.5));
-      float viewSparkle = max(0.0, dot(viewDir, sparkleVec));
+      // Sparkle Logic (Mica / Sand grains)
+      // Based on view angle relative to micro-facets
 
-      // High frequency glint
-      float glint = sin(dot(gl_FragCoord.xy, vec2(0.1, 0.2)) + uTime * 2.0); // Screen space glint for sub-pixel aliasing look?
-      // Actually better to use viewDir for stability
-      float glintStable = sin(dot(viewDir.xy, vec2(200.0)) + rNoise * 50.0);
+      // Create a random facet normal using noise
+      vec3 facetNormal = normalize(vec3(rNoise - 0.5, 1.0, n2 - 0.5));
 
-      float sparkle = smoothstep(0.97, 1.0, rNoise + glintStable * 0.02 + viewSparkle * 0.05);
+      float spec = max(0.0, dot(viewDir, facetNormal));
 
-      roughnessFactor = mix(roughnessFactor, 0.05, sparkle * 0.9); // Ultra shiny sparkles
-      roughnessFactor += (n - 0.5) * 0.3; // Roughness variation
-      roughnessFactor = clamp(roughnessFactor, 0.1, 1.0);
+      // Only sparkle at very specific angles (high power)
+      float sparkle = pow(spec, 32.0);
+
+      // Mask by noise threshold to make it sparse
+      float sparkleMask = step(0.98, rNoise);
+
+      // Combine
+      float finalSparkle = sparkle * sparkleMask;
+
+      // Add view-independent glint for aliasing-like shimmer
+      float glint = step(0.99, sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233))) * 43758.5453);
+
+      // Final roughness modification
+      // Sand is generally rough (0.8-0.9), but sparkles are smooth (0.1)
+      roughnessFactor = mix(0.9, 0.1, finalSparkle * 0.8 + glint * 0.02);
       `
     )
 
@@ -161,15 +180,12 @@ export const Terrain = ({ isHeadless }) => {
       '#include <metalnessmap_fragment>',
       `
       #include <metalnessmap_fragment>
-      // Re-calculate sparkle for metalness
-      // Need rNoise, noiseUV, vCustomViewPos
-      vec2 noiseUVM = vTerrainUv * 6.0;
-      float rNoiseM = texture2D(uNoiseMap, noiseUVM * 3.0).b;
-      vec3 viewDirM = normalize(vCustomViewPos);
-      float glintM = sin(dot(viewDirM.xy, vec2(200.0)) + rNoiseM * 50.0);
-      float sparkleM = smoothstep(0.97, 1.0, rNoiseM + glintM * 0.02);
+      // Metalness for sparkles to make them pop in HDR
+      // Recalculate sparkle (need optimization in real production to share vars)
+      float rNoiseM = texture2D(uNoiseMap, noiseUV * 4.0).b;
+      float sparkleMaskM = step(0.98, rNoiseM);
 
-      metalnessFactor = mix(metalnessFactor, 0.6, sparkleM);
+      metalnessFactor = mix(0.0, 0.8, sparkleMaskM * 0.5);
       `
     )
 
@@ -177,25 +193,26 @@ export const Terrain = ({ isHeadless }) => {
       '#include <normal_fragment_maps>',
       `
       #include <normal_fragment_maps>
-      // Calculate complex ripple bump
-      // To get proper derivatives for a function f(u,v,t), we need dFdx(f) and dFdy(f)
-      // Since ripple() is procedural, we can use dFdx/dFdy on the result directly.
+
+      // Procedural Normal Bump from Ripples
+      // Use analytical derivatives or dFdx
 
       float rVal = ripple(vTerrainUv, uTime);
 
-      float bumpRipple = rVal * 0.06; // Deeper ripples
-      float bumpGrain = n3 * 0.03;
-      float bumpMacro = n * 0.2;
+      // Macro bump from noise
+      float macro = texture2D(uNoiseMap, noiseUV).r;
 
-      float totalBump = bumpRipple + bumpGrain + bumpMacro;
+      float totalHeight = rVal * 0.15 + macro * 0.3; // Dominant ripples
 
-      // Flatten bump at edges to avoid weird lighting on the skirt
-      totalBump *= (1.0 - smoothstep(40.0, 48.0, vDist));
+      // Fade normal perturbation at edges to avoid lighting artifacts on skirt
+      totalHeight *= (1.0 - smoothstep(40.0, 48.0, vDist));
 
-      vec3 bumpGrad = vec3(dFdx(totalBump), dFdy(totalBump), 0.0);
+      // Calculate surface gradient
+      vec3 bumpGrad = vec3(dFdx(totalHeight), dFdy(totalHeight), 0.0);
 
-      // Apply
-      normal = normalize(normal - bumpGrad * 8.0); // Stronger normal effect
+      // Apply to normal
+      // Increase multiplier for deeper relief
+      normal = normalize(normal - bumpGrad * 12.0);
       `
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps

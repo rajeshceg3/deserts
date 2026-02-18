@@ -4,8 +4,12 @@ import { useFrame } from '@react-three/fiber';
 
 // --- Shared Shader Chunks ---
 const noiseChunk = `
-// Simplex 2D noise
+// Simplex 2D/3D noise
+
 vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+vec4 permute(vec4 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
 float snoise(vec2 v){
   const vec4 C = vec4(0.211324865405187, 0.366025403784439,
            -0.577350269189626, 0.024390243902439);
@@ -31,6 +35,81 @@ float snoise(vec2 v){
   g.yz = a0.yz * x12.xz + h.yz * x12.yw;
   return 130.0 * dot(m, g);
 }
+
+// 3D Simplex Noise for Volumetric effects
+float snoise3(vec3 v){
+  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+
+  // First corner
+  vec3 i  = floor(v + dot(v, C.yyy) );
+  vec3 x0 = v - i + dot(i, C.xxx) ;
+
+  // Other corners
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min( g.xyz, l.zxy );
+  vec3 i2 = max( g.xyz, l.zxy );
+
+  //  x0 = x0 - 0.0 + 0.0 * C.xxx;
+  //  x1 = x0 - i1  + 1.0 * C.xxx;
+  //  x2 = x0 - i2  + 2.0 * C.xxx;
+  //  x3 = x0 - 1.0 + 3.0 * C.xxx;
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
+  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
+
+  // Permutations
+  i = mod(i, 289.0 );
+  vec4 p = permute( permute( permute(
+             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+
+  // Gradients: 7x7 points over a square, mapped onto an octahedron.
+  // The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
+  float n_ = 0.142857142857; // 1.0/7.0
+  vec3  ns = n_ * D.wyz - D.xzx;
+
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)
+
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)
+
+  vec4 x = x_ *ns.x + ns.yyyy;
+  vec4 y = y_ *ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+
+  vec4 b0 = vec4( x.xy, y.xy );
+  vec4 b1 = vec4( x.zw, y.zw );
+
+  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;
+  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;
+  vec4 s0 = floor(b0)*2.0 + 1.0;
+  vec4 s1 = floor(b1)*2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+
+  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+
+  vec3 p0 = vec3(a0.xy,h.x);
+  vec3 p1 = vec3(a0.zw,h.y);
+  vec3 p2 = vec3(a1.xy,h.z);
+  vec3 p3 = vec3(a1.zw,h.w);
+
+  //Normalise gradients
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+  p0 *= norm.x;
+  p1 *= norm.y;
+  p2 *= norm.z;
+  p3 *= norm.w;
+
+  // Mix final noise value
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
+                                dot(p2,x2), dot(p3,x3) ) );
+}
 `;
 
 const voronoiChunk = `
@@ -55,6 +134,15 @@ float voronoi(vec2 x) {
     }
     return m_dist;
 }
+
+// Domain Warping for Organic Look
+float fbm(vec2 p) {
+    float f = 0.0;
+    f += 0.5000 * snoise(p); p = p*2.02;
+    f += 0.2500 * snoise(p); p = p*2.03;
+    f += 0.1250 * snoise(p); p = p*2.01;
+    return f;
+}
 `;
 
 // --- Fur Material ---
@@ -67,7 +155,6 @@ export const FurMaterial = (props) => {
 
     shader.vertexShader = `
       varying vec3 vPos;
-      varying vec2 vUv;
       uniform float uTime;
       ${noiseChunk}
       ${shader.vertexShader}
@@ -76,23 +163,29 @@ export const FurMaterial = (props) => {
       `
       #include <begin_vertex>
       vPos = position;
-      vUv = uv;
-      // Organic wind/breathing displacement
-      // Low freq breathing + High freq wind flutter
-      float breath = sin(uTime * 2.0) * 0.005;
-      float wind = snoise(position.xy * 10.0 + uTime * 3.0) * 0.015;
+      // vUv is already available in standard material
+      // vNormal is available
 
-      // Directional bias for wind (assuming Z forward)
-      float windDir = snoise(vec2(uTime * 0.5, position.z * 0.1));
+      // Improved Organic Wind
+      float windFreq = 2.0;
+      float windAmp = 0.02;
 
-      transformed += normal * (breath + wind);
-      transformed.x += wind * windDir * 0.5; // Slight sway
+      // Turbulence
+      float turbulence = snoise(position.xy * 0.5 + uTime * 0.5) * 0.5 + 0.5;
+
+      // Main wind direction
+      float wind = sin(uTime * windFreq + position.x * 2.0 + position.y) * windAmp * turbulence;
+
+      // Breathing / Life pulse
+      float pulse = sin(uTime * 1.5) * 0.003;
+
+      // Apply displacement
+      transformed += normal * (wind + pulse);
       `
     );
 
     shader.fragmentShader = `
       varying vec3 vPos;
-      varying vec2 vUv;
       uniform float uTime;
       ${noiseChunk}
       ${shader.fragmentShader}
@@ -101,20 +194,41 @@ export const FurMaterial = (props) => {
       `
       #include <color_fragment>
 
-      // Multi-layered noise for fur texture
-      float n1 = snoise(vPos.xy * 50.0); // Base coat
-      float n2 = snoise(vPos.xz * 100.0); // Fine hairs
+      // Multi-layered noise for realistic fur strands
+      float n1 = snoise(vPos.xy * 60.0);
+      float n2 = snoise(vPos.yz * 120.0);
+      float n3 = snoise(vPos.xz * 200.0); // Fine details
 
-      // Animate sheen slightly
-      float sheen = snoise(vPos.xy * 20.0 + uTime * 0.5);
+      // Fur density mask
+      float fur = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
 
-      float fur = n1 * 0.5 + n2 * 0.5;
+      // Roots are darker, tips are lighter
+      vec3 rootColor = diffuseColor.rgb * 0.6;
+      vec3 tipColor = diffuseColor.rgb * 1.2;
 
-      // Darken roots (low values)
-      vec3 furColor = diffuseColor.rgb * (0.8 + 0.4 * fur);
+      vec3 furColor = mix(rootColor, tipColor, smoothstep(-0.2, 0.5, fur));
 
-      // Add subtle sheen
-      furColor += vec3(0.05) * sheen;
+      // Fresnel Rim Light (Velvet effect)
+      // vViewPosition is available in Standard material fragment
+      vec3 viewDir = normalize(vViewPosition);
+
+      // vNormal might need to be 'normal' (the calculated normal in fragment)
+      // In color_fragment, 'normal' isn't fully ready yet?
+      // Actually standard material calculates 'normal' in 'normal_fragment_maps' which comes before 'color_fragment' usually?
+      // Let's check order:
+      // normal_fragment_begin -> normal_fragment_maps -> ... -> color_fragment ?
+      // No, color_fragment is usually early.
+
+      // If 'normal' is not ready, we use vNormal.
+      // But standard material vertex shader exports vNormal.
+      vec3 viewVec = normalize(-vViewPosition);
+      float NdotV = clamp(dot(normalize(vNormal), viewVec), 0.0, 1.0);
+
+      // Rim effect
+      float rim = 1.0 - NdotV;
+      rim = pow(rim, 3.0); // Sharpen rim
+
+      furColor += vec3(0.1, 0.1, 0.15) * rim * 0.5; // Blue-ish rim for sky reflection hint
 
       diffuseColor.rgb = furColor;
       `
@@ -122,9 +236,10 @@ export const FurMaterial = (props) => {
       '#include <roughnessmap_fragment>',
       `
       #include <roughnessmap_fragment>
-      // Fur is matte but tips might catch light
-      float n = snoise(vPos.xy * 80.0);
-      roughnessFactor = 0.8 + 0.2 * n;
+      // Fur catches light at grazing angles (sheen)
+      // Low roughness at rim, high at center
+      roughnessFactor = 0.6 + 0.3 * (1.0 - pow(1.0 - abs(dot(vNormal, vec3(0,0,1))), 2.0));
+      // Simplified Fresnel approx for roughness
       `
     );
   }, []);
@@ -148,7 +263,6 @@ export const ScaleMaterial = (props) => {
       shader.uniforms.uTime = { value: 0 };
 
       shader.vertexShader = `
-        varying vec2 vUv;
         varying vec3 vPos;
         uniform float uTime;
         ${shader.vertexShader}
@@ -156,19 +270,18 @@ export const ScaleMaterial = (props) => {
         '#include <begin_vertex>',
         `
         #include <begin_vertex>
-        vUv = uv;
         vPos = position;
 
-        // Slight breathing for lizard skin
-        float breath = sin(uTime * 4.0 + position.x * 5.0) * 0.002;
+        // Breathing
+        float breath = sin(uTime * 3.0 + position.y * 2.0) * 0.003;
         transformed += normal * breath;
         `
       );
 
       shader.fragmentShader = `
-        varying vec2 vUv;
         varying vec3 vPos;
         uniform float uTime;
+        ${noiseChunk}
         ${voronoiChunk}
         ${shader.fragmentShader}
       `.replace(
@@ -176,27 +289,35 @@ export const ScaleMaterial = (props) => {
         `
         #include <color_fragment>
 
-        // Generate scales using Voronoi
-        // Scale UVs for density
-        float v = voronoi(vUv * 30.0);
+        // Domain Warping for Organic Scales
+        vec2 warpedUV = vUv * 25.0;
+        float warp = fbm(warpedUV * 0.1 + uTime * 0.05); // Slow morph
+        warpedUV += vec2(warp, warp) * 2.0;
 
-        // Create edges
-        float edge = smoothstep(0.05, 0.1, v);
+        // Voronoi
+        float v = voronoi(warpedUV);
 
-        // Color variation per scale
-        // We can use the cell center ID concept but simple noise works too
-        float colorVar = voronoi(vUv * 5.0);
+        // Edge Softness
+        float edge = smoothstep(0.05, 0.15, v);
+
+        // Iridescence based on viewing angle
+        vec3 viewVec = normalize(-vViewPosition);
+        float NdotV = dot(normalize(vNormal), viewVec);
 
         vec3 scaleColor = diffuseColor.rgb;
-        scaleColor *= (0.8 + 0.4 * colorVar); // Macro variation
+
+        // Color variation
+        float cellNoise = snoise(floor(warpedUV));
+        scaleColor += (cellNoise * 0.1);
 
         // Iridescence shift
-        float shift = sin(uTime + vUv.x * 10.0) * 0.05;
-        scaleColor += vec3(shift, 0.0, -shift) * 0.1;
+        vec3 shiftColor = vec3(0.0, 0.2, 0.1); // Green shift
+        float irid = pow(1.0 - NdotV, 2.0);
+        scaleColor = mix(scaleColor, scaleColor + shiftColor, irid * 0.5);
 
-        // Darken edges (interstitial tissue)
+        // Darken interstitial
         scaleColor *= edge;
-        scaleColor = mix(vec3(0.1, 0.1, 0.1), scaleColor, edge);
+        scaleColor = mix(vec3(0.05, 0.05, 0.02), scaleColor, edge);
 
         diffuseColor.rgb = scaleColor;
         `
@@ -204,33 +325,30 @@ export const ScaleMaterial = (props) => {
         '#include <roughnessmap_fragment>',
         `
         #include <roughnessmap_fragment>
-        // Scales are shiny, edges are rough
-        float v = voronoi(vUv * 30.0);
+        float v = voronoi(vUv * 25.0 + fbm(vUv * 2.5)); // Approx same UV
         float edge = smoothstep(0.05, 0.1, v);
-        roughnessFactor = mix(0.8, 0.3, edge); // Shiny scales
+        // Scales are shiny (wet/smooth), gaps are rough
+        roughnessFactor = mix(0.9, 0.3, edge);
         `
       ).replace(
         '#include <normal_fragment_maps>',
         `
         #include <normal_fragment_maps>
-        // Perturb normal based on scale shape
-        float v = voronoi(vUv * 30.0);
+        // Procedural Bump
+        vec2 wUV = vUv * 25.0;
+        float warp = fbm(wUV * 0.1);
+        wUV += vec2(warp) * 2.0;
 
-        // To make a dome shape: 1.0 - v (v is distance from center 0 to edge 1 approx)
-        // Actually voronoi implementation returns distance to feature point.
-        // Min distance. So 0 at center, max at edge.
+        float v = voronoi(wUV);
+
+        // Dome profile
         float dome = sqrt(clamp(1.0 - v, 0.0, 1.0));
 
-        // Calculate derivatives for bump mapping
+        // Derivatives
         vec3 bumpGrad = vec3(dFdx(dome), dFdy(dome), 0.0);
 
-        // Apply bump to normal
-        // Transform bumpGrad to view space normal perturbation?
-        // Simple hack: add to normal in tangent space (but we are in view space here mostly)
-        // Actually fragment shader 'normal' is view space normal.
-
-        // Factor controls depth
-        normal = normalize(normal + bumpGrad * 2.0);
+        // Perturb normal
+        normal = normalize(normal + bumpGrad * 1.5);
         `
       );
     }, []);
@@ -253,10 +371,8 @@ export const ChitinMaterial = (props) => {
       materialRef.current.userData.shader = shader;
       shader.uniforms.uTime = { value: 0 };
 
-      // Need view position for Fresnel
       shader.vertexShader = `
         varying vec3 vPos;
-        varying vec3 vViewPosition;
         uniform float uTime;
         ${shader.vertexShader}
       `.replace(
@@ -264,16 +380,11 @@ export const ChitinMaterial = (props) => {
         `
         #include <begin_vertex>
         vPos = position;
-        // vViewPosition is calculated in 'project_vertex' chunk usually,
-        // but let's ensure we have what we need.
-        // Three.js Standard material usually has vViewPosition.
-        // But to be safe let's rely on standard chunks.
         `
       );
 
       shader.fragmentShader = `
         varying vec3 vPos;
-        varying vec3 vViewPosition;
         uniform float uTime;
         ${noiseChunk}
         ${shader.fragmentShader}
@@ -282,41 +393,60 @@ export const ChitinMaterial = (props) => {
         `
         #include <color_fragment>
 
-        // Organic Noise
-        float n = snoise(vPos.xyz * 5.0);
+        // Base noise for shell texture imperfections
+        float n = snoise(vPos.xyz * 8.0);
 
-        // Fresnel Effect for Chitin Iridescence
-        // normal is the varying from normal_fragment_maps (view space normal)
-        // vViewPosition is -viewSpacePosition.
-        // View direction is normalize(vViewPosition).
+        // View Direction & Fresnel
+        vec3 viewDir = normalize(-vViewPosition); // Camera vector
+        vec3 N = normalize(vNormal);
+        float NdotV = dot(N, viewDir);
+        float fresnel = pow(1.0 - clamp(NdotV, 0.0, 1.0), 4.0);
 
-        vec3 viewDir = normalize(vViewPosition);
-        vec3 viewNormal = normalize(normal);
+        // Iridescent Thin Film Interference (Fake)
+        // Shifts from base color to Cyan/Purple at grazing angles
+        vec3 iridColor = vec3(0.0, 0.8, 1.0); // Cyan
+        vec3 iridColor2 = vec3(0.6, 0.0, 1.0); // Purple
 
-        float fresnel = pow(1.0 - clamp(dot(viewDir, viewNormal), 0.0, 1.0), 3.0);
-
-        // Iridescent colors (Blue/Green/Purple shift)
-        vec3 iridColor = vec3(0.0, 0.5, 1.0); // Cyan base
-        iridColor = mix(iridColor, vec3(0.5, 0.0, 1.0), sin(uTime * 0.5) * 0.5 + 0.5); // Shift to purple
+        vec3 shift = mix(iridColor, iridColor2, sin(uTime + vPos.x) * 0.5 + 0.5);
 
         vec3 base = diffuseColor.rgb;
 
-        // Add fresnel glow
-        diffuseColor.rgb = mix(base, iridColor, fresnel * 0.6);
+        // Subsurface Scattering (Fake)
+        // Light passing through thin parts (edges)
+        // Approximated by inverting NdotV slightly
+        float sss = smoothstep(0.0, 0.5, 1.0 - NdotV);
+        vec3 sssColor = vec3(1.0, 0.4, 0.0); // Orange glow
 
-        // Add noise variation
-        diffuseColor.rgb += (n - 0.5) * 0.1;
+        // Mix all
+        // Base -> SSS Glow -> Fresnel Irid
+        vec3 finalColor = base;
+        finalColor += sssColor * sss * 0.3; // Add internal glow
+        finalColor = mix(finalColor, shift, fresnel * 0.7); // Coat with iridescence
+
+        // Surface imperfections
+        finalColor -= abs(n) * 0.1;
+
+        diffuseColor.rgb = finalColor;
         `
       ).replace(
         '#include <roughnessmap_fragment>',
         `
         #include <roughnessmap_fragment>
-        // Chitin is very smooth/shiny
-        roughnessFactor = 0.2;
+        // Very glossy
+        roughnessFactor = 0.15;
 
         // Scratches
-        float scratch = snoise(vPos.xyz * 50.0);
-        if (scratch > 0.6) roughnessFactor = 0.6;
+        float scratch = snoise(vPos.xyz * 40.0);
+        if (scratch > 0.7) roughnessFactor = 0.5;
+        `
+      ).replace(
+        '#include <normal_fragment_maps>',
+        `
+        #include <normal_fragment_maps>
+        // Micro-bumps
+        float micro = snoise(vPos.xyz * 100.0);
+        vec3 microBump = vec3(dFdx(micro), dFdy(micro), 0.0);
+        normal = normalize(normal + microBump * 0.1);
         `
       );
     }, []);
