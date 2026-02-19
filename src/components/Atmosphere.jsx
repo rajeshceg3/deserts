@@ -166,30 +166,37 @@ const Sun = () => {
                 float dist = distance(vUv, center);
 
                 // Intense HDR Core
-                float core = smoothstep(0.12, 0.02, dist);
+                float core = smoothstep(0.12, 0.08, dist); // Sharper core edge
 
-                // Turbulent Corona
+                // Turbulent Corona (Animated Noise)
                 float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
-                float rayNoise = snoise(vec2(angle * 10.0, uTime * 0.2 + dist * 5.0));
+                float rayNoise = snoise(vec2(angle * 8.0, uTime * 0.1 + dist * 3.0));
 
-                // Starburst Rays
-                float rays = sin(angle * 20.0 + uTime * 0.1) * sin(angle * 13.0 - uTime * 0.2);
-                rays = smoothstep(0.5, 1.0, rays) * 0.2;
+                // Outer Rays
+                float rays = max(0.0, sin(angle * 20.0 + uTime * 0.05) + sin(angle * 13.0 - uTime * 0.1));
+                rays = pow(rays, 3.0) * 0.5; // Sharpen
 
-                // Glow falloff
-                float glow = 1.0 / (dist * 12.0 + 0.2) - 0.1;
+                // Glow Falloff
+                // Inverse square law approximation
+                float glow = 0.05 / (dist * dist + 0.01) - 0.2;
                 glow = max(0.0, glow);
 
-                // Combine details
-                glow += rayNoise * (1.0 - smoothstep(0.0, 0.6, dist)) * 0.1;
-                glow += rays * (1.0 - smoothstep(0.1, 0.5, dist));
+                // Combine
+                // Core is solid uColor (HDR)
+                // Glow mixes uHalo
 
-                // Combine colors
-                vec3 finalColor = uColor * core * 15.0; // HDR Burst
-                finalColor += uHalo * glow * 2.0;
+                vec3 finalColor = uColor * core * 50.0; // Very bright core
 
-                // Soft edge for quad
-                float alpha = smoothstep(0.5, 0.1, dist);
+                // Add corona noise to glow
+                float noiseGlow = glow * (1.0 + rayNoise * 0.5);
+
+                finalColor += uHalo * noiseGlow * 2.0;
+
+                // Add rays
+                finalColor += uHalo * rays * smoothstep(0.5, 0.1, dist) * 0.5;
+
+                // Alpha for blending
+                float alpha = smoothstep(0.5, 0.2, dist);
 
                 gl_FragColor = vec4(finalColor, alpha);
                 #include <colorspace_fragment>
