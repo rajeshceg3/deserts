@@ -30,26 +30,88 @@ export const CreatureManager = () => {
     creatureRefs.current = creatureRefs.current.slice(0, creatures.length);
   }, [creatures]);
 
-  // Idle animation: bobbing & terrain following
+  // Wandering & Terrain Following Logic
   useFrame((state, delta) => {
       if (!desert) return
-      const time = state.clock.getElapsedTime();
+
       creatureRefs.current.forEach((ref, i) => {
-          // If creature is exiting (animated by GSAP), don't override Y
-          if (ref && !ref.userData?.isExiting) {
-              // Target height on new terrain
-              const targetY = getTerrainHeight(ref.position.x, ref.position.z, desert.terrainParams)
+          if (!ref || ref.userData?.isExiting) return
 
-              // Smoothly interpolate current base height to target height
-              // This prevents snapping and matches terrain morph speed (~delta * 3)
-              const currentBaseY = ref.userData.baseY || ref.position.y;
-              const newBaseY = THREE.MathUtils.lerp(currentBaseY, targetY, delta * 3);
-
-              ref.userData.baseY = newBaseY;
-
-              // Apply height + bobbing
-              ref.position.y = newBaseY + Math.sin(time * 2 + i) * 0.1;
+          // Initialize wandering state if missing
+          if (!ref.userData.target) {
+              // Pick random target
+              const range = 15;
+              const tx = ref.position.x + (Math.random() - 0.5) * range;
+              const tz = ref.position.z + (Math.random() - 0.5) * range;
+              ref.userData.target = new THREE.Vector3(tx, 0, tz);
+              ref.userData.speed = 0.5 + Math.random() * 1.5; // Random speed
+              ref.userData.waitTime = 0;
+              ref.userData.state = 'moving';
           }
+
+          // State Machine
+          if (ref.userData.state === 'moving') {
+              const target = ref.userData.target;
+              const currentPos = ref.position;
+
+              // Direction vector (ignore Y)
+              const dx = target.x - currentPos.x;
+              const dz = target.z - currentPos.z;
+              const dist = Math.sqrt(dx*dx + dz*dz);
+
+              if (dist < 0.5) {
+                  // Arrived
+                  ref.userData.state = 'idle';
+                  ref.userData.waitTime = 1 + Math.random() * 3; // Wait 1-4s
+              } else {
+                  // Move
+                  const moveDist = ref.userData.speed * delta;
+                  const factor = moveDist / dist;
+
+                  ref.position.x += dx * factor;
+                  ref.position.z += dz * factor;
+
+                  // Rotate towards target
+                  const targetRotation = Math.atan2(dx, dz);
+                  let rotDiff = targetRotation - ref.rotation.y;
+                  while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
+                  while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
+
+                  // Smooth turn
+                  ref.rotation.y += rotDiff * delta * 2;
+              }
+          } else {
+              // Idle
+              ref.userData.waitTime -= delta;
+              if (ref.userData.waitTime <= 0) {
+                  // Pick new target
+                  const range = 20;
+                  // Bias towards center slightly to keep them on map
+                  const biasX = -ref.position.x * 0.05;
+                  const biasZ = -ref.position.z * 0.05;
+
+                  let tx = ref.position.x + (Math.random() - 0.5) * range + biasX;
+                  let tz = ref.position.z + (Math.random() - 0.5) * range + biasZ;
+
+                  // Clamp to safe area
+                  tx = Math.max(-45, Math.min(45, tx));
+                  tz = Math.max(-45, Math.min(45, tz));
+
+                  ref.userData.target.set(tx, 0, tz);
+                  ref.userData.state = 'moving';
+              }
+          }
+
+          // Update Y based on Terrain
+          const targetY = getTerrainHeight(ref.position.x, ref.position.z, desert.terrainParams)
+
+          // Smooth terrain following
+          const currentBaseY = ref.userData.baseY || ref.position.y;
+          // Faster lerp for Y to prevent clipping into steep dunes
+          const newBaseY = THREE.MathUtils.lerp(currentBaseY, targetY, delta * 5);
+
+          ref.userData.baseY = newBaseY;
+          ref.position.y = newBaseY;
       });
   });
 
@@ -143,6 +205,9 @@ export const CreatureManager = () => {
                  el.position.y = data.baseY - 2
                  el.scale.set(0, 0, 0)
                  el.userData.baseY = data.baseY
+                 // Clear any stale userData
+                 el.userData.target = null
+                 el.userData.isExiting = false
              }
           })
 
