@@ -5,6 +5,7 @@ import { HeatHaze } from './effects/HeatHaze'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
+import { FloraManager } from './FloraManager'
 import { Particles } from './Particles'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
@@ -173,6 +174,7 @@ export const Experience = ({ onReady }) => {
       <Atmosphere isHeadless={isHeadless} />
       <Suspense fallback={null}>
         <CreatureManager />
+        <FloraManager />
       </Suspense>
       <Particles />
 

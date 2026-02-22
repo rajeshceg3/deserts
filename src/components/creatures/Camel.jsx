@@ -49,7 +49,7 @@ const Leg = ({ position, side, index, offset }) => {
              {/* Position Y is handled by animation to lift foot */}
 
             {/* Thigh / Upper Leg */}
-            <group position={[0, position[1], 0]} ref={thighRef}>
+            <group position={[0, 0, 0]} ref={thighRef}>
                  <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                     <capsuleGeometry args={[0.16, 0.8, 4, 8]} />
                     <FurMaterial color="#C19A6B" />
