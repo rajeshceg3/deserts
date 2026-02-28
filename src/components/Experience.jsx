@@ -1,7 +1,5 @@
 import React, { useRef, useMemo, useEffect, Suspense } from 'react'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette, SMAA, DepthOfField, Noise, ToneMapping } from '@react-three/postprocessing'
-import { HeatHaze } from './effects/HeatHaze'
 import { Terrain } from './Terrain'
 import { Atmosphere } from './Atmosphere'
 import { CreatureManager } from './CreatureManager'
@@ -114,29 +112,7 @@ export const Experience = ({ onReady }) => {
 
   return (
     <>
-      {!isHeadless && (
-          <EffectComposer disableNormalPass multisampling={0}>
-            <SMAA />
-            <Bloom
-                luminanceThreshold={1.1} // Only very bright things bloom (sun, specular)
-                mipmapBlur
-                intensity={0.4}
-                radius={0.5}
-            />
-            <ToneMapping
-                mode={THREE.ACESFilmicToneMapping} // Cinematic tone mapping
-                exposure={1.0}
-            />
-            <DepthOfField
-                focusDistance={0.05}
-                focalLength={0.02}
-                bokehScale={3}
-            />
-            <Noise opacity={0.02} />
-            <Vignette eskil={false} offset={0.05} darkness={0.5} />
-            <HeatHaze strength={0.4} speed={0.5} />
-          </EffectComposer>
-      )}
+
 
       <OrbitControls
         makeDefault
