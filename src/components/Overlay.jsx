@@ -452,15 +452,18 @@ export const Overlay = ({ started }) => {
                       animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
                       exit={{ x: prefersReducedMotion ? 0 : 20, opacity: 0, filter: 'blur(5px)' }}
                       transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                      className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20"
+                      className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20 relative overflow-hidden group"
                     >
-                      <p className="text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong selection:bg-white/30">
+                      {/* Interactive light sweep for Living Lore Panel */}
+                      <div className="absolute inset-0 lore-panel-sweep z-0 rounded-lg"></div>
+
+                      <p className="relative z-10 text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong selection:bg-white/30">
                         {desert?.lore || desert?.description}
                       </p>
 
                       {/* Factoid */}
                       {desert?.factoid && (
-                          <div className="mt-4 pt-4 border-t border-white/10">
+                          <div className="relative z-10 mt-4 pt-4 border-t border-white/10">
                               <p className="italic text-white/70 text-sm">
                                   <span className="font-bold not-italic text-white/50 uppercase text-xs tracking-wider mr-2">Did You Know?</span>
                                   {desert.factoid}
