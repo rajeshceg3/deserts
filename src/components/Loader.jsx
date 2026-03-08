@@ -99,10 +99,11 @@ export const Loader = ({ onStarted, started, ready }) => {
                   <div className="h-24 flex flex-col items-center justify-center">
                      {!showButton && !slowLoading ? (
                          <motion.span
-                           initial={{ opacity: 0 }}
-                           animate={{ opacity: 1 }}
-                           exit={{ opacity: 0 }}
-                           className="font-serif italic text-lg text-white/80 drop-shadow-md"
+                           initial={{ opacity: 0, filter: 'blur(10px)' }}
+                           animate={{ opacity: [0.4, 1, 0.4], filter: ['blur(4px)', 'blur(0px)', 'blur(4px)'] }}
+                           exit={{ opacity: 0, filter: 'blur(10px)' }}
+                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                           className="font-serif italic text-lg text-white/80 drop-shadow-md tracking-wider"
                          >
                            Building Atmosphere...
                          </motion.span>
@@ -125,9 +126,11 @@ export const Loader = ({ onStarted, started, ready }) => {
                                         whileHover={prefersReducedMotion ? {} : { scale: 1.05, letterSpacing: "0.2em" }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={onStarted}
-                                        className="px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white drop-shadow-md"
+                                        className="relative overflow-hidden px-8 py-3 glass-panel rounded-full font-serif text-xl tracking-widest text-white hover:bg-white/20 transition-all duration-300 border border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white drop-shadow-md group"
                                     >
-                                        {slowLoading && !loaded ? "Enter Anyway" : "Enter Experience"}
+                                        <span className="relative z-10">{slowLoading && !loaded ? "Enter Anyway" : "Enter Experience"}</span>
+                                        {/* Shimmer overlay element */}
+                                        <div className="absolute inset-0 z-0 btn-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     </motion.button>
                                 </div>
                             )}
