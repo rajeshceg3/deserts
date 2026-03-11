@@ -99,11 +99,11 @@ export const Loader = ({ onStarted, started, ready }) => {
                   <div className="h-24 flex flex-col items-center justify-center">
                      {!showButton && !slowLoading ? (
                          <motion.span
-                           initial={{ opacity: 0, filter: 'blur(10px)' }}
-                           animate={{ opacity: [0.4, 1, 0.4], filter: ['blur(4px)', 'blur(0px)', 'blur(4px)'] }}
-                           exit={{ opacity: 0, filter: 'blur(10px)' }}
-                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                           className="font-serif italic text-lg text-white/80 drop-shadow-md tracking-wider"
+                           initial={{ opacity: 0, filter: 'blur(10px)', scale: 0.95 }}
+                           animate={{ opacity: [0.3, 1, 0.3], filter: ['blur(6px)', 'blur(0px)', 'blur(6px)'], scale: [0.98, 1.02, 0.98] }}
+                           exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.95 }}
+                           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                           className="font-serif italic text-lg text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] tracking-[0.2em]"
                          >
                            Building Atmosphere...
                          </motion.span>

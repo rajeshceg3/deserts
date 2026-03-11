@@ -455,7 +455,7 @@ export const Overlay = ({ started }) => {
                       className="bg-black/10 backdrop-blur-sm rounded-lg p-6 border-l-2 border-white/20 relative overflow-hidden group"
                     >
                       {/* Interactive light sweep for Living Lore Panel */}
-                      <div className="absolute inset-0 lore-panel-sweep z-0 rounded-lg"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 lore-panel-sweep z-0 rounded-lg"></div>
 
                       <p className="relative z-10 text-white/90 text-lg md:text-xl font-sans font-light leading-relaxed drop-shadow-text-strong selection:bg-white/30">
                         {desert?.lore || desert?.description}
