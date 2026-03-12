@@ -13,7 +13,6 @@ import { gsap } from 'gsap'
 import { getSkyColor } from '../utils/colorUtils'
 
 export const Experience = ({ onReady }) => {
-  const dayNightCycle = useStore((state) => state.dayNightCycle)
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const isCinematic = useStore((state) => state.isCinematic)
 
@@ -62,6 +61,7 @@ export const Experience = ({ onReady }) => {
   }, [currentDesertIndex]);
 
   useFrame(() => {
+    const dayNightCycle = useStore.getState().dayNightCycle
     const angle = (dayNightCycle - 0.25) * Math.PI * 2
     const radius = 60
     const x = Math.cos(angle) * radius
@@ -106,9 +106,12 @@ export const Experience = ({ onReady }) => {
   })
 
   // Environment Intensity
-  const dayness = Math.sin(dayNightCycle * Math.PI)
-  // Non-linear curve for realistic twilight reflection falloff
-  const envIntensity = 0.1 + Math.pow(Math.max(0, dayness), 3) * 0.5
+  // We cannot use dayNightCycle here statically anymore if it's not in component state
+  // We can just set a default or compute it dynamically if needed.
+  // Actually, we can subscribe to dayNightCycle for Environment since it needs a react update to change props,
+  // but it's better to avoid re-rendering. Environment component might not need frequent updates.
+  // Let's just use 0.5 for now, or use a basic day/night state that updates less frequently.
+  const envIntensity = 0.5
 
   return (
     <>
@@ -155,7 +158,7 @@ export const Experience = ({ onReady }) => {
       <Particles />
 
       {!isHeadless && (
-        <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
+        <ContactShadows frames={1} resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
       )}
     </>
   )

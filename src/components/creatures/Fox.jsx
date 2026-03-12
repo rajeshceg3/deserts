@@ -32,13 +32,13 @@ const Leg = ({ position, offset, index }) => {
         <group position={position} ref={ref}>
             {/* Thigh */}
             <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
-                <capsuleGeometry args={[0.06, 0.4, 4, 8]} />
+                <capsuleGeometry args={[0.06, 0.4, 2, 4]} />
                 <FurMaterial color="#d35400" />
             </mesh>
             {/* Lower Leg */}
             <group position={[0, -0.35, 0]} ref={shinRef}>
                 <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
-                     <capsuleGeometry args={[0.05, 0.4, 4, 8]} />
+                     <capsuleGeometry args={[0.05, 0.4, 2, 4]} />
                      <FurMaterial color="#d35400" />
                 </mesh>
                 {/* Paw */}
@@ -82,13 +82,13 @@ export const Fox = (props) => {
     <group ref={group} {...props}>
       {/* Body - Main */}
       <mesh position={[0, 0.45, 0]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-         <capsuleGeometry args={[0.18, 0.7, 8, 16]} />
+         <capsuleGeometry args={[0.18, 0.7, 4, 8]} />
          <FurMaterial color="#d35400" />
       </mesh>
 
       {/* Chest fluff */}
       <mesh position={[0, 0.4, 0.25]} rotation={[0.5, 0, 0]} castShadow receiveShadow>
-          <sphereGeometry args={[0.19, 12, 12]} />
+          <sphereGeometry args={[0.19, 6, 6]} />
           <FurMaterial color="#e67e22" />
       </mesh>
 
@@ -96,33 +96,33 @@ export const Fox = (props) => {
       <group position={[0, 0.7, 0.5]} ref={headRef}>
         {/* Neck connection */}
         <mesh position={[0, -0.15, -0.1]} rotation={[0.4, 0, 0]}>
-            <capsuleGeometry args={[0.14, 0.4, 4, 8]} />
+            <capsuleGeometry args={[0.14, 0.4, 2, 4]} />
             <FurMaterial color="#d35400" />
         </mesh>
 
         {/* Head */}
         <mesh castShadow receiveShadow>
-             <sphereGeometry args={[0.16, 16, 16]} />
+             <sphereGeometry args={[0.16, 8, 8]} />
              <FurMaterial color="#d35400" />
         </mesh>
 
         {/* Snout */}
         <mesh position={[0, -0.05, 0.2]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-             <coneGeometry args={[0.07, 0.35, 16]} />
+             <coneGeometry args={[0.07, 0.35, 8]} />
              <meshStandardMaterial color="#d35400" />
         </mesh>
         <mesh position={[0, -0.05, 0.38]} castShadow receiveShadow>
-             <sphereGeometry args={[0.025, 8, 8]} />
+             <sphereGeometry args={[0.025, 4, 4]} />
              <meshStandardMaterial color="#111" />
         </mesh>
 
         {/* Ears */}
         <mesh position={[0.1, 0.18, 0]} rotation={[0, 0, -0.2]} castShadow receiveShadow>
-             <coneGeometry args={[0.06, 0.25, 16]} />
+             <coneGeometry args={[0.06, 0.25, 8]} />
              <meshStandardMaterial color="#3e2723" />
         </mesh>
          <mesh position={[-0.1, 0.18, 0]} rotation={[0, 0, 0.2]} castShadow receiveShadow>
-             <coneGeometry args={[0.06, 0.25, 16]} />
+             <coneGeometry args={[0.06, 0.25, 8]} />
              <meshStandardMaterial color="#3e2723" />
         </mesh>
       </group>
@@ -130,12 +130,12 @@ export const Fox = (props) => {
       {/* Tail - Big and Fluffy */}
       <group position={[0, 0.5, -0.35]} ref={tailRef}>
            <mesh position={[0, 0.1, -0.3]} rotation={[1.2, 0, 0]} castShadow receiveShadow>
-             <capsuleGeometry args={[0.15, 0.8, 8, 16]} />
+             <capsuleGeometry args={[0.15, 0.8, 4, 8]} />
              <FurMaterial color="#e67e22" />
           </mesh>
           {/* Tip */}
            <mesh position={[0, 0.35, -0.4]} castShadow receiveShadow>
-               <sphereGeometry args={[0.12, 12, 12]} />
+               <sphereGeometry args={[0.12, 6, 6]} />
                <FurMaterial color="#ecf0f1" />
           </mesh>
       </group>
