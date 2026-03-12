@@ -13,7 +13,7 @@ export const Terrain = ({ isHeadless }) => {
   const desert = deserts[currentDesertIndex]
 
   const noiseMap = useMemo(() => {
-      const size = 1024;
+      const size = 256;
       const data = new Uint8Array(size * size * 4);
       for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
@@ -90,11 +90,8 @@ export const Terrain = ({ isHeadless }) => {
           // Layer 2: Cross patterns
           float wave2 = sin(distortedUV.y * 30.0 - distortedUV.x * 10.0 - time * 0.15);
 
-          // Layer 3: Micro surface noise
-          float wave3 = sin(distortedUV.x * 80.0 + distortedUV.y * 80.0);
-
           // Combine with non-linear mixing
-          float w = wave1 * 0.6 + wave2 * 0.3 + wave3 * 0.1;
+          float w = wave1 * 0.7 + wave2 * 0.3;
 
           // Sharpen crests (Sand dunes are sharp at top)
           w = pow(0.5 + 0.5 * w, 4.0);
@@ -167,12 +164,9 @@ export const Terrain = ({ isHeadless }) => {
       // Combine
       float finalSparkle = sparkle * sparkleMask;
 
-      // Add view-independent glint for aliasing-like shimmer
-      float glint = step(0.99, sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233))) * 43758.5453);
-
       // Final roughness modification
       // Sand is generally rough (0.8-0.9), but sparkles are smooth (0.1)
-      roughnessFactor = mix(0.9, 0.1, finalSparkle * 0.8 + glint * 0.02);
+      roughnessFactor = mix(0.9, 0.1, finalSparkle * 0.8);
       `
     )
 
@@ -220,7 +214,7 @@ export const Terrain = ({ isHeadless }) => {
 
   const geometry = useMemo(() => {
     // Increased segments for smoother silhouette
-    const segments = isHeadless ? 32 : 384
+    const segments = isHeadless ? 32 : 128
     const geo = new THREE.PlaneGeometry(100, 100, segments, segments)
     const count = geo.attributes.position.count
     const colors = new Float32Array(count * 3)
@@ -292,10 +286,6 @@ export const Terrain = ({ isHeadless }) => {
 
       if (stillMoving) {
         meshRef.current.geometry.attributes.position.needsUpdate = true;
-        frameCount.current += 1;
-        if (frameCount.current % 3 === 0) {
-             meshRef.current.geometry.computeVertexNormals();
-        }
       } else {
         isAnimating.current = false;
         meshRef.current.geometry.computeVertexNormals();
