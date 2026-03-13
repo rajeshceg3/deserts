@@ -136,7 +136,7 @@ export const Experience = ({ onReady }) => {
         position={[10, 10, 5]}
         intensity={1.0}
         castShadow={!isHeadless}
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0005}
         shadow-camera-near={0.1}
         shadow-camera-far={200}
