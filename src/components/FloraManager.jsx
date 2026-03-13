@@ -60,15 +60,15 @@ const floraConfig = {
 export const FloraManager = () => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const desert = deserts[currentDesertIndex]
-  const [plants, setPlants] = useState([])
+  const [plantsByType, setPlantsByType] = useState({})
 
   useEffect(() => {
     if (!desert || !desert.flora) {
-        setPlants([])
+        setPlantsByType({})
         return
     }
 
-    const newPlants = []
+    const groupedPlants = {}
     const count = 60 // Number of plants
 
     for (let i = 0; i < count; i++) {
@@ -87,23 +87,26 @@ export const FloraManager = () => {
 
         const y = getTerrainHeight(x, z, desert.terrainParams)
 
-        newPlants.push({
+        const type = config.type;
+        if (!groupedPlants[type]) {
+            groupedPlants[type] = [];
+        }
+
+        groupedPlants[type].push({
             id: i,
-            x, y, z,
-            ...config,
-            // Vary scale slightly
-            scale: config.scale * (0.8 + Math.random() * 0.4)
+            position: [x, y, z],
+            color: config.color,
+            scale: config.scale * (0.8 + Math.random() * 0.4),
+            rotation: [0, Math.random() * Math.PI * 2, 0]
         })
     }
-    setPlants(newPlants)
+    setPlantsByType(groupedPlants)
   }, [desert])
 
   return (
     <group>
-      {plants.map((p) => (
-        <group key={p.id} position={[p.x, p.y, p.z]}>
-            <ProceduralPlant type={p.type} color={p.color} scale={p.scale} />
-        </group>
+      {Object.entries(plantsByType).map(([type, plants]) => (
+        <ProceduralPlant key={type} type={type} instances={plants} />
       ))}
     </group>
   )

@@ -13,7 +13,7 @@ export const Terrain = ({ isHeadless }) => {
   const desert = deserts[currentDesertIndex]
 
   const noiseMap = useMemo(() => {
-      const size = 1024;
+      const size = 256;
       const data = new Uint8Array(size * size * 4);
       for (let i = 0; i < size; i++) {
           for (let j = 0; j < size; j++) {
@@ -293,9 +293,6 @@ export const Terrain = ({ isHeadless }) => {
       if (stillMoving) {
         meshRef.current.geometry.attributes.position.needsUpdate = true;
         frameCount.current += 1;
-        if (frameCount.current % 3 === 0) {
-             meshRef.current.geometry.computeVertexNormals();
-        }
       } else {
         isAnimating.current = false;
         meshRef.current.geometry.computeVertexNormals();
