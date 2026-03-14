@@ -79,8 +79,8 @@ export const Terrain = ({ isHeadless }) => {
 
       // Better organic ripple with domain warping
       float ripple(vec2 uv, float time) {
-          // Sample noise map for warping
-          float warp = texture2D(uNoiseMap, uv * 0.5).r;
+          // Sample noise map for warping (simplified)
+          float warp = sin(uv.x * 10.0 + uv.y * 10.0) * 0.05;
 
           vec2 distortedUV = uv + vec2(warp * 0.2, warp * 0.1);
 
@@ -220,7 +220,7 @@ export const Terrain = ({ isHeadless }) => {
 
   const geometry = useMemo(() => {
     // Increased segments for smoother silhouette
-    const segments = isHeadless ? 32 : 384
+    const segments = isHeadless ? 32 : 128
     const geo = new THREE.PlaneGeometry(100, 100, segments, segments)
     const count = geo.attributes.position.count
     const colors = new Float32Array(count * 3)
@@ -295,7 +295,6 @@ export const Terrain = ({ isHeadless }) => {
         frameCount.current += 1;
       } else {
         isAnimating.current = false;
-        meshRef.current.geometry.computeVertexNormals();
       }
     }
 

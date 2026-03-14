@@ -45,7 +45,7 @@ const ProceduralPlantGroup = ({ type, instances }) => {
 
         return (
             <instancedMesh ref={leafRef} args={[null, null, instances.length * 5]} castShadow receiveShadow>
-                <planeGeometry args={[0.3, 1.2, 2, 4]} />
+                <planeGeometry args={[0.3, 1.2, 2, 2]} />
                 <meshStandardMaterial roughness={0.8} side={THREE.DoubleSide} />
             </instancedMesh>
         );
@@ -87,11 +87,11 @@ const ProceduralPlantGroup = ({ type, instances }) => {
         return (
             <group>
                 <instancedMesh ref={stemRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0.02, 0.02, 0.8, 6]} />
+                    <cylinderGeometry args={[0.02, 0.02, 0.8, 4]} />
                     <meshStandardMaterial color="#556b2f" roughness={0.8} />
                 </instancedMesh>
-                <instancedMesh ref={headRef} args={[null, null, instances.length]} castShadow>
-                    <sphereGeometry args={[0.15, 8, 8]} />
+                <instancedMesh ref={headRef} args={[null, null, instances.length]}>
+                    <sphereGeometry args={[0.15, 6, 6]} />
                     {/* Note: emissive from instance color isn't perfectly supported natively, but base color works */}
                     <meshStandardMaterial emissiveIntensity={0.2} roughness={0.8} />
                 </instancedMesh>
@@ -150,9 +150,9 @@ const ProceduralPlantGroup = ({ type, instances }) => {
         }, [instances, bladesConfig]);
 
         return (
-            <instancedMesh ref={grassRef} args={[null, null, instances.length * 10]} castShadow receiveShadow>
+            <instancedMesh ref={grassRef} args={[null, null, instances.length * 10]} receiveShadow>
                 {/* normalized height cone so y scale behaves nicely */}
-                <coneGeometry args={[0.02, 1, 4]} />
+                <coneGeometry args={[0.02, 1, 3]} />
                 <meshStandardMaterial roughness={0.8} />
             </instancedMesh>
         );
@@ -221,11 +221,11 @@ const ProceduralPlantGroup = ({ type, instances }) => {
         return (
             <group>
                 <instancedMesh ref={baseRef} args={[null, null, instances.length]} receiveShadow>
-                    <circleGeometry args={[1, 16]} />
+                    <circleGeometry args={[1, 8]} />
                     <meshStandardMaterial roughness={1.0} />
                 </instancedMesh>
-                <instancedMesh ref={bumpRef} args={[null, null, instances.length * 5]} receiveShadow>
-                    <sphereGeometry args={[1, 6, 6]} />
+                <instancedMesh ref={bumpRef} args={[null, null, instances.length * 5]}>
+                    <sphereGeometry args={[1, 4, 4]} />
                     <meshStandardMaterial roughness={0.8} />
                 </instancedMesh>
             </group>
@@ -288,11 +288,11 @@ const ProceduralPlantGroup = ({ type, instances }) => {
         return (
             <group>
                 <instancedMesh ref={trunkRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0.05, 0.08, 0.5, 6]} />
+                    <cylinderGeometry args={[0.05, 0.08, 0.5, 4]} />
                     <meshStandardMaterial color="#3e2723" roughness={0.8} />
                 </instancedMesh>
                 <instancedMesh ref={leavesRef} args={[null, null, instances.length * 4]} castShadow receiveShadow>
-                    <sphereGeometry args={[1, 8, 8]} />
+                    <sphereGeometry args={[1, 6, 6]} />
                     <meshStandardMaterial roughness={0.8} />
                 </instancedMesh>
             </group>
@@ -346,11 +346,11 @@ const ProceduralPlantGroup = ({ type, instances }) => {
         return (
             <group>
                 <instancedMesh ref={centerRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <coneGeometry args={[0.12, 0.4, 5]} />
+                    <coneGeometry args={[0.12, 0.4, 4]} />
                     <meshStandardMaterial roughness={0.8} />
                 </instancedMesh>
-                <instancedMesh ref={leafRef} args={[null, null, instances.length * 8]} castShadow receiveShadow>
-                    <coneGeometry args={[0.1, 0.5, 5]} />
+                <instancedMesh ref={leafRef} args={[null, null, instances.length * 8]}>
+                    <coneGeometry args={[0.1, 0.5, 4]} />
                     <meshStandardMaterial roughness={0.4} />
                 </instancedMesh>
             </group>
