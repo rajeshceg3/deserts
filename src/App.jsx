@@ -52,7 +52,7 @@ function App() {
 
         <Canvas
           shadows
-          dpr={[1, 2]} // Handle high-DPI screens
+          dpr={[1, 1.5]} // Handle high-DPI screens
           camera={{
             fov: 45,
             near: 0.1,
