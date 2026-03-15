@@ -170,8 +170,8 @@ export const FurMaterial = (props) => {
       float windFreq = 2.0;
       float windAmp = 0.02;
 
-      // Turbulence
-      float turbulence = snoise(position.xy * 0.5 + uTime * 0.5) * 0.5 + 0.5;
+      // Turbulence (Simplified)
+      float turbulence = sin(position.x * 2.0 + uTime) * sin(position.y * 2.0 + uTime) * 0.5 + 0.5;
 
       // Main wind direction
       float wind = sin(uTime * windFreq + position.x * 2.0 + position.y) * windAmp * turbulence;
@@ -194,13 +194,8 @@ export const FurMaterial = (props) => {
       `
       #include <color_fragment>
 
-      // Multi-layered noise for realistic fur strands
-      float n1 = snoise(vPos.xy * 60.0);
-      float n2 = snoise(vPos.yz * 120.0);
-      float n3 = snoise(vPos.xz * 200.0); // Fine details
-
-      // Fur density mask
-      float fur = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
+      // Multi-layered noise for realistic fur strands (Simplified)
+      float fur = sin(vPos.x * 60.0) * sin(vPos.y * 60.0) * sin(vPos.z * 60.0) * 0.5 + 0.5;
 
       // Roots are darker, tips are lighter
       vec3 rootColor = diffuseColor.rgb * 0.6;
@@ -289,13 +284,13 @@ export const ScaleMaterial = (props) => {
         `
         #include <color_fragment>
 
-        // Domain Warping for Organic Scales
+        // Domain Warping for Organic Scales (Simplified)
         vec2 warpedUV = vUv * 25.0;
-        float warp = fbm(warpedUV * 0.1 + uTime * 0.05); // Slow morph
+        float warp = sin(warpedUV.x * 0.1 + uTime * 0.05) * sin(warpedUV.y * 0.1 + uTime * 0.05); // Slow morph
         warpedUV += vec2(warp, warp) * 2.0;
 
-        // Voronoi
-        float v = voronoi(warpedUV);
+        // Simplified pattern instead of Voronoi
+        float v = sin(warpedUV.x) * sin(warpedUV.y) * 0.5 + 0.5;
 
         // Edge Softness
         float edge = smoothstep(0.05, 0.15, v);
@@ -307,7 +302,7 @@ export const ScaleMaterial = (props) => {
         vec3 scaleColor = diffuseColor.rgb;
 
         // Color variation
-        float cellNoise = snoise(floor(warpedUV));
+        float cellNoise = sin(floor(warpedUV.x)) * sin(floor(warpedUV.y));
         scaleColor += (cellNoise * 0.1);
 
         // Iridescence shift
@@ -325,7 +320,7 @@ export const ScaleMaterial = (props) => {
         '#include <roughnessmap_fragment>',
         `
         #include <roughnessmap_fragment>
-        float v = voronoi(vUv * 25.0 + fbm(vUv * 2.5)); // Approx same UV
+        float v = sin(vUv.x * 25.0 + sin(vUv.x * 2.5)) * sin(vUv.y * 25.0 + sin(vUv.y * 2.5)) * 0.5 + 0.5;
         float edge = smoothstep(0.05, 0.1, v);
         // Scales are shiny (wet/smooth), gaps are rough
         roughnessFactor = mix(0.9, 0.3, edge);
@@ -336,10 +331,10 @@ export const ScaleMaterial = (props) => {
         #include <normal_fragment_maps>
         // Procedural Bump
         vec2 wUV = vUv * 25.0;
-        float warp = fbm(wUV * 0.1);
+        float warp = sin(wUV.x * 0.1) * sin(wUV.y * 0.1);
         wUV += vec2(warp) * 2.0;
 
-        float v = voronoi(wUV);
+        float v = sin(wUV.x) * sin(wUV.y) * 0.5 + 0.5;
 
         // Dome profile
         float dome = sqrt(clamp(1.0 - v, 0.0, 1.0));
@@ -393,8 +388,8 @@ export const ChitinMaterial = (props) => {
         `
         #include <color_fragment>
 
-        // Base noise for shell texture imperfections
-        float n = snoise(vPos.xyz * 8.0);
+        // Base noise for shell texture imperfections (Simplified)
+        float n = sin(vPos.x * 16.0) * sin(vPos.y * 16.0) * sin(vPos.z * 16.0);
 
         // View Direction & Fresnel
         vec3 viewDir = normalize(-vViewPosition); // Camera vector
@@ -435,16 +430,16 @@ export const ChitinMaterial = (props) => {
         // Very glossy
         roughnessFactor = 0.15;
 
-        // Scratches
-        float scratch = snoise(vPos.xyz * 40.0);
+        // Scratches (Simplified)
+        float scratch = sin(vPos.x * 40.0) * sin(vPos.y * 40.0) * sin(vPos.z * 40.0);
         if (scratch > 0.7) roughnessFactor = 0.5;
         `
       ).replace(
         '#include <normal_fragment_maps>',
         `
         #include <normal_fragment_maps>
-        // Micro-bumps
-        float micro = snoise(vPos.xyz * 100.0);
+        // Micro-bumps (Simplified)
+        float micro = sin(vPos.x * 100.0) * sin(vPos.y * 100.0) * sin(vPos.z * 100.0);
         vec3 microBump = vec3(dFdx(micro), dFdy(micro), 0.0);
         normal = normalize(normal + microBump * 0.1);
         `
