@@ -1,9 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getTerrainHeight } from '../utils/terrainUtils'
 import { ProceduralPlant } from './flora/ProceduralPlant'
-import * as THREE from 'three'
 
 const floraConfig = {
   // Ethereal Dunes
@@ -63,13 +62,10 @@ export const FloraManager = () => {
   const [plantsByType, setPlantsByType] = useState({})
 
   useEffect(() => {
-    if (!desert || !desert.flora) {
-        setPlantsByType({})
-        return
-    }
-
     const groupedPlants = {}
-    const count = 60 // Number of plants
+
+    if (desert && desert.flora) {
+        const count = 60 // Number of plants
 
     for (let i = 0; i < count; i++) {
         // Pick a random flora type from the desert's list
@@ -99,8 +95,15 @@ export const FloraManager = () => {
             scale: config.scale * (0.8 + Math.random() * 0.4),
             rotation: [0, Math.random() * Math.PI * 2, 0]
         })
+      }
     }
-    setPlantsByType(groupedPlants)
+
+    // Only update if desert actually changed to prevent cascading updates
+    setPlantsByType(prev => {
+        // Deep compare isn't necessary, but avoiding empty clear loops helps
+        if (Object.keys(prev).length === 0 && Object.keys(groupedPlants).length === 0) return prev;
+        return groupedPlants;
+    });
   }, [desert])
 
   return (
