@@ -8,7 +8,6 @@ import * as THREE from 'three'
 
 const NightStars = () => {
     const pointsRef = useRef()
-    const dayNightCycle = useStore((state) => state.dayNightCycle)
 
     const [positions, sizes, colors] = useMemo(() => {
         const count = 5000
@@ -92,6 +91,7 @@ const NightStars = () => {
 
     useFrame((state) => {
         if (pointsRef.current) {
+            const dayNightCycle = useStore.getState().dayNightCycle;
             const dayness = Math.sin(dayNightCycle * Math.PI)
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
             pointsRef.current.material.uniforms.uOpacity.value = opacity;
@@ -115,7 +115,6 @@ const NightStars = () => {
 const Sun = () => {
     const meshRef = useRef()
     const materialRef = useRef()
-    const dayNightCycle = useStore((state) => state.dayNightCycle)
 
     const shaderArgs = useMemo(() => ({
         uniforms: {
@@ -209,6 +208,7 @@ const Sun = () => {
 
     useFrame((state) => {
         if (meshRef.current && materialRef.current) {
+             const dayNightCycle = useStore.getState().dayNightCycle;
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
              const radius = 80
              const x = Math.cos(angle) * radius
@@ -344,42 +344,44 @@ const SkyGradient = ({ horizonColor }) => {
     )
 }
 
-const VolumetricClouds = ({ color }) => {
+const VolumetricClouds = ({ desert }) => {
+    const dayNightCycle = useStore((state) => state.dayNightCycle)
+
+    const cloudColor = useMemo(() => {
+        if (!desert) return new THREE.Color('#fff')
+        const dayness = Math.sin(dayNightCycle * Math.PI)
+        const baseColor = new THREE.Color(desert.colors.sky)
+        const sunsetColor = new THREE.Color('#FF9A8B')
+        const nightColor = new THREE.Color('#1a1a2e')
+
+        const c = baseColor.clone().lerp(sunsetColor, (1 - dayness) * 0.7)
+        if (dayness < 0.2) {
+            c.lerp(nightColor, 1 - dayness * 5)
+        }
+        c.multiplyScalar(1.2)
+        return c
+    }, [dayNightCycle, desert])
+
     return (
       <group position={[0, 10, 0]}>
-        <Cloud position={[-20, 5, -20]} speed={0.2} opacity={0.5} segments={20} bounds={[10, 2, 10]} color={color} />
-        <Cloud position={[20, 8, -15]} speed={0.2} opacity={0.4} segments={20} bounds={[10, 2, 10]} color={color} />
-        <Cloud position={[0, 15, -5]} speed={0.1} opacity={0.3} segments={20} bounds={[15, 2, 5]} color={color} />
+        <Cloud position={[-20, 5, -20]} speed={0.2} opacity={0.5} segments={10} bounds={[10, 2, 10]} color={cloudColor} />
+        <Cloud position={[20, 8, -15]} speed={0.2} opacity={0.4} segments={10} bounds={[10, 2, 10]} color={cloudColor} />
+        <Cloud position={[0, 15, -5]} speed={0.1} opacity={0.3} segments={10} bounds={[15, 2, 5]} color={cloudColor} />
       </group>
     )
 }
 
 export const Atmosphere = ({ isHeadless }) => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
-  const dayNightCycle = useStore((state) => state.dayNightCycle)
   const desert = deserts[currentDesertIndex]
   const fogRef = useRef()
-
-  const cloudColor = useMemo(() => {
-    if (!desert) return new THREE.Color('#fff')
-    const dayness = Math.sin(dayNightCycle * Math.PI)
-    const baseColor = new THREE.Color(desert.colors.sky)
-    const sunsetColor = new THREE.Color('#FF9A8B')
-    const nightColor = new THREE.Color('#1a1a2e')
-
-    const c = baseColor.clone().lerp(sunsetColor, (1 - dayness) * 0.7)
-    if (dayness < 0.2) {
-        c.lerp(nightColor, 1 - dayness * 5)
-    }
-    c.multiplyScalar(1.2)
-    return c
-  }, [dayNightCycle, desert])
 
   const currentSkyColor = useMemo(() => new THREE.Color(desert?.colors.sky || '#000'), [desert])
 
   useFrame((state, delta) => {
     if (!desert) return
 
+    const dayNightCycle = useStore.getState().dayNightCycle;
     const dayness = Math.sin(dayNightCycle * Math.PI)
     const targetSkyColor = getSkyColor(dayNightCycle, desert.colors)
     currentSkyColor.copy(targetSkyColor)
@@ -408,7 +410,7 @@ export const Atmosphere = ({ isHeadless }) => {
         <Sun />
         {!isHeadless && (
             <Suspense fallback={null}>
-                <VolumetricClouds color={cloudColor} />
+                <VolumetricClouds desert={desert} />
             </Suspense>
         )}
     </>

@@ -244,6 +244,12 @@ export const Terrain = ({ isHeadless }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    return () => {
+      geometry.dispose()
+    }
+  }, [geometry])
+
   const targetHeights = useRef(new Float32Array(geometry.attributes.position.count))
   const isAnimating = useRef(true)
   const frameCount = useRef(0)
