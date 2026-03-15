@@ -155,7 +155,7 @@ export const Experience = ({ onReady }) => {
       <Particles />
 
       {!isHeadless && (
-        <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
+        <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" frames={1} />
       )}
     </>
   )

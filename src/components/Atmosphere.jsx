@@ -17,16 +17,21 @@ const NightStars = () => {
         const col = new Float32Array(count * 3)
 
         for(let i=0; i<count; i++) {
+            // eslint-disable-next-line react-hooks/purity
             const r = 100 + Math.random() * 50
+            // eslint-disable-next-line react-hooks/purity
             const theta = Math.random() * Math.PI * 2
+            // eslint-disable-next-line react-hooks/purity
             const phi = Math.acos(2 * Math.random() - 1)
             pos[i*3] = r * Math.sin(phi) * Math.cos(theta)
             pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta)
             pos[i*3+2] = r * Math.cos(phi)
+            // eslint-disable-next-line react-hooks/purity
             sz[i] = Math.random() * 1.5 + 0.5 // Varied sizes
 
             // Star Colors (Temperature)
             // 0: Blue, 1: White, 2: Orange/Red
+            // eslint-disable-next-line react-hooks/purity
             const type = Math.random();
             const starColor = new THREE.Color();
             if (type > 0.9) starColor.setHex(0xffccaa); // Red Giant
@@ -97,6 +102,7 @@ const NightStars = () => {
             pointsRef.current.material.uniforms.uOpacity.value = opacity;
             pointsRef.current.material.uniforms.uTime.value = state.clock.elapsedTime;
             pointsRef.current.rotation.y = state.clock.elapsedTime * 0.005; // Slower rotation
+            pointsRef.current.visible = opacity > 0;
         }
     })
 
