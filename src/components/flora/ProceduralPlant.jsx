@@ -7,10 +7,10 @@ const PlantMaterial = ({ color, ...props }) => (
 )
 
 const ProceduralPlantGroup = ({ type, instances }) => {
-    if (!instances || instances.length === 0) return null;
-
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const tempColor = useMemo(() => new THREE.Color(), []);
+
+    if (!instances || instances.length === 0) return null;
 
     // Fern definition
     const FernGroup = () => {

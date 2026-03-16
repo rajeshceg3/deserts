@@ -102,13 +102,17 @@ export const CreatureManager = () => {
               }
           }
 
-          // Update Y based on Terrain
-          const targetY = getTerrainHeight(ref.position.x, ref.position.z, desert.terrainParams)
+          // Update Y based on Terrain (throttled to avoid heavy CPU noise generation every frame)
+          ref.userData.terrainTimer = (ref.userData.terrainTimer || 0) + delta;
+          if (ref.userData.terrainTimer > 0.1 || ref.userData.targetY === undefined) {
+              ref.userData.targetY = getTerrainHeight(ref.position.x, ref.position.z, desert.terrainParams);
+              ref.userData.terrainTimer = 0;
+          }
 
           // Smooth terrain following
           const currentBaseY = ref.userData.baseY || ref.position.y;
           // Faster lerp for Y to prevent clipping into steep dunes
-          const newBaseY = THREE.MathUtils.lerp(currentBaseY, targetY, delta * 5);
+          const newBaseY = THREE.MathUtils.lerp(currentBaseY, ref.userData.targetY, delta * 5);
 
           ref.userData.baseY = newBaseY;
           ref.position.y = newBaseY;
