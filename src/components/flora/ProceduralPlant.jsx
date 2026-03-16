@@ -398,11 +398,11 @@ const ProceduralPlantGroup = ({ type, instances }) => {
             <group>
                 <instancedMesh ref={mainRef} args={[null, null, instances.length]} castShadow receiveShadow>
                     <cylinderGeometry args={[0, 0.2, 1, 4]} />
-                    <meshPhysicalMaterial transmission={0.6} roughness={0.1} metalness={0.1} thickness={0.5} />
+                    <meshStandardMaterial opacity={0.8} transparent={true} roughness={0.1} metalness={0.1} />
                 </instancedMesh>
                 <instancedMesh ref={shardRef} args={[null, null, instances.length]} castShadow receiveShadow>
                     <cylinderGeometry args={[0, 0.1, 0.6, 4]} />
-                    <meshPhysicalMaterial transmission={0.6} roughness={0.1} metalness={0.1} thickness={0.3} />
+                    <meshStandardMaterial opacity={0.8} transparent={true} roughness={0.1} metalness={0.1} />
                 </instancedMesh>
             </group>
         );

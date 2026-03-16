@@ -36,21 +36,21 @@ const Leg = ({ side, index, offset, position }) => {
         <group position={[position[0], 0, position[2]]} ref={group}>
             {/* Coxa (Hip) */}
             <mesh rotation={[0, 0, side * 0.2]}>
-                <sphereGeometry args={[0.04, 6, 6]} />
+                <sphereGeometry args={[0.04, 4, 4]} />
                 <ChitinMaterial color="#1a1a1a" />
             </mesh>
 
             {/* Femur */}
             <group ref={femurRef}>
-                <mesh position={[side * 0.15, 0.05, 0]} rotation={[0, 0, side * 0.5]} castShadow receiveShadow>
-                    <capsuleGeometry args={[0.035, 0.3, 4, 6]} rotation={[0,0,Math.PI/2]} />
+                <mesh position={[side * 0.15, 0.05, 0]} rotation={[0, 0, side * 0.5]}>
+                    <capsuleGeometry args={[0.035, 0.3, 4, 4]} rotation={[0,0,Math.PI/2]} />
                     <ChitinMaterial color="#1a1a1a" />
                 </mesh>
 
                 {/* Knee */}
                 <group position={[side * 0.3, 0.1, 0]} ref={tibiaRef}>
-                     <mesh position={[side * 0.15, -0.1, 0]} rotation={[0, 0, -side * 0.8]} castShadow receiveShadow>
-                        <capsuleGeometry args={[0.025, 0.35, 4, 6]} rotation={[0,0,Math.PI/2]} />
+                     <mesh position={[side * 0.15, -0.1, 0]} rotation={[0, 0, -side * 0.8]}>
+                        <capsuleGeometry args={[0.025, 0.35, 4, 4]} rotation={[0,0,Math.PI/2]} />
                         <ChitinMaterial color="#1a1a1a" />
                      </mesh>
                      {/* Tarsus (Foot) */}
@@ -86,7 +86,7 @@ const TailSegment = ({ index, count, offset }) => {
     return (
         <group ref={ref} position={[0, index === 0 ? 0 : 0.15, index === 0 ? 0 : 0.05]}>
              <mesh scale={[scale, scale, scale * 1.2]} castShadow receiveShadow>
-                 <sphereGeometry args={[0.1, 8, 8]} />
+                 <sphereGeometry args={[0.1, 6, 6]} />
                  <ChitinMaterial color="#222" />
              </mesh>
 
@@ -96,11 +96,11 @@ const TailSegment = ({ index, count, offset }) => {
                  // Stinger
                  <group position={[0, 0.1, 0.05]} rotation={[0.5, 0, 0]}>
                      <mesh position={[0, 0.1, 0]} castShadow receiveShadow>
-                         <sphereGeometry args={[0.08, 8, 8]} />
+                         <sphereGeometry args={[0.08, 6, 6]} />
                          <meshStandardMaterial color="#800000" roughness={0.1} />
                      </mesh>
                      <mesh position={[0, 0.25, 0.05]} rotation={[-0.2, 0, 0]} castShadow receiveShadow>
-                         <coneGeometry args={[0.03, 0.25, 6]} />
+                         <coneGeometry args={[0.03, 0.25, 4]} />
                          <meshStandardMaterial color="#aa0000" roughness={0.1} />
                      </mesh>
                  </group>
@@ -132,14 +132,14 @@ const Pincer = ({ side, offset }) => {
             {/* Arm Segments */}
             <group rotation={[0, side * 0.8, 0]}>
                  <mesh position={[0, 0, -0.15]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-                     <capsuleGeometry args={[0.05, 0.3, 4, 6]} />
+                     <capsuleGeometry args={[0.05, 0.3, 4, 4]} />
                      <ChitinMaterial color="#1a1a1a" />
                  </mesh>
 
                  {/* Forearm */}
                  <group position={[0, 0, -0.3]} rotation={[0, -side * 0.5, 0]}>
                      <mesh position={[0, 0, -0.15]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-                         <capsuleGeometry args={[0.06, 0.35, 4, 6]} />
+                         <capsuleGeometry args={[0.06, 0.35, 4, 4]} />
                          <ChitinMaterial color="#1a1a1a" />
                      </mesh>
 
@@ -147,13 +147,13 @@ const Pincer = ({ side, offset }) => {
                      <group position={[0, 0, -0.35]} rotation={[0, 0, Math.PI/2]}>
                          {/* Fixed Finger */}
                          <mesh position={[0.05, 0, 0]} rotation={[0, 0, 0.2]}>
-                             <coneGeometry args={[0.04, 0.3, 6]} />
+                             <coneGeometry args={[0.04, 0.3, 4]} />
                              <ChitinMaterial color="#000" />
                          </mesh>
                          {/* Moving Finger */}
                          <group ref={clawRef}>
                              <mesh position={[-0.05, 0, 0]} rotation={[0, 0, -0.2]}>
-                                 <coneGeometry args={[0.04, 0.3, 6]} />
+                                 <coneGeometry args={[0.04, 0.3, 4]} />
                                  <ChitinMaterial color="#000" />
                              </mesh>
                          </group>
