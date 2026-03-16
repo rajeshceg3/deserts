@@ -79,8 +79,13 @@ export const Terrain = ({ isHeadless }) => {
 
       // Better organic ripple with domain warping
       float ripple(vec2 uv, float time) {
+<<<<<<< HEAD
           // Sample noise map for warping (simplified)
           float warp = sin(uv.x * 10.0 + uv.y * 10.0) * 0.05;
+=======
+          // Sample noise map for warping
+          float warp = texture2D(uNoiseMap, uv * 0.5).r;
+>>>>>>> perf-optimization-7920764803979990382
 
           vec2 distortedUV = uv + vec2(warp * 0.2, warp * 0.1);
 
@@ -90,11 +95,16 @@ export const Terrain = ({ isHeadless }) => {
           // Layer 2: Cross patterns
           float wave2 = sin(distortedUV.y * 30.0 - distortedUV.x * 10.0 - time * 0.15);
 
+<<<<<<< HEAD
           // Layer 3: Micro surface noise
           float wave3 = sin(distortedUV.x * 80.0 + distortedUV.y * 80.0);
 
           // Combine with non-linear mixing
           float w = wave1 * 0.6 + wave2 * 0.3 + wave3 * 0.1;
+=======
+          // Combine with non-linear mixing
+          float w = wave1 * 0.7 + wave2 * 0.3;
+>>>>>>> perf-optimization-7920764803979990382
 
           // Sharpen crests (Sand dunes are sharp at top)
           w = pow(0.5 + 0.5 * w, 4.0);
@@ -167,12 +177,18 @@ export const Terrain = ({ isHeadless }) => {
       // Combine
       float finalSparkle = sparkle * sparkleMask;
 
+<<<<<<< HEAD
       // Add view-independent glint for aliasing-like shimmer
       float glint = step(0.99, sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233))) * 43758.5453);
 
       // Final roughness modification
       // Sand is generally rough (0.8-0.9), but sparkles are smooth (0.1)
       roughnessFactor = mix(0.9, 0.1, finalSparkle * 0.8 + glint * 0.02);
+=======
+      // Final roughness modification
+      // Sand is generally rough (0.8-0.9), but sparkles are smooth (0.1)
+      roughnessFactor = mix(0.9, 0.1, finalSparkle * 0.8);
+>>>>>>> perf-optimization-7920764803979990382
       `
     )
 
@@ -292,9 +308,15 @@ export const Terrain = ({ isHeadless }) => {
 
       if (stillMoving) {
         meshRef.current.geometry.attributes.position.needsUpdate = true;
+<<<<<<< HEAD
         frameCount.current += 1;
       } else {
         isAnimating.current = false;
+=======
+      } else {
+        isAnimating.current = false;
+        meshRef.current.geometry.computeVertexNormals();
+>>>>>>> perf-optimization-7920764803979990382
       }
     }
 

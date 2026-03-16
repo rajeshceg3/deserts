@@ -35,20 +35,31 @@ const Leg = ({ side, index, offset, position }) => {
     return (
         <group position={[position[0], 0, position[2]]} ref={group}>
             {/* Coxa (Hip) */}
+<<<<<<< HEAD
             <mesh rotation={[0, 0, side * 0.2]}>
                 <sphereGeometry args={[0.04, 4, 4]} />
+=======
+            <mesh rotation={[0, 0, side * 0.2]} castShadow receiveShadow>
+                <sphereGeometry args={[0.04, 8, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                 <ChitinMaterial color="#1a1a1a" />
             </mesh>
 
             {/* Femur */}
             <group ref={femurRef}>
+<<<<<<< HEAD
                 <mesh position={[side * 0.15, 0.05, 0]} rotation={[0, 0, side * 0.5]}>
                     <capsuleGeometry args={[0.035, 0.3, 4, 4]} rotation={[0,0,Math.PI/2]} />
+=======
+                <mesh position={[side * 0.15, 0.05, 0]} rotation={[0, 0, side * 0.5]} castShadow receiveShadow>
+                    <capsuleGeometry args={[0.035, 0.3, 4, 8]} rotation={[0,0,Math.PI/2]} />
+>>>>>>> perf-optimization-7920764803979990382
                     <ChitinMaterial color="#1a1a1a" />
                 </mesh>
 
                 {/* Knee */}
                 <group position={[side * 0.3, 0.1, 0]} ref={tibiaRef}>
+<<<<<<< HEAD
                      <mesh position={[side * 0.15, -0.1, 0]} rotation={[0, 0, -side * 0.8]}>
                         <capsuleGeometry args={[0.025, 0.35, 4, 4]} rotation={[0,0,Math.PI/2]} />
                         <ChitinMaterial color="#1a1a1a" />
@@ -56,6 +67,15 @@ const Leg = ({ side, index, offset, position }) => {
                      {/* Tarsus (Foot) */}
                      <mesh position={[side * 0.3, -0.25, 0]} rotation={[0, 0, -side * 0.5]}>
                         <coneGeometry args={[0.01, 0.1, 3]} />
+=======
+                     <mesh position={[side * 0.15, -0.1, 0]} rotation={[0, 0, -side * 0.8]} castShadow receiveShadow>
+                        <capsuleGeometry args={[0.025, 0.35, 4, 8]} rotation={[0,0,Math.PI/2]} />
+                        <ChitinMaterial color="#1a1a1a" />
+                     </mesh>
+                     {/* Tarsus (Foot) */}
+                     <mesh position={[side * 0.3, -0.25, 0]} rotation={[0, 0, -side * 0.5]} castShadow receiveShadow>
+                        <coneGeometry args={[0.01, 0.1, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
                         <ChitinMaterial color="#000" />
                      </mesh>
                 </group>
@@ -86,7 +106,11 @@ const TailSegment = ({ index, count, offset }) => {
     return (
         <group ref={ref} position={[0, index === 0 ? 0 : 0.15, index === 0 ? 0 : 0.05]}>
              <mesh scale={[scale, scale, scale * 1.2]} castShadow receiveShadow>
+<<<<<<< HEAD
                  <sphereGeometry args={[0.1, 6, 6]} />
+=======
+                 <sphereGeometry args={[0.1, 12, 12]} />
+>>>>>>> perf-optimization-7920764803979990382
                  <ChitinMaterial color="#222" />
              </mesh>
 
@@ -96,11 +120,19 @@ const TailSegment = ({ index, count, offset }) => {
                  // Stinger
                  <group position={[0, 0.1, 0.05]} rotation={[0.5, 0, 0]}>
                      <mesh position={[0, 0.1, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                          <sphereGeometry args={[0.08, 6, 6]} />
                          <meshStandardMaterial color="#800000" roughness={0.1} />
                      </mesh>
                      <mesh position={[0, 0.25, 0.05]} rotation={[-0.2, 0, 0]} castShadow receiveShadow>
                          <coneGeometry args={[0.03, 0.25, 4]} />
+=======
+                         <sphereGeometry args={[0.08, 12, 12]} />
+                         <meshStandardMaterial color="#800000" roughness={0.1} />
+                     </mesh>
+                     <mesh position={[0, 0.25, 0.05]} rotation={[-0.2, 0, 0]} castShadow receiveShadow>
+                         <coneGeometry args={[0.03, 0.25, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                          <meshStandardMaterial color="#aa0000" roughness={0.1} />
                      </mesh>
                  </group>
@@ -132,28 +164,46 @@ const Pincer = ({ side, offset }) => {
             {/* Arm Segments */}
             <group rotation={[0, side * 0.8, 0]}>
                  <mesh position={[0, 0, -0.15]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                      <capsuleGeometry args={[0.05, 0.3, 4, 4]} />
+=======
+                     <capsuleGeometry args={[0.05, 0.3, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                      <ChitinMaterial color="#1a1a1a" />
                  </mesh>
 
                  {/* Forearm */}
                  <group position={[0, 0, -0.3]} rotation={[0, -side * 0.5, 0]}>
                      <mesh position={[0, 0, -0.15]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                          <capsuleGeometry args={[0.06, 0.35, 4, 4]} />
+=======
+                         <capsuleGeometry args={[0.06, 0.35, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                          <ChitinMaterial color="#1a1a1a" />
                      </mesh>
 
                      {/* Claw Hand */}
                      <group position={[0, 0, -0.35]} rotation={[0, 0, Math.PI/2]}>
                          {/* Fixed Finger */}
+<<<<<<< HEAD
                          <mesh position={[0.05, 0, 0]} rotation={[0, 0, 0.2]}>
                              <coneGeometry args={[0.04, 0.3, 4]} />
+=======
+                         <mesh position={[0.05, 0, 0]} rotation={[0, 0, 0.2]} castShadow receiveShadow>
+                             <coneGeometry args={[0.04, 0.3, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                              <ChitinMaterial color="#000" />
                          </mesh>
                          {/* Moving Finger */}
                          <group ref={clawRef}>
+<<<<<<< HEAD
                              <mesh position={[-0.05, 0, 0]} rotation={[0, 0, -0.2]}>
                                  <coneGeometry args={[0.04, 0.3, 4]} />
+=======
+                             <mesh position={[-0.05, 0, 0]} rotation={[0, 0, -0.2]} castShadow receiveShadow>
+                                 <coneGeometry args={[0.04, 0.3, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                                  <ChitinMaterial color="#000" />
                              </mesh>
                          </group>
@@ -181,6 +231,7 @@ export const Scorpion = (props) => {
       {/* Body Carapace (Segmented) */}
       <group position={[0, 0.15, 0]}>
           <mesh position={[0, 0.05, -0.15]} scale={[1, 0.6, 1.2]} castShadow receiveShadow>
+<<<<<<< HEAD
             <sphereGeometry args={[0.25, 8, 8]} />
             <ChitinMaterial color="#1a1a1a" />
           </mesh>
@@ -190,6 +241,17 @@ export const Scorpion = (props) => {
           </mesh>
           <mesh position={[0, 0.06, 0.3]} scale={[0.9, 0.6, 0.8]} castShadow receiveShadow>
             <sphereGeometry args={[0.18, 8, 8]} />
+=======
+            <sphereGeometry args={[0.25, 16, 16]} />
+            <ChitinMaterial color="#1a1a1a" />
+          </mesh>
+          <mesh position={[0, 0.08, 0.1]} scale={[1.1, 0.7, 1]} castShadow receiveShadow>
+            <sphereGeometry args={[0.22, 16, 16]} />
+            <ChitinMaterial color="#1a1a1a" />
+          </mesh>
+          <mesh position={[0, 0.06, 0.3]} scale={[0.9, 0.6, 0.8]} castShadow receiveShadow>
+            <sphereGeometry args={[0.18, 16, 16]} />
+>>>>>>> perf-optimization-7920764803979990382
             <ChitinMaterial color="#1a1a1a" />
           </mesh>
       </group>

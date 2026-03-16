@@ -4,7 +4,11 @@ import * as THREE from 'three'
 import { FurMaterial } from '../../utils/proceduralMaterials'
 import { noise2D } from '../../utils/noise'
 
+<<<<<<< HEAD
 const Leg = ({ position, index, offset }) => {
+=======
+const Leg = ({ position, side, index, offset }) => {
+>>>>>>> perf-optimization-7920764803979990382
     const group = useRef()
     const thighRef = useRef()
     const shinRef = useRef()
@@ -50,19 +54,29 @@ const Leg = ({ position, index, offset }) => {
 
             {/* Thigh / Upper Leg */}
             <group position={[0, 0, 0]} ref={thighRef}>
+<<<<<<< HEAD
                  <mesh position={[0, -0.4, 0]}>
                     <capsuleGeometry args={[0.16, 0.8, 4, 4]} />
+=======
+                 <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
+                    <capsuleGeometry args={[0.16, 0.8, 2, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
                     <FurMaterial color="#C19A6B" />
                  </mesh>
 
                  {/* Knee Joint */}
+<<<<<<< HEAD
                  <mesh position={[0, -0.85, 0]}>
+=======
+                 <mesh position={[0, -0.85, 0]} castShadow receiveShadow>
+>>>>>>> perf-optimization-7920764803979990382
                     <sphereGeometry args={[0.15, 4, 4]} />
                     <FurMaterial color="#a08050" />
                  </mesh>
 
                  {/* Shin / Lower Leg */}
                  <group position={[0, -0.85, 0]} ref={shinRef}>
+<<<<<<< HEAD
                      <mesh position={[0, -0.4, 0]}>
                         <capsuleGeometry args={[0.13, 0.8, 4, 4]} />
                         <FurMaterial color="#C19A6B" />
@@ -70,6 +84,15 @@ const Leg = ({ position, index, offset }) => {
                      {/* Hoof */}
                      <mesh position={[0, -0.85, 0.05]}>
                         <cylinderGeometry args={[0.12, 0.15, 0.2, 6]} />
+=======
+                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
+                        <capsuleGeometry args={[0.13, 0.8, 2, 4]} />
+                        <FurMaterial color="#C19A6B" />
+                     </mesh>
+                     {/* Hoof */}
+                     <mesh position={[0, -0.85, 0.05]} castShadow receiveShadow>
+                        <cylinderGeometry args={[0.12, 0.15, 0.2, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
                         <meshStandardMaterial color="#3E2723" roughness={0.9} />
                      </mesh>
                  </group>
@@ -143,13 +166,18 @@ export const Camel = (props) => {
       {/* Neck */}
       <group position={[0, 1.8, 0.6]}>
          <mesh castShadow receiveShadow>
+<<<<<<< HEAD
             <tubeGeometry args={[neckCurve, 8, 0.3, 6, false]} />
+=======
+            <tubeGeometry args={[neckCurve, 8, 0.3, 4, false]} />
+>>>>>>> perf-optimization-7920764803979990382
             <FurMaterial color="#C19A6B" />
          </mesh>
 
          {/* Head */}
          <group position={[0, 1.2, 1.3]} ref={headGroup}>
              {/* Skull Base */}
+<<<<<<< HEAD
              <mesh rotation={[0.2, 0, 0]}>
                 <sphereGeometry args={[0.3, 6, 6]} />
                 <FurMaterial color="#C19A6B" />
@@ -157,11 +185,24 @@ export const Camel = (props) => {
              {/* Snout */}
              <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]}>
                  <capsuleGeometry args={[0.18, 0.5, 4, 4]} />
+=======
+             <mesh castShadow receiveShadow rotation={[0.2, 0, 0]}>
+                <sphereGeometry args={[0.3, 8, 8]} />
+                <FurMaterial color="#C19A6B" />
+             </mesh>
+             {/* Snout */}
+             <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+                 <capsuleGeometry args={[0.18, 0.5, 2, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
                  <FurMaterial color="#a08050" />
              </mesh>
 
              {/* Cheeks/Jaw */}
+<<<<<<< HEAD
              <mesh position={[0, -0.15, 0.1]}>
+=======
+             <mesh position={[0, -0.15, 0.1]} castShadow receiveShadow>
+>>>>>>> perf-optimization-7920764803979990382
                  <sphereGeometry args={[0.25, 6, 6]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
@@ -190,6 +231,7 @@ export const Camel = (props) => {
 
       {/* Legs - Positioned relative to origin, but using Leg logic to lift Y */}
       {/* Front Left */}
+<<<<<<< HEAD
       <Leg index={0} offset={offset} position={[-0.4, 1.7, 0.7]} />
       {/* Front Right */}
       <Leg index={1} offset={offset} position={[0.4, 1.7, 0.7]} />
@@ -197,6 +239,15 @@ export const Camel = (props) => {
       <Leg index={2} offset={offset} position={[-0.4, 1.8, -0.7]} />
       {/* Back Right */}
       <Leg index={3} offset={offset} position={[0.4, 1.8, -0.7]} />
+=======
+      <Leg side={1} index={0} offset={offset} position={[-0.4, 1.7, 0.7]} />
+      {/* Front Right */}
+      <Leg side={-1} index={1} offset={offset} position={[0.4, 1.7, 0.7]} />
+      {/* Back Left */}
+      <Leg side={1} index={2} offset={offset} position={[-0.4, 1.8, -0.7]} />
+      {/* Back Right */}
+      <Leg side={-1} index={3} offset={offset} position={[0.4, 1.8, -0.7]} />
+>>>>>>> perf-optimization-7920764803979990382
     </group>
   )
 }

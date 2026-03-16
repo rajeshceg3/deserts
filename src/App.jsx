@@ -18,17 +18,24 @@ function App() {
   // Optimize Performance: Subscribe to store changes directly to update DOM style
   // This avoids re-rendering the entire App component (and Canvas) on every frame/drag of the time slider
   useEffect(() => {
+<<<<<<< HEAD
     let lastColor = ''
+=======
+>>>>>>> perf-optimization-7920764803979990382
     const updateBackground = (state) => {
         if (!containerRef.current) return
         const desert = deserts[state.currentDesertIndex]
         if (desert) {
             const color = getSkyColor(state.dayNightCycle, desert.colors)
+<<<<<<< HEAD
             const hexColor = '#' + color.getHexString()
             if (hexColor !== lastColor) {
                 containerRef.current.style.backgroundColor = hexColor
                 lastColor = hexColor
             }
+=======
+            containerRef.current.style.backgroundColor = '#' + color.getHexString()
+>>>>>>> perf-optimization-7920764803979990382
         }
     }
 
@@ -57,7 +64,11 @@ function App() {
 
         <Canvas
           shadows
+<<<<<<< HEAD
           dpr={[1, 1.5]} // Handle high-DPI screens, optimized to max 1.5
+=======
+          dpr={[1, 2]} // Handle high-DPI screens
+>>>>>>> perf-optimization-7920764803979990382
           camera={{
             fov: 45,
             near: 0.1,

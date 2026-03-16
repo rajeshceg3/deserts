@@ -21,7 +21,11 @@ const TailSegment = ({ index, count, offset }) => {
     return (
         <group ref={ref} position={[0, 0, 0.15]}>
              <mesh scale={[scale, scale, 1.2]} position={[0, 0, 0.05]} castShadow receiveShadow>
+<<<<<<< HEAD
                  <capsuleGeometry args={[0.08, 0.15, 4, 4]} rotation={[Math.PI/2, 0, 0]} />
+=======
+                 <capsuleGeometry args={[0.08, 0.15, 4, 8]} rotation={[Math.PI/2, 0, 0]} />
+>>>>>>> perf-optimization-7920764803979990382
                  <ScaleMaterial color="#4caf50" />
              </mesh>
 
@@ -83,7 +87,11 @@ export const Lizard = (props) => {
       {/* Main Body */}
       <group position={[0, 0.15, 0]} ref={bodyRef}>
           <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
              <capsuleGeometry args={[0.15, 0.6, 4, 4]} />
+=======
+             <capsuleGeometry args={[0.15, 0.6, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
              <ScaleMaterial color="#4caf50" />
           </mesh>
 
@@ -95,13 +103,18 @@ export const Lizard = (props) => {
           {/* Neck */}
           <group position={[0, 0.05, -0.3]}>
               <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                  <capsuleGeometry args={[0.12, 0.3, 4, 4]} />
+=======
+                 <capsuleGeometry args={[0.12, 0.3, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                  <ScaleMaterial color="#4caf50" />
               </mesh>
 
               {/* Head */}
               <group position={[0, 0, -0.2]} ref={headRef}>
                   <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                       <coneGeometry args={[0.1, 0.4, 4]} />
                       <ScaleMaterial color="#388e3c" />
                   </mesh>
@@ -112,6 +125,18 @@ export const Lizard = (props) => {
                   </mesh>
                   <mesh position={[-0.08, 0.05, -0.1]}>
                       <sphereGeometry args={[0.03, 4, 4]} />
+=======
+                      <coneGeometry args={[0.1, 0.4, 8]} />
+                      <ScaleMaterial color="#388e3c" />
+                  </mesh>
+                  {/* Eyes */}
+                  <mesh position={[0.08, 0.05, -0.1]} castShadow receiveShadow>
+                      <sphereGeometry args={[0.03, 8, 8]} />
+                      <meshStandardMaterial color="#111" />
+                  </mesh>
+                  <mesh position={[-0.08, 0.05, -0.1]} castShadow receiveShadow>
+                      <sphereGeometry args={[0.03, 8, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                       <meshStandardMaterial color="#111" />
                   </mesh>
               </group>
@@ -134,12 +159,21 @@ export const Lizard = (props) => {
               >
                 {/* Upper Leg */}
                 <mesh position={[i % 2 === 0 ? -0.15 : 0.15, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow receiveShadow>
+<<<<<<< HEAD
                     <capsuleGeometry args={[0.05, 0.3, 4, 4]} />
                     <ScaleMaterial color="#2e7d32" />
                 </mesh>
                 {/* Lower Leg */}
                  <mesh position={[i % 2 === 0 ? -0.3 : 0.3, -0.1, 0.1]} rotation={[0.5, 0, Math.PI / 2]}>
                     <capsuleGeometry args={[0.04, 0.25, 4, 4]} />
+=======
+                    <capsuleGeometry args={[0.05, 0.3, 4, 8]} />
+                    <ScaleMaterial color="#2e7d32" />
+                </mesh>
+                {/* Lower Leg */}
+                 <mesh position={[i % 2 === 0 ? -0.3 : 0.3, -0.1, 0.1]} rotation={[0.5, 0, Math.PI / 2]} castShadow receiveShadow>
+                    <capsuleGeometry args={[0.04, 0.25, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
                     <ScaleMaterial color="#2e7d32" />
                 </mesh>
               </group>

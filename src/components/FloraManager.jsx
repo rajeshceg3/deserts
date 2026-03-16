@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react'
+=======
+import React, { useMemo, useState, useEffect } from 'react'
+>>>>>>> perf-optimization-7920764803979990382
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getTerrainHeight } from '../utils/terrainUtils'
 import { ProceduralPlant } from './flora/ProceduralPlant'
+<<<<<<< HEAD
+=======
+import * as THREE from 'three'
+>>>>>>> perf-optimization-7920764803979990382
 
 const floraConfig = {
   // Ethereal Dunes
@@ -59,6 +67,7 @@ const floraConfig = {
 export const FloraManager = () => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
   const desert = deserts[currentDesertIndex]
+<<<<<<< HEAD
   const [plantsByType, setPlantsByType] = useState({})
 
   useEffect(() => {
@@ -66,6 +75,18 @@ export const FloraManager = () => {
 
     if (desert && desert.flora) {
         const count = 60 // Number of plants
+=======
+  const [plants, setPlants] = useState([])
+
+  useEffect(() => {
+    if (!desert || !desert.flora) {
+        setPlants([])
+        return
+    }
+
+    const newPlants = []
+    const count = 60 // Number of plants
+>>>>>>> perf-optimization-7920764803979990382
 
     for (let i = 0; i < count; i++) {
         // Pick a random flora type from the desert's list
@@ -83,6 +104,7 @@ export const FloraManager = () => {
 
         const y = getTerrainHeight(x, z, desert.terrainParams)
 
+<<<<<<< HEAD
         const type = config.type;
         if (!groupedPlants[type]) {
             groupedPlants[type] = [];
@@ -104,12 +126,30 @@ export const FloraManager = () => {
         if (Object.keys(prev).length === 0 && Object.keys(groupedPlants).length === 0) return prev;
         return groupedPlants;
     });
+=======
+        newPlants.push({
+            id: i,
+            x, y, z,
+            ...config,
+            // Vary scale slightly
+            scale: config.scale * (0.8 + Math.random() * 0.4)
+        })
+    }
+    setPlants(newPlants)
+>>>>>>> perf-optimization-7920764803979990382
   }, [desert])
 
   return (
     <group>
+<<<<<<< HEAD
       {Object.entries(plantsByType).map(([type, plants]) => (
         <ProceduralPlant key={type} type={type} instances={plants} />
+=======
+      {plants.map((p) => (
+        <group key={p.id} position={[p.x, p.y, p.z]}>
+            <ProceduralPlant type={p.type} color={p.color} scale={p.scale} />
+        </group>
+>>>>>>> perf-optimization-7920764803979990382
       ))}
     </group>
   )

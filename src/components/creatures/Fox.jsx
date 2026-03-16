@@ -32,13 +32,21 @@ const Leg = ({ position, offset, index }) => {
         <group position={position} ref={ref}>
             {/* Thigh */}
             <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                 <capsuleGeometry args={[0.06, 0.4, 4, 4]} />
+=======
+                <capsuleGeometry args={[0.06, 0.4, 2, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
                 <FurMaterial color="#d35400" />
             </mesh>
             {/* Lower Leg */}
             <group position={[0, -0.35, 0]} ref={shinRef}>
                 <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
                      <capsuleGeometry args={[0.05, 0.4, 4, 4]} />
+=======
+                     <capsuleGeometry args={[0.05, 0.4, 2, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
                      <FurMaterial color="#d35400" />
                 </mesh>
                 {/* Paw */}
@@ -82,13 +90,21 @@ export const Fox = (props) => {
     <group ref={group} {...props}>
       {/* Body - Main */}
       <mesh position={[0, 0.45, 0]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
          <capsuleGeometry args={[0.18, 0.7, 8, 8]} />
+=======
+         <capsuleGeometry args={[0.18, 0.7, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
          <FurMaterial color="#d35400" />
       </mesh>
 
       {/* Chest fluff */}
       <mesh position={[0, 0.4, 0.25]} rotation={[0.5, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
           <sphereGeometry args={[0.19, 8, 8]} />
+=======
+          <sphereGeometry args={[0.19, 6, 6]} />
+>>>>>>> perf-optimization-7920764803979990382
           <FurMaterial color="#e67e22" />
       </mesh>
 
@@ -96,7 +112,11 @@ export const Fox = (props) => {
       <group position={[0, 0.7, 0.5]} ref={headRef}>
         {/* Neck connection */}
         <mesh position={[0, -0.15, -0.1]} rotation={[0.4, 0, 0]}>
+<<<<<<< HEAD
             <capsuleGeometry args={[0.14, 0.4, 4, 4]} />
+=======
+            <capsuleGeometry args={[0.14, 0.4, 2, 4]} />
+>>>>>>> perf-optimization-7920764803979990382
             <FurMaterial color="#d35400" />
         </mesh>
 
@@ -130,12 +150,20 @@ export const Fox = (props) => {
       {/* Tail - Big and Fluffy */}
       <group position={[0, 0.5, -0.35]} ref={tailRef}>
            <mesh position={[0, 0.1, -0.3]} rotation={[1.2, 0, 0]} castShadow receiveShadow>
+<<<<<<< HEAD
              <capsuleGeometry args={[0.15, 0.8, 8, 8]} />
+=======
+             <capsuleGeometry args={[0.15, 0.8, 4, 8]} />
+>>>>>>> perf-optimization-7920764803979990382
              <FurMaterial color="#e67e22" />
           </mesh>
           {/* Tip */}
            <mesh position={[0, 0.35, -0.4]} castShadow receiveShadow>
+<<<<<<< HEAD
                <sphereGeometry args={[0.12, 8, 8]} />
+=======
+               <sphereGeometry args={[0.12, 6, 6]} />
+>>>>>>> perf-optimization-7920764803979990382
                <FurMaterial color="#ecf0f1" />
           </mesh>
       </group>

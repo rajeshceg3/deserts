@@ -5,6 +5,13 @@ import * as THREE from 'three'
 
 export const Particles = () => {
   const groupRef = useRef()
+<<<<<<< HEAD
+=======
+  // Keep dayNightCycle from store to pass into React props for Sparkles.
+  // We can't easily avoid re-render here since Sparkles is declarative and we need to pass new colors.
+  // Throttling or using raw meshes is the only way to completely remove react updates,
+  // but let's just leave this one as is since it's hard to refactor Sparkles away in this plan limit.
+>>>>>>> perf-optimization-7920764803979990382
   const dayNightCycle = useStore((state) => state.dayNightCycle)
 
   // Calculate colors and opacity based on day/night cycle

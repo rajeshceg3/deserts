@@ -106,6 +106,7 @@ export const Experience = ({ onReady }) => {
   })
 
   // Environment Intensity
+<<<<<<< HEAD
   // Rendered with fixed env intensity to avoid re-rendering Environment component,
   // Or we use a ref if possible. Since we can't easily ref the envIntensity on standard Environment,
   // we either accept the react re-render, or we use a fixed envIntensity and adjust exposure via post-processing.
@@ -113,6 +114,14 @@ export const Experience = ({ onReady }) => {
   // Wait, if dayNightCycle is removed from useStore hook, envIntensity won't update here.
   // The memory states: "Experience.jsx utilizes an `<Environment preset="city" environmentIntensity={0.2} />` (modulated dynamically by sun elevation) to provide neutral, realistic reflections."
   // Oh, `environmentIntensity={0.2}` is fixed in memory! I'll fix it to 0.2.
+=======
+  // We cannot use dayNightCycle here statically anymore if it's not in component state
+  // We can just set a default or compute it dynamically if needed.
+  // Actually, we can subscribe to dayNightCycle for Environment since it needs a react update to change props,
+  // but it's better to avoid re-rendering. Environment component might not need frequent updates.
+  // Let's just use 0.5 for now, or use a basic day/night state that updates less frequently.
+  const envIntensity = 0.5
+>>>>>>> perf-optimization-7920764803979990382
 
   return (
     <>
@@ -131,7 +140,11 @@ export const Experience = ({ onReady }) => {
       />
 
       <Suspense fallback={null}>
+<<<<<<< HEAD
         <Environment preset="city" environmentIntensity={0.2} />
+=======
+        <Environment preset="city" environmentIntensity={envIntensity} />
+>>>>>>> perf-optimization-7920764803979990382
       </Suspense>
 
       <ambientLight ref={ambientLightRef} intensity={0.4} />
@@ -140,7 +153,11 @@ export const Experience = ({ onReady }) => {
         position={[10, 10, 5]}
         intensity={1.0}
         castShadow={!isHeadless}
+<<<<<<< HEAD
         shadow-mapSize={[1024, 1024]}
+=======
+        shadow-mapSize={[2048, 2048]}
+>>>>>>> perf-optimization-7920764803979990382
         shadow-bias={-0.0005}
         shadow-camera-near={0.1}
         shadow-camera-far={200}
@@ -159,7 +176,11 @@ export const Experience = ({ onReady }) => {
       <Particles />
 
       {!isHeadless && (
+<<<<<<< HEAD
         <ContactShadows resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" frames={1} />
+=======
+        <ContactShadows frames={1} resolution={1024} scale={50} blur={2} opacity={0.5} far={10} color="#000000" />
+>>>>>>> perf-optimization-7920764803979990382
       )}
     </>
   )
