@@ -10,7 +10,7 @@ const NightStars = () => {
     const pointsRef = useRef()
 
     const [positions, sizes, colors] = useMemo(() => {
-        const count = 5000
+        const count = 2000
         const pos = new Float32Array(count * 3)
         const sz = new Float32Array(count)
         const col = new Float32Array(count * 3)
@@ -360,18 +360,21 @@ export const Atmosphere = ({ isHeadless }) => {
 
   const currentSkyColor = useMemo(() => new THREE.Color(desert?.colors.sky || '#000'), [desert])
 
+  // Pre-allocate to avoid GC overhead
+  const targetFogColor = useMemo(() => new THREE.Color(), [])
+  const whiteColor = useMemo(() => new THREE.Color('#FFFFFF'), [])
+
   useFrame((state, delta) => {
     if (!desert) return
 
     const dayNightCycle = useStore.getState().dayNightCycle
     const dayness = Math.sin(dayNightCycle * Math.PI)
-    const targetSkyColor = getSkyColor(dayNightCycle, desert.colors)
-    currentSkyColor.copy(targetSkyColor)
+    getSkyColor(dayNightCycle, desert.colors, currentSkyColor)
 
     if (fogRef.current) {
-        const targetFogColor = targetSkyColor.clone()
+        targetFogColor.copy(currentSkyColor)
         const hazeIntensity = Math.pow(dayness, 2) * 0.4
-        targetFogColor.lerp(new THREE.Color('#FFFFFF'), hazeIntensity)
+        targetFogColor.lerp(whiteColor, hazeIntensity)
         fogRef.current.color.lerp(targetFogColor, delta * 1.5)
 
         let targetDensity = 0.008
