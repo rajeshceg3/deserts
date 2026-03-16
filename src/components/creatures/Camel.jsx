@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { FurMaterial } from '../../utils/proceduralMaterials'
 import { noise2D } from '../../utils/noise'
 
-const Leg = ({ position, side, index, offset }) => {
+const Leg = ({ position, index, offset }) => {
     const group = useRef()
     const thighRef = useRef()
     const shinRef = useRef()
@@ -50,21 +50,21 @@ const Leg = ({ position, side, index, offset }) => {
 
             {/* Thigh / Upper Leg */}
             <group position={[0, 0, 0]} ref={thighRef}>
-                 <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
-                    <capsuleGeometry args={[0.16, 0.8, 4, 8]} />
+                 <mesh position={[0, -0.4, 0]}>
+                    <capsuleGeometry args={[0.16, 0.8, 4, 4]} />
                     <FurMaterial color="#C19A6B" />
                  </mesh>
 
                  {/* Knee Joint */}
                  <mesh position={[0, -0.85, 0]}>
-                    <sphereGeometry args={[0.15, 6, 6]} />
+                    <sphereGeometry args={[0.15, 4, 4]} />
                     <FurMaterial color="#a08050" />
                  </mesh>
 
                  {/* Shin / Lower Leg */}
                  <group position={[0, -0.85, 0]} ref={shinRef}>
-                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
-                        <capsuleGeometry args={[0.13, 0.8, 4, 8]} />
+                     <mesh position={[0, -0.4, 0]}>
+                        <capsuleGeometry args={[0.13, 0.8, 4, 4]} />
                         <FurMaterial color="#C19A6B" />
                      </mesh>
                      {/* Hoof */}
@@ -143,46 +143,46 @@ export const Camel = (props) => {
       {/* Neck */}
       <group position={[0, 1.8, 0.6]}>
          <mesh castShadow receiveShadow>
-            <tubeGeometry args={[neckCurve, 16, 0.3, 8, false]} />
+            <tubeGeometry args={[neckCurve, 8, 0.3, 6, false]} />
             <FurMaterial color="#C19A6B" />
          </mesh>
 
          {/* Head */}
          <group position={[0, 1.2, 1.3]} ref={headGroup}>
              {/* Skull Base */}
-             <mesh castShadow receiveShadow rotation={[0.2, 0, 0]}>
-                <sphereGeometry args={[0.3, 8, 8]} />
+             <mesh rotation={[0.2, 0, 0]}>
+                <sphereGeometry args={[0.3, 6, 6]} />
                 <FurMaterial color="#C19A6B" />
              </mesh>
              {/* Snout */}
-             <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-                 <capsuleGeometry args={[0.18, 0.5, 4, 6]} />
+             <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]}>
+                 <capsuleGeometry args={[0.18, 0.5, 4, 4]} />
                  <FurMaterial color="#a08050" />
              </mesh>
 
              {/* Cheeks/Jaw */}
-             <mesh position={[0, -0.15, 0.1]} castShadow receiveShadow>
-                 <sphereGeometry args={[0.25, 8, 8]} />
+             <mesh position={[0, -0.15, 0.1]}>
+                 <sphereGeometry args={[0.25, 6, 6]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
 
              {/* Ears */}
              <mesh position={[0.2, 0.25, -0.1]} rotation={[0, 0, -0.3]}>
-                 <coneGeometry args={[0.06, 0.15, 6]} />
+                 <coneGeometry args={[0.06, 0.15, 4]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
              <mesh position={[-0.2, 0.25, -0.1]} rotation={[0, 0, 0.3]}>
-                 <coneGeometry args={[0.06, 0.15, 6]} />
+                 <coneGeometry args={[0.06, 0.15, 4]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
 
               {/* Eyes */}
               <mesh position={[0.22, 0.05, 0.1]}>
-                  <sphereGeometry args={[0.045, 6, 6]} />
+                  <sphereGeometry args={[0.045, 4, 4]} />
                   <meshStandardMaterial color="#111" roughness={0.1} />
               </mesh>
               <mesh position={[-0.22, 0.05, 0.1]}>
-                  <sphereGeometry args={[0.045, 6, 6]} />
+                  <sphereGeometry args={[0.045, 4, 4]} />
                   <meshStandardMaterial color="#111" roughness={0.1} />
               </mesh>
          </group>
@@ -190,13 +190,13 @@ export const Camel = (props) => {
 
       {/* Legs - Positioned relative to origin, but using Leg logic to lift Y */}
       {/* Front Left */}
-      <Leg side={1} index={0} offset={offset} position={[-0.4, 1.7, 0.7]} />
+      <Leg index={0} offset={offset} position={[-0.4, 1.7, 0.7]} />
       {/* Front Right */}
-      <Leg side={-1} index={1} offset={offset} position={[0.4, 1.7, 0.7]} />
+      <Leg index={1} offset={offset} position={[0.4, 1.7, 0.7]} />
       {/* Back Left */}
-      <Leg side={1} index={2} offset={offset} position={[-0.4, 1.8, -0.7]} />
+      <Leg index={2} offset={offset} position={[-0.4, 1.8, -0.7]} />
       {/* Back Right */}
-      <Leg side={-1} index={3} offset={offset} position={[0.4, 1.8, -0.7]} />
+      <Leg index={3} offset={offset} position={[0.4, 1.8, -0.7]} />
     </group>
   )
 }

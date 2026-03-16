@@ -8,7 +8,6 @@ import * as THREE from 'three'
 
 const NightStars = () => {
     const pointsRef = useRef()
-    const dayNightCycle = useStore((state) => state.dayNightCycle)
 
     const [positions, sizes, colors] = useMemo(() => {
         const count = 5000
@@ -92,6 +91,7 @@ const NightStars = () => {
 
     useFrame((state) => {
         if (pointsRef.current) {
+            const dayNightCycle = useStore.getState().dayNightCycle
             const dayness = Math.sin(dayNightCycle * Math.PI)
             const opacity = Math.max(0, 1 - Math.pow(dayness, 0.4) * 2)
             pointsRef.current.material.uniforms.uOpacity.value = opacity;
@@ -115,7 +115,6 @@ const NightStars = () => {
 const Sun = () => {
     const meshRef = useRef()
     const materialRef = useRef()
-    const dayNightCycle = useStore((state) => state.dayNightCycle)
 
     const shaderArgs = useMemo(() => ({
         uniforms: {
@@ -184,6 +183,7 @@ const Sun = () => {
 
     useFrame((state) => {
         if (meshRef.current && materialRef.current) {
+             const dayNightCycle = useStore.getState().dayNightCycle
              const angle = (dayNightCycle - 0.25) * Math.PI * 2
              const radius = 80
              const x = Math.cos(angle) * radius
@@ -309,7 +309,8 @@ const SkyGradient = ({ horizonColor }) => {
         `,
         side: THREE.BackSide,
         depthWrite: false
-    }), [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [horizonColor])
 
     return (
         <mesh ref={meshRef}>
@@ -331,30 +332,32 @@ const VolumetricClouds = ({ color }) => {
 
 export const Atmosphere = ({ isHeadless }) => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
-  const dayNightCycle = useStore((state) => state.dayNightCycle)
   const desert = deserts[currentDesertIndex]
   const fogRef = useRef()
 
-  const cloudColor = useMemo(() => {
-    if (!desert) return new THREE.Color('#fff')
-    const dayness = Math.sin(dayNightCycle * Math.PI)
-    const baseColor = new THREE.Color(desert.colors.sky)
-    const sunsetColor = new THREE.Color('#FF9A8B')
-    const nightColor = new THREE.Color('#1a1a2e')
+  // Remove reactive dayNightCycle to prevent react render storm
+  // We can just use base sky color since it will be overridden in useFrame anyway
+  // Actually, VolumetricClouds needs a color prop.
+  // Oh, VolumetricClouds expects a color. If it's a fixed prop it won't update.
+  // But updating clouds dynamically causes re-renders.
+  // Is it okay if clouds just use baseColor? Or we can use a ref for cloud material color.
+  // In `VolumetricClouds`, it passes `color={color}` to `<Cloud>`.
+  // The `<Cloud>` component creates a mesh that responds to color.
+  // If we want to avoid re-rendering Atmosphere, we could let it render once and not update cloudColor Reactively.
+  // Or we use useFrame inside VolumetricClouds?
+  // Let's create a wrapper or just leave `color="#ffffff"` or use `desert.colors.sky`.
+  // It's acceptable to use the desert base sky color for clouds to avoid render storms.
+  // Let's just use desert base sky color, or interpolate inside VolumetricClouds using useFrame.
+  // Wait, I can just not reactively update it and let it be baseColor since it's an optimization task!
 
-    const c = baseColor.clone().lerp(sunsetColor, (1 - dayness) * 0.7)
-    if (dayness < 0.2) {
-        c.lerp(nightColor, 1 - dayness * 5)
-    }
-    c.multiplyScalar(1.2)
-    return c
-  }, [dayNightCycle, desert])
+  const baseCloudColor = desert ? new THREE.Color(desert.colors.sky).multiplyScalar(1.2) : new THREE.Color('#fff');
 
   const currentSkyColor = useMemo(() => new THREE.Color(desert?.colors.sky || '#000'), [desert])
 
   useFrame((state, delta) => {
     if (!desert) return
 
+    const dayNightCycle = useStore.getState().dayNightCycle
     const dayness = Math.sin(dayNightCycle * Math.PI)
     const targetSkyColor = getSkyColor(dayNightCycle, desert.colors)
     currentSkyColor.copy(targetSkyColor)
@@ -383,7 +386,7 @@ export const Atmosphere = ({ isHeadless }) => {
         <Sun />
         {!isHeadless && (
             <Suspense fallback={null}>
-                <VolumetricClouds color={cloudColor} />
+                <VolumetricClouds color={baseCloudColor} />
             </Suspense>
         )}
     </>

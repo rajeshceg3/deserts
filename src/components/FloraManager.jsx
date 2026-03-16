@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { deserts } from '../data/deserts'
 import { getTerrainHeight } from '../utils/terrainUtils'
