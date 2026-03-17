@@ -113,6 +113,10 @@ export const Terrain = ({ isHeadless }) => {
       float n2 = noiseSample.g;
       float n3 = noiseSample.b;
 
+      // Pre-calculate shared sparkle mask to optimize texture lookups
+      float rNoiseShared = texture2D(uNoiseMap, noiseUV * 4.0).b;
+      float sharedSparkleMask = step(0.98, rNoiseShared);
+
       // Base color variation based on vertex color (height noise)
       float t = (vColor.r - 0.5) / 0.5;
       t = clamp(t, 0.0, 1.0);
@@ -146,26 +150,21 @@ export const Terrain = ({ isHeadless }) => {
       '#include <roughnessmap_fragment>',
       `
       #include <roughnessmap_fragment>
-      float rNoise = texture2D(uNoiseMap, noiseUV * 4.0).b;
-
       vec3 viewDir = normalize(vCustomViewPos);
 
       // Sparkle Logic (Mica / Sand grains)
       // Based on view angle relative to micro-facets
 
       // Create a random facet normal using noise
-      vec3 facetNormal = normalize(vec3(rNoise - 0.5, 1.0, n2 - 0.5));
+      vec3 facetNormal = normalize(vec3(rNoiseShared - 0.5, 1.0, n2 - 0.5));
 
       float spec = max(0.0, dot(viewDir, facetNormal));
 
       // Only sparkle at very specific angles (high power)
       float sparkle = pow(spec, 32.0);
 
-      // Mask by noise threshold to make it sparse
-      float sparkleMask = step(0.98, rNoise);
-
-      // Combine
-      float finalSparkle = sparkle * sparkleMask;
+      // Combine using the shared mask
+      float finalSparkle = sparkle * sharedSparkleMask;
 
       // Add view-independent glint for aliasing-like shimmer
       float glint = step(0.99, sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233))) * 43758.5453);
@@ -181,11 +180,8 @@ export const Terrain = ({ isHeadless }) => {
       `
       #include <metalnessmap_fragment>
       // Metalness for sparkles to make them pop in HDR
-      // Recalculate sparkle (need optimization in real production to share vars)
-      float rNoiseM = texture2D(uNoiseMap, noiseUV * 4.0).b;
-      float sparkleMaskM = step(0.98, rNoiseM);
-
-      metalnessFactor = mix(0.0, 0.8, sparkleMaskM * 0.5);
+      // Use the shared sparkle mask
+      metalnessFactor = mix(0.0, 0.8, sharedSparkleMask * 0.5);
       `
     )
 
@@ -220,7 +216,7 @@ export const Terrain = ({ isHeadless }) => {
 
   const geometry = useMemo(() => {
     // Increased segments for smoother silhouette
-    const segments = isHeadless ? 32 : 128
+    const segments = isHeadless ? 32 : 64
     const geo = new THREE.PlaneGeometry(100, 100, segments, segments)
     const count = geo.attributes.position.count
     const colors = new Float32Array(count * 3)
@@ -261,6 +257,9 @@ export const Terrain = ({ isHeadless }) => {
     }
   }, [desert, geometry])
 
+  const targetColorLow = useMemo(() => new THREE.Color(), [])
+  const targetColorHigh = useMemo(() => new THREE.Color(), [])
+
   useFrame((state, delta) => {
     if (!meshRef.current || !desert) return;
 
@@ -270,8 +269,10 @@ export const Terrain = ({ isHeadless }) => {
     if (shaderRef.current) {
         // Updated speed
         shaderRef.current.uniforms.uTime.value += delta * 0.15;
-        shaderRef.current.uniforms.uColorLow.value.lerp(new THREE.Color(desert.colors.groundLow), delta * 2)
-        shaderRef.current.uniforms.uColorHigh.value.lerp(new THREE.Color(desert.colors.groundHigh), delta * 2)
+        targetColorLow.set(desert.colors.groundLow)
+        targetColorHigh.set(desert.colors.groundHigh)
+        shaderRef.current.uniforms.uColorLow.value.lerp(targetColorLow, delta * 2)
+        shaderRef.current.uniforms.uColorHigh.value.lerp(targetColorHigh, delta * 2)
     }
 
     if (isAnimating.current) {

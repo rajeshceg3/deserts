@@ -50,25 +50,25 @@ const Leg = ({ position, index, offset }) => {
 
             {/* Thigh / Upper Leg */}
             <group position={[0, 0, 0]} ref={thighRef}>
-                 <mesh position={[0, -0.4, 0]}>
+                 <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                     <capsuleGeometry args={[0.16, 0.8, 4, 4]} />
                     <FurMaterial color="#C19A6B" />
                  </mesh>
 
                  {/* Knee Joint */}
-                 <mesh position={[0, -0.85, 0]}>
+                 <mesh position={[0, -0.85, 0]} castShadow={false} receiveShadow={false}>
                     <sphereGeometry args={[0.15, 4, 4]} />
                     <FurMaterial color="#a08050" />
                  </mesh>
 
                  {/* Shin / Lower Leg */}
                  <group position={[0, -0.85, 0]} ref={shinRef}>
-                     <mesh position={[0, -0.4, 0]}>
+                     <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                         <capsuleGeometry args={[0.13, 0.8, 4, 4]} />
                         <FurMaterial color="#C19A6B" />
                      </mesh>
                      {/* Hoof */}
-                     <mesh position={[0, -0.85, 0.05]}>
+                     <mesh position={[0, -0.85, 0.05]} castShadow={false} receiveShadow={false}>
                         <cylinderGeometry args={[0.12, 0.15, 0.2, 6]} />
                         <meshStandardMaterial color="#3E2723" roughness={0.9} />
                      </mesh>
@@ -150,38 +150,38 @@ export const Camel = (props) => {
          {/* Head */}
          <group position={[0, 1.2, 1.3]} ref={headGroup}>
              {/* Skull Base */}
-             <mesh rotation={[0.2, 0, 0]}>
+             <mesh rotation={[0.2, 0, 0]} castShadow receiveShadow>
                 <sphereGeometry args={[0.3, 6, 6]} />
                 <FurMaterial color="#C19A6B" />
              </mesh>
              {/* Snout */}
-             <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]}>
+             <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
                  <capsuleGeometry args={[0.18, 0.5, 4, 4]} />
                  <FurMaterial color="#a08050" />
              </mesh>
 
              {/* Cheeks/Jaw */}
-             <mesh position={[0, -0.15, 0.1]}>
+             <mesh position={[0, -0.15, 0.1]} castShadow receiveShadow>
                  <sphereGeometry args={[0.25, 6, 6]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
 
              {/* Ears */}
-             <mesh position={[0.2, 0.25, -0.1]} rotation={[0, 0, -0.3]}>
+             <mesh position={[0.2, 0.25, -0.1]} rotation={[0, 0, -0.3]} castShadow={false} receiveShadow={false}>
                  <coneGeometry args={[0.06, 0.15, 4]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
-             <mesh position={[-0.2, 0.25, -0.1]} rotation={[0, 0, 0.3]}>
+             <mesh position={[-0.2, 0.25, -0.1]} rotation={[0, 0, 0.3]} castShadow={false} receiveShadow={false}>
                  <coneGeometry args={[0.06, 0.15, 4]} />
                  <FurMaterial color="#C19A6B" />
              </mesh>
 
               {/* Eyes */}
-              <mesh position={[0.22, 0.05, 0.1]}>
+              <mesh position={[0.22, 0.05, 0.1]} castShadow={false} receiveShadow={false}>
                   <sphereGeometry args={[0.045, 4, 4]} />
                   <meshStandardMaterial color="#111" roughness={0.1} />
               </mesh>
-              <mesh position={[-0.22, 0.05, 0.1]}>
+              <mesh position={[-0.22, 0.05, 0.1]} castShadow={false} receiveShadow={false}>
                   <sphereGeometry args={[0.045, 4, 4]} />
                   <meshStandardMaterial color="#111" roughness={0.1} />
               </mesh>

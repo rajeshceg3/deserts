@@ -19,12 +19,13 @@ function App() {
   // This avoids re-rendering the entire App component (and Canvas) on every frame/drag of the time slider
   useEffect(() => {
     let lastColor = ''
+    const colorTarget = new THREE.Color()
     const updateBackground = (state) => {
         if (!containerRef.current) return
         const desert = deserts[state.currentDesertIndex]
         if (desert) {
-            const color = getSkyColor(state.dayNightCycle, desert.colors)
-            const hexColor = '#' + color.getHexString()
+            getSkyColor(state.dayNightCycle, desert.colors, colorTarget)
+            const hexColor = '#' + colorTarget.getHexString()
             if (hexColor !== lastColor) {
                 containerRef.current.style.backgroundColor = hexColor
                 lastColor = hexColor
