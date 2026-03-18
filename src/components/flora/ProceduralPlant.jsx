@@ -6,16 +6,10 @@ const PlantMaterial = ({ color, ...props }) => (
   <meshStandardMaterial color={color} roughness={0.8} side={THREE.DoubleSide} {...props} />
 )
 
-const ProceduralPlantGroup = ({ type, instances }) => {
-    const dummy = useMemo(() => new THREE.Object3D(), []);
-    const tempColor = useMemo(() => new THREE.Color(), []);
-
-    if (!instances || instances.length === 0) return null;
-
-    // Fern definition
-    const FernGroup = () => {
-        const leafRef = useRef();
-        useEffect(() => {
+// Fern definition
+const FernGroup = ({ instances, dummy, tempColor }) => {
+    const leafRef = useRef();
+    useEffect(() => {
             if (leafRef.current) {
                 for (let i = 0; i < instances.length; i++) {
                     const inst = instances[i];
@@ -49,13 +43,13 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 <meshStandardMaterial roughness={0.8} side={THREE.DoubleSide} />
             </instancedMesh>
         );
-    };
+};
 
-    // Flower definition
-    const FlowerGroup = () => {
-        const stemRef = useRef();
-        const headRef = useRef();
-        useEffect(() => {
+// Flower definition
+const FlowerGroup = ({ instances, dummy, tempColor }) => {
+    const stemRef = useRef();
+    const headRef = useRef();
+    useEffect(() => {
             if (stemRef.current && headRef.current) {
                 for (let i = 0; i < instances.length; i++) {
                     const inst = instances[i];
@@ -97,19 +91,23 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 </instancedMesh>
             </group>
         );
-    };
+};
 
-    // Grass definition
-    const GrassGroup = () => {
-        const grassRef = useRef();
+// Grass definition
+const GrassGroup = ({ instances, dummy, tempColor }) => {
+    const grassRef = useRef();
 
-        // Use useMemo to ensure reproducible random offsets for the grass blades per instance
-        const bladesConfig = useMemo(() => {
-            return instances.map(() => {
-                return Array(10).fill(0).map(() => ({
-                    posOffset: [(Math.random()-0.5)*0.5, 0.3, (Math.random()-0.5)*0.5],
-                    rotOffset: [Math.random()*0.2, Math.random()*Math.PI, Math.random()*0.2],
-                    scaleOffset: 0.6 + Math.random()*0.3
+    // Use useMemo to ensure reproducible random offsets for the grass blades per instance
+    const bladesConfig = useMemo(() => {
+            return instances.map((inst, i) => {
+                // Pseudo-random based on instance position to avoid purity issues
+                const seed = inst.position[0] * 100 + inst.position[2] * i + 1.0;
+                const random = (s) => Math.abs(Math.sin(seed * (s + 1.0))) % 1;
+
+                return Array(10).fill(0).map((_, j) => ({
+                    posOffset: [(random(j*1.1)-0.5)*0.5, 0.3, (random(j*1.2)-0.5)*0.5],
+                    rotOffset: [random(j*1.3)*0.2, random(j*1.4)*Math.PI, random(j*1.5)*0.2],
+                    scaleOffset: 0.6 + random(j*1.6)*0.3
                 }));
             });
         }, [instances]);
@@ -136,6 +134,7 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                         dummy.rotateZ(blade.rotOffset[2]);
 
                         // Non-uniform scale adjustment based on grass height
+                        // eslint-disable-next-line react-hooks/immutability
                         dummy.scale.y *= blade.scaleOffset;
 
                         dummy.updateMatrix();
@@ -156,20 +155,23 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 <meshStandardMaterial roughness={0.8} />
             </instancedMesh>
         );
-    };
+};
 
-    // Moss definition
-    const MossGroup = () => {
-        const baseRef = useRef();
-        const bumpRef = useRef();
+// Moss definition
+const MossGroup = ({ instances, dummy, tempColor }) => {
+    const baseRef = useRef();
+    const bumpRef = useRef();
 
-        const mossConfig = useMemo(() => {
-             return instances.map(() => {
+    const mossConfig = useMemo(() => {
+             return instances.map((inst, i) => {
+                 const seed = inst.position[0] * 100 + inst.position[2] * i + 1.0;
+                 const random = (s) => Math.abs(Math.sin(seed * (s + 1.0))) % 1;
+
                  return {
-                     baseScale: 0.5 + Math.random()*0.3,
-                     bumps: Array(5).fill(0).map(() => ({
-                         posOffset: [(Math.random()-0.5)*0.6, 0.05, (Math.random()-0.5)*0.6],
-                         scaleOffset: 0.1 + Math.random()*0.1
+                     baseScale: 0.5 + random(1)*0.3,
+                     bumps: Array(5).fill(0).map((_, j) => ({
+                         posOffset: [(random(j*2.1)-0.5)*0.6, 0.05, (random(j*2.2)-0.5)*0.6],
+                         scaleOffset: 0.1 + random(j*2.3)*0.1
                      }))
                  }
              });
@@ -230,18 +232,21 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 </instancedMesh>
             </group>
         );
-    };
+};
 
-    // Bush definition
-    const BushGroup = () => {
-        const leavesRef = useRef();
-        const trunkRef = useRef();
+// Bush definition
+const BushGroup = ({ instances, dummy, tempColor }) => {
+    const leavesRef = useRef();
+    const trunkRef = useRef();
 
-        const bushConfig = useMemo(() => {
-            return instances.map(() => {
-                return Array(4).fill(0).map(() => ({
-                    posOffset: [(Math.random()-0.5)*0.5, 0.3 + Math.random()*0.3, (Math.random()-0.5)*0.5],
-                    scaleOffset: 0.3 + Math.random()*0.2
+    const bushConfig = useMemo(() => {
+            return instances.map((inst, i) => {
+                const seed = inst.position[0] * 100 + inst.position[2] * i + 1.0;
+                const random = (s) => Math.abs(Math.sin(seed * (s + 1.0))) % 1;
+
+                return Array(4).fill(0).map((_, j) => ({
+                    posOffset: [(random(j*3.1)-0.5)*0.5, 0.3 + random(j*3.2)*0.3, (random(j*3.3)-0.5)*0.5],
+                    scaleOffset: 0.3 + random(j*3.4)*0.2
                 }));
             });
         }, [instances]);
@@ -297,13 +302,13 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 </instancedMesh>
             </group>
         );
-    };
+};
 
-    // Succulent definition
-    const SucculentGroup = () => {
-        const leafRef = useRef();
-        const centerRef = useRef();
-        useEffect(() => {
+// Succulent definition
+const SucculentGroup = ({ instances, dummy, tempColor }) => {
+    const leafRef = useRef();
+    const centerRef = useRef();
+    useEffect(() => {
             if (leafRef.current && centerRef.current) {
                 for (let i = 0; i < instances.length; i++) {
                     const inst = instances[i];
@@ -355,13 +360,13 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 </instancedMesh>
             </group>
         );
-    };
+};
 
-    // Crystal definition
-    const CrystalGroup = () => {
-        const mainRef = useRef();
-        const shardRef = useRef();
-        useEffect(() => {
+// Crystal definition
+const CrystalGroup = ({ instances, dummy, tempColor }) => {
+    const mainRef = useRef();
+    const shardRef = useRef();
+    useEffect(() => {
             if (mainRef.current && shardRef.current) {
                 for (let i = 0; i < instances.length; i++) {
                     const inst = instances[i];
@@ -406,17 +411,23 @@ const ProceduralPlantGroup = ({ type, instances }) => {
                 </instancedMesh>
             </group>
         );
-    };
+};
+
+const ProceduralPlantGroup = ({ type, instances }) => {
+    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const tempColor = useMemo(() => new THREE.Color(), []);
+
+    if (!instances || instances.length === 0) return null;
 
     switch(type) {
-        case 'Fern': return <FernGroup />;
-        case 'Flower': return <FlowerGroup />;
-        case 'Grass': return <GrassGroup />;
-        case 'Moss': return <MossGroup />;
-        case 'Bush': return <BushGroup />;
-        case 'Succulent': return <SucculentGroup />;
-        case 'Crystal': return <CrystalGroup />;
-        default: return <BushGroup />;
+        case 'Fern': return <FernGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        case 'Flower': return <FlowerGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        case 'Grass': return <GrassGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        case 'Moss': return <MossGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        case 'Bush': return <BushGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        case 'Succulent': return <SucculentGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        case 'Crystal': return <CrystalGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
+        default: return <BushGroup instances={instances} dummy={dummy} tempColor={tempColor} />;
     }
 }
 
