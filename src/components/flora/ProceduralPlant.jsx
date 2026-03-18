@@ -35,7 +35,7 @@ const FernGroup = ({ instances, dummy, tempColor }) => {
                 leafRef.current.instanceMatrix.needsUpdate = true;
                 if(leafRef.current.instanceColor) leafRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances]);
+        }, [instances, dummy, tempColor]);
 
         return (
             <instancedMesh ref={leafRef} args={[null, null, instances.length * 5]} castShadow receiveShadow>
@@ -76,7 +76,7 @@ const FlowerGroup = ({ instances, dummy, tempColor }) => {
                 headRef.current.instanceMatrix.needsUpdate = true;
                 if(headRef.current.instanceColor) headRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances]);
+        }, [instances, dummy, tempColor]);
 
         return (
             <group>
@@ -146,7 +146,7 @@ const GrassGroup = ({ instances, dummy, tempColor }) => {
                 grassRef.current.instanceMatrix.needsUpdate = true;
                 if(grassRef.current.instanceColor) grassRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances, bladesConfig]);
+        }, [instances, bladesConfig, dummy, tempColor]);
 
         return (
             <instancedMesh ref={grassRef} args={[null, null, instances.length * 10]} receiveShadow>
@@ -218,7 +218,7 @@ const MossGroup = ({ instances, dummy, tempColor }) => {
                 if(baseRef.current.instanceColor) baseRef.current.instanceColor.needsUpdate = true;
                 if(bumpRef.current.instanceColor) bumpRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances, mossConfig]);
+        }, [instances, mossConfig, dummy, tempColor]);
 
         return (
             <group>
@@ -288,7 +288,7 @@ const BushGroup = ({ instances, dummy, tempColor }) => {
                 leavesRef.current.instanceMatrix.needsUpdate = true;
                 if(leavesRef.current.instanceColor) leavesRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances, bushConfig]);
+        }, [instances, bushConfig, dummy, tempColor]);
 
         return (
             <group>
@@ -346,7 +346,7 @@ const SucculentGroup = ({ instances, dummy, tempColor }) => {
                 if(centerRef.current.instanceColor) centerRef.current.instanceColor.needsUpdate = true;
                 if(leafRef.current.instanceColor) leafRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances]);
+        }, [instances, dummy, tempColor]);
 
         return (
             <group>
@@ -397,7 +397,7 @@ const CrystalGroup = ({ instances, dummy, tempColor }) => {
                 if(mainRef.current.instanceColor) mainRef.current.instanceColor.needsUpdate = true;
                 if(shardRef.current.instanceColor) shardRef.current.instanceColor.needsUpdate = true;
             }
-        }, [instances]);
+        }, [instances, dummy, tempColor]);
 
         return (
             <group>
