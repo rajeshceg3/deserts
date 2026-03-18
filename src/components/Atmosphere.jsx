@@ -215,13 +215,14 @@ const SkyGradient = ({ horizonColor }) => {
 
     const midColor = useMemo(() => new THREE.Color(), [])
     const zenithColor = useMemo(() => new THREE.Color(), [])
+    const _hsl = useMemo(() => ({ h: 0, s: 0, l: 0 }), [])
 
     useFrame((state, delta) => {
         if (shaderRef.current) {
              shaderRef.current.uniforms.uHorizon.value.lerp(horizonColor, delta * 2)
 
              // Mid color: Horizon shifted towards blue, slightly darker
-             const h = horizonColor.getHSL({ h: 0, s: 0, l: 0 })
+             const h = horizonColor.getHSL(_hsl)
              midColor.setHSL((h.h + 0.05) % 1.0, h.s * 0.9, Math.max(0.05, h.l * 0.6))
              shaderRef.current.uniforms.uMid.value.lerp(midColor, delta * 2)
 
@@ -315,7 +316,6 @@ const SkyGradient = ({ horizonColor }) => {
         `,
         side: THREE.BackSide,
         depthWrite: false
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }), [horizonColor])
 
     return (

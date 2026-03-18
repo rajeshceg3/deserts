@@ -32,6 +32,7 @@ export const Experience = ({ onReady }) => {
   const tempColor = useMemo(() => new THREE.Color(), [])
 
   const { camera, scene } = useThree()
+  const targetSkyColor = useMemo(() => new THREE.Color(), [])
 
   useEffect(() => {
     const targetPosition = new THREE.Vector3(0, 5, 10)
@@ -68,12 +69,11 @@ export const Experience = ({ onReady }) => {
     const y = Math.sin(angle) * radius
     const z = Math.cos(angle) * 15
 
-    const dayness = Math.sin(dayNightCycle * Math.PI)
     // More accurate sun elevation factor (0 at horizon, 1 at zenith)
     const sunElevation = Math.max(0, y / radius);
 
     if (deserts[currentDesertIndex]) {
-        const skyColor = getSkyColor(dayNightCycle, deserts[currentDesertIndex].colors)
+        const skyColor = getSkyColor(dayNightCycle, deserts[currentDesertIndex].colors, targetSkyColor)
         // eslint-disable-next-line react-hooks/immutability
         scene.background = skyColor
     }

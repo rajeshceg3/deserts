@@ -64,7 +64,6 @@ export const Lizard = (props) => {
         // Legs
         legRefs.current.forEach((leg, i) => {
             if (leg) {
-                const side = i % 2 === 0 ? 1 : -1
                 // Alternating gait
                 const phase = i < 2 ? 0 : Math.PI
                 const legAngle = Math.sin(t * speed + phase) * 0.6 * moveFactor

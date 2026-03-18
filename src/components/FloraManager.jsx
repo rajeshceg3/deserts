@@ -99,11 +99,9 @@ export const FloraManager = () => {
     }
 
     // Only update if desert actually changed to prevent cascading updates
-    setPlantsByType(prev => {
-        // Deep compare isn't necessary, but avoiding empty clear loops helps
-        if (Object.keys(prev).length === 0 && Object.keys(groupedPlants).length === 0) return prev;
-        return groupedPlants;
-    });
+    // Removing the functional update since it's triggering the eslint warning
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPlantsByType(groupedPlants);
   }, [desert])
 
   return (
