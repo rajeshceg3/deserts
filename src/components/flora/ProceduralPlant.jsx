@@ -1,10 +1,33 @@
 import React, { useMemo, useRef, useEffect } from 'react'
 import * as THREE from 'three'
 
-// Simple materials for now, could be improved
-const PlantMaterial = ({ color, ...props }) => (
-  <meshStandardMaterial color={color} roughness={0.8} side={THREE.DoubleSide} {...props} />
-)
+// Pre-allocate geometry and materials where possible to reduce WebGL memory leaks
+const fernGeometry = new THREE.PlaneGeometry(0.3, 1.2, 2, 2);
+const sharedMaterialDouble = new THREE.MeshStandardMaterial({ roughness: 0.8, side: THREE.DoubleSide });
+const sharedMaterialSingle = new THREE.MeshStandardMaterial({ roughness: 0.8 });
+const mossBaseMaterial = new THREE.MeshStandardMaterial({ roughness: 1.0 });
+
+const stemGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.8, 4);
+const stemMaterial = new THREE.MeshStandardMaterial({ color: 0x556b2f, roughness: 0.8 });
+const flowerHeadGeometry = new THREE.SphereGeometry(0.15, 6, 6);
+const flowerHeadMaterial = new THREE.MeshStandardMaterial({ emissiveIntensity: 0.2, roughness: 0.8 });
+
+const grassGeometry = new THREE.ConeGeometry(0.02, 1, 3);
+
+const mossBaseGeometry = new THREE.CircleGeometry(1, 8);
+const mossBumpGeometry = new THREE.SphereGeometry(1, 4, 4);
+
+const bushTrunkGeometry = new THREE.CylinderGeometry(0.05, 0.08, 0.5, 4);
+const bushTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.8 });
+const bushLeafGeometry = new THREE.SphereGeometry(1, 6, 6);
+
+const succulentCenterGeometry = new THREE.ConeGeometry(0.12, 0.4, 4);
+const succulentLeafGeometry = new THREE.ConeGeometry(0.1, 0.5, 4);
+const succulentLeafMaterial = new THREE.MeshStandardMaterial({ roughness: 0.4 });
+
+const crystalMainGeometry = new THREE.CylinderGeometry(0, 0.2, 1, 4);
+const crystalShardGeometry = new THREE.CylinderGeometry(0, 0.1, 0.6, 4);
+const crystalMaterial = new THREE.MeshStandardMaterial({ opacity: 0.8, transparent: true, roughness: 0.1, metalness: 0.1 });
 
 // Fern definition
 const FernGroup = ({ instances, dummy, tempColor }) => {
@@ -38,10 +61,7 @@ const FernGroup = ({ instances, dummy, tempColor }) => {
         }, [instances]);
 
         return (
-            <instancedMesh ref={leafRef} args={[null, null, instances.length * 5]} castShadow receiveShadow>
-                <planeGeometry args={[0.3, 1.2, 2, 2]} />
-                <meshStandardMaterial roughness={0.8} side={THREE.DoubleSide} />
-            </instancedMesh>
+            <instancedMesh ref={leafRef} args={[fernGeometry, sharedMaterialDouble, instances.length * 5]} castShadow receiveShadow />
         );
 };
 
@@ -80,15 +100,8 @@ const FlowerGroup = ({ instances, dummy, tempColor }) => {
 
         return (
             <group>
-                <instancedMesh ref={stemRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0.02, 0.02, 0.8, 4]} />
-                    <meshStandardMaterial color="#556b2f" roughness={0.8} />
-                </instancedMesh>
-                <instancedMesh ref={headRef} args={[null, null, instances.length]}>
-                    <sphereGeometry args={[0.15, 6, 6]} />
-                    {/* Note: emissive from instance color isn't perfectly supported natively, but base color works */}
-                    <meshStandardMaterial emissiveIntensity={0.2} roughness={0.8} />
-                </instancedMesh>
+                <instancedMesh ref={stemRef} args={[stemGeometry, stemMaterial, instances.length]} castShadow receiveShadow />
+                <instancedMesh ref={headRef} args={[flowerHeadGeometry, flowerHeadMaterial, instances.length]} />
             </group>
         );
 };
@@ -149,11 +162,7 @@ const GrassGroup = ({ instances, dummy, tempColor }) => {
         }, [instances, bladesConfig]);
 
         return (
-            <instancedMesh ref={grassRef} args={[null, null, instances.length * 10]} receiveShadow>
-                {/* normalized height cone so y scale behaves nicely */}
-                <coneGeometry args={[0.02, 1, 3]} />
-                <meshStandardMaterial roughness={0.8} />
-            </instancedMesh>
+            <instancedMesh ref={grassRef} args={[grassGeometry, sharedMaterialSingle, instances.length * 10]} receiveShadow />
         );
 };
 
@@ -222,14 +231,8 @@ const MossGroup = ({ instances, dummy, tempColor }) => {
 
         return (
             <group>
-                <instancedMesh ref={baseRef} args={[null, null, instances.length]} receiveShadow>
-                    <circleGeometry args={[1, 8]} />
-                    <meshStandardMaterial roughness={1.0} />
-                </instancedMesh>
-                <instancedMesh ref={bumpRef} args={[null, null, instances.length * 5]}>
-                    <sphereGeometry args={[1, 4, 4]} />
-                    <meshStandardMaterial roughness={0.8} />
-                </instancedMesh>
+                <instancedMesh ref={baseRef} args={[mossBaseGeometry, mossBaseMaterial, instances.length]} receiveShadow />
+                <instancedMesh ref={bumpRef} args={[mossBumpGeometry, sharedMaterialSingle, instances.length * 5]} />
             </group>
         );
 };
@@ -292,14 +295,8 @@ const BushGroup = ({ instances, dummy, tempColor }) => {
 
         return (
             <group>
-                <instancedMesh ref={trunkRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0.05, 0.08, 0.5, 4]} />
-                    <meshStandardMaterial color="#3e2723" roughness={0.8} />
-                </instancedMesh>
-                <instancedMesh ref={leavesRef} args={[null, null, instances.length * 4]} castShadow receiveShadow>
-                    <sphereGeometry args={[1, 6, 6]} />
-                    <meshStandardMaterial roughness={0.8} />
-                </instancedMesh>
+                <instancedMesh ref={trunkRef} args={[bushTrunkGeometry, bushTrunkMaterial, instances.length]} castShadow receiveShadow />
+                <instancedMesh ref={leavesRef} args={[bushLeafGeometry, sharedMaterialSingle, instances.length * 4]} castShadow receiveShadow />
             </group>
         );
 };
@@ -350,14 +347,8 @@ const SucculentGroup = ({ instances, dummy, tempColor }) => {
 
         return (
             <group>
-                <instancedMesh ref={centerRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <coneGeometry args={[0.12, 0.4, 4]} />
-                    <meshStandardMaterial roughness={0.8} />
-                </instancedMesh>
-                <instancedMesh ref={leafRef} args={[null, null, instances.length * 8]}>
-                    <coneGeometry args={[0.1, 0.5, 4]} />
-                    <meshStandardMaterial roughness={0.4} />
-                </instancedMesh>
+                <instancedMesh ref={centerRef} args={[succulentCenterGeometry, sharedMaterialSingle, instances.length]} castShadow receiveShadow />
+                <instancedMesh ref={leafRef} args={[succulentLeafGeometry, succulentLeafMaterial, instances.length * 8]} />
             </group>
         );
 };
@@ -401,14 +392,8 @@ const CrystalGroup = ({ instances, dummy, tempColor }) => {
 
         return (
             <group>
-                <instancedMesh ref={mainRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0, 0.2, 1, 4]} />
-                    <meshStandardMaterial opacity={0.8} transparent={true} roughness={0.1} metalness={0.1} />
-                </instancedMesh>
-                <instancedMesh ref={shardRef} args={[null, null, instances.length]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0, 0.1, 0.6, 4]} />
-                    <meshStandardMaterial opacity={0.8} transparent={true} roughness={0.1} metalness={0.1} />
-                </instancedMesh>
+                <instancedMesh ref={mainRef} args={[crystalMainGeometry, crystalMaterial, instances.length]} castShadow receiveShadow />
+                <instancedMesh ref={shardRef} args={[crystalShardGeometry, crystalMaterial, instances.length]} castShadow receiveShadow />
             </group>
         );
 };
