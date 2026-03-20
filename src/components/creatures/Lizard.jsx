@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { ScaleMaterial } from '../../utils/proceduralMaterials'
+import { scaleOnBeforeCompile } from '../../utils/proceduralMaterials'
 
 const TailSegment = ({ index, count, offset }) => {
     const ref = useRef()
@@ -22,7 +22,7 @@ const TailSegment = ({ index, count, offset }) => {
         <group ref={ref} position={[0, 0, 0.15]}>
              <mesh scale={[scale, scale, 1.2]} position={[0, 0, 0.05]} castShadow receiveShadow>
                  <capsuleGeometry args={[0.08, 0.15, 4, 4]} rotation={[Math.PI/2, 0, 0]} />
-                 <ScaleMaterial color="#4caf50" />
+                 <meshStandardMaterial color="#4caf50" onBeforeCompile={scaleOnBeforeCompile} />
              </mesh>
 
              {index < count - 1 && (
@@ -83,7 +83,7 @@ export const Lizard = (props) => {
       <group position={[0, 0.15, 0]} ref={bodyRef}>
           <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
              <capsuleGeometry args={[0.15, 0.6, 4, 4]} />
-             <ScaleMaterial color="#4caf50" />
+             <meshStandardMaterial color="#4caf50" onBeforeCompile={scaleOnBeforeCompile} />
           </mesh>
 
           {/* Tail Start */}
@@ -95,14 +95,14 @@ export const Lizard = (props) => {
           <group position={[0, 0.05, -0.3]}>
               <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
                  <capsuleGeometry args={[0.12, 0.3, 4, 4]} />
-                 <ScaleMaterial color="#4caf50" />
+                 <meshStandardMaterial color="#4caf50" onBeforeCompile={scaleOnBeforeCompile} />
               </mesh>
 
               {/* Head */}
               <group position={[0, 0, -0.2]} ref={headRef}>
                   <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
                       <coneGeometry args={[0.1, 0.4, 4]} />
-                      <ScaleMaterial color="#388e3c" />
+                      <meshStandardMaterial color="#388e3c" onBeforeCompile={scaleOnBeforeCompile} />
                   </mesh>
                   {/* Eyes */}
                   <mesh position={[0.08, 0.05, -0.1]}>
@@ -134,12 +134,12 @@ export const Lizard = (props) => {
                 {/* Upper Leg */}
                 <mesh position={[i % 2 === 0 ? -0.15 : 0.15, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow receiveShadow>
                     <capsuleGeometry args={[0.05, 0.3, 4, 4]} />
-                    <ScaleMaterial color="#2e7d32" />
+                    <meshStandardMaterial color="#2e7d32" onBeforeCompile={scaleOnBeforeCompile} />
                 </mesh>
                 {/* Lower Leg */}
                  <mesh position={[i % 2 === 0 ? -0.3 : 0.3, -0.1, 0.1]} rotation={[0.5, 0, Math.PI / 2]}>
                     <capsuleGeometry args={[0.04, 0.25, 4, 4]} />
-                    <ScaleMaterial color="#2e7d32" />
+                    <meshStandardMaterial color="#2e7d32" onBeforeCompile={scaleOnBeforeCompile} />
                 </mesh>
               </group>
           ))}

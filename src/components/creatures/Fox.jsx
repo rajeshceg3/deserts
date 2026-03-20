@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { FurMaterial } from '../../utils/proceduralMaterials'
+import { furOnBeforeCompile } from '../../utils/proceduralMaterials'
 
 const Leg = ({ position, offset, index }) => {
     const ref = useRef()
@@ -33,13 +33,13 @@ const Leg = ({ position, offset, index }) => {
             {/* Thigh */}
             <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
                 <capsuleGeometry args={[0.06, 0.4, 4, 4]} />
-                <FurMaterial color="#d35400" />
+                <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
             </mesh>
             {/* Lower Leg */}
             <group position={[0, -0.35, 0]} ref={shinRef}>
                 <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
                      <capsuleGeometry args={[0.05, 0.4, 4, 4]} />
-                     <FurMaterial color="#d35400" />
+                     <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
                 </mesh>
                 {/* Paw */}
                 <mesh position={[0, -0.4, 0.05]} castShadow receiveShadow>
@@ -83,13 +83,13 @@ export const Fox = (props) => {
       {/* Body - Main */}
       <mesh position={[0, 0.45, 0]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
          <capsuleGeometry args={[0.18, 0.7, 8, 8]} />
-         <FurMaterial color="#d35400" />
+         <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
       </mesh>
 
       {/* Chest fluff */}
       <mesh position={[0, 0.4, 0.25]} rotation={[0.5, 0, 0]} castShadow receiveShadow>
           <sphereGeometry args={[0.19, 8, 8]} />
-          <FurMaterial color="#e67e22" />
+          <meshStandardMaterial color="#e67e22" onBeforeCompile={furOnBeforeCompile} />
       </mesh>
 
       {/* Head Group */}
@@ -97,13 +97,13 @@ export const Fox = (props) => {
         {/* Neck connection */}
         <mesh position={[0, -0.15, -0.1]} rotation={[0.4, 0, 0]}>
             <capsuleGeometry args={[0.14, 0.4, 4, 4]} />
-            <FurMaterial color="#d35400" />
+            <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
         </mesh>
 
         {/* Head */}
         <mesh castShadow receiveShadow>
              <sphereGeometry args={[0.16, 8, 8]} />
-             <FurMaterial color="#d35400" />
+             <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
         </mesh>
 
         {/* Snout */}
@@ -131,12 +131,12 @@ export const Fox = (props) => {
       <group position={[0, 0.5, -0.35]} ref={tailRef}>
            <mesh position={[0, 0.1, -0.3]} rotation={[1.2, 0, 0]} castShadow receiveShadow>
              <capsuleGeometry args={[0.15, 0.8, 8, 8]} />
-             <FurMaterial color="#e67e22" />
+             <meshStandardMaterial color="#e67e22" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
           {/* Tip */}
            <mesh position={[0, 0.35, -0.4]} castShadow receiveShadow>
                <sphereGeometry args={[0.12, 8, 8]} />
-               <FurMaterial color="#ecf0f1" />
+               <meshStandardMaterial color="#ecf0f1" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
       </group>
 

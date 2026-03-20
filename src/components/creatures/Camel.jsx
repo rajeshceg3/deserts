@@ -1,7 +1,7 @@
 import React, { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { FurMaterial } from '../../utils/proceduralMaterials'
+import { furOnBeforeCompile } from '../../utils/proceduralMaterials'
 import { noise2D } from '../../utils/noise'
 
 const Leg = ({ position, index, offset }) => {
@@ -52,20 +52,20 @@ const Leg = ({ position, index, offset }) => {
             <group position={[0, 0, 0]} ref={thighRef}>
                  <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                     <capsuleGeometry args={[0.16, 0.8, 4, 4]} />
-                    <FurMaterial color="#C19A6B" />
+                    <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
                  </mesh>
 
                  {/* Knee Joint */}
                  <mesh position={[0, -0.85, 0]} castShadow={false} receiveShadow={false}>
                     <sphereGeometry args={[0.15, 4, 4]} />
-                    <FurMaterial color="#a08050" />
+                    <meshStandardMaterial color="#a08050" onBeforeCompile={furOnBeforeCompile} />
                  </mesh>
 
                  {/* Shin / Lower Leg */}
                  <group position={[0, -0.85, 0]} ref={shinRef}>
                      <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
                         <capsuleGeometry args={[0.13, 0.8, 4, 4]} />
-                        <FurMaterial color="#C19A6B" />
+                        <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
                      </mesh>
                      {/* Hoof */}
                      <mesh position={[0, -0.85, 0.05]} castShadow={false} receiveShadow={false}>
@@ -120,23 +120,23 @@ export const Camel = (props) => {
           {/* Ribcage */}
           <mesh position={[0, 0, 0.4]} rotation={[0.1, 0, 0]} castShadow receiveShadow>
              <sphereGeometry args={[0.75, 8, 8]} />
-             <FurMaterial color="#C19A6B" />
+             <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
           {/* Rear */}
           <mesh position={[0, 0.1, -0.7]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
              <sphereGeometry args={[0.7, 8, 8]} />
-             <FurMaterial color="#C19A6B" />
+             <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
           {/* Midsection connection */}
           <mesh position={[0, 0, -0.1]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
               <capsuleGeometry args={[0.68, 1.2, 4, 8]} />
-              <FurMaterial color="#C19A6B" />
+              <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
 
           {/* Hump */}
            <mesh position={[0, 0.8, -0.1]} scale={[1, 1.1, 1]} castShadow receiveShadow>
              <sphereGeometry args={[0.6, 8, 8]} />
-             <FurMaterial color="#C19A6B" />
+             <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
       </group>
 
@@ -144,7 +144,7 @@ export const Camel = (props) => {
       <group position={[0, 1.8, 0.6]}>
          <mesh castShadow receiveShadow>
             <tubeGeometry args={[neckCurve, 8, 0.3, 6, false]} />
-            <FurMaterial color="#C19A6B" />
+            <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
          </mesh>
 
          {/* Head */}
@@ -152,28 +152,28 @@ export const Camel = (props) => {
              {/* Skull Base */}
              <mesh rotation={[0.2, 0, 0]} castShadow receiveShadow>
                 <sphereGeometry args={[0.3, 6, 6]} />
-                <FurMaterial color="#C19A6B" />
+                <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
              </mesh>
              {/* Snout */}
              <mesh position={[0, -0.1, 0.35]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
                  <capsuleGeometry args={[0.18, 0.5, 4, 4]} />
-                 <FurMaterial color="#a08050" />
+                 <meshStandardMaterial color="#a08050" onBeforeCompile={furOnBeforeCompile} />
              </mesh>
 
              {/* Cheeks/Jaw */}
              <mesh position={[0, -0.15, 0.1]} castShadow receiveShadow>
                  <sphereGeometry args={[0.25, 6, 6]} />
-                 <FurMaterial color="#C19A6B" />
+                 <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
              </mesh>
 
              {/* Ears */}
              <mesh position={[0.2, 0.25, -0.1]} rotation={[0, 0, -0.3]} castShadow={false} receiveShadow={false}>
                  <coneGeometry args={[0.06, 0.15, 4]} />
-                 <FurMaterial color="#C19A6B" />
+                 <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
              </mesh>
              <mesh position={[-0.2, 0.25, -0.1]} rotation={[0, 0, 0.3]} castShadow={false} receiveShadow={false}>
                  <coneGeometry args={[0.06, 0.15, 4]} />
-                 <FurMaterial color="#C19A6B" />
+                 <meshStandardMaterial color="#C19A6B" onBeforeCompile={furOnBeforeCompile} />
              </mesh>
 
               {/* Eyes */}
