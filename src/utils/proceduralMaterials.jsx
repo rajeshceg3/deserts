@@ -1,6 +1,5 @@
-import React, { useMemo, useRef } from 'react';
+import React from 'react';
 import * as THREE from 'three';
-import { useFrame } from '@react-three/fiber';
 
 // --- Shared Shader Chunks ---
 const noiseChunk = `
@@ -23,13 +22,14 @@ float fbm(vec2 p) {
 }
 `;
 
-// --- Fur Material ---
-export const FurMaterial = (props) => {
-  const materialRef = useRef();
+// Global uniforms shared by all procedural materials
+export const proceduralUniforms = {
+    uTime: { value: 0 }
+};
 
-  const onBeforeCompile = useMemo(() => (shader) => {
-    materialRef.current.userData.shader = shader;
-    shader.uniforms.uTime = { value: 0 };
+// --- Fur Material ---
+export const furOnBeforeCompile = (shader) => {
+    shader.uniforms.uTime = proceduralUniforms.uTime;
 
     shader.vertexShader = `
       varying vec3 vPos;
@@ -115,25 +115,12 @@ export const FurMaterial = (props) => {
       // Simplified Fresnel approx for roughness
       `
     );
-  }, []);
-
-  useFrame((state) => {
-    if (materialRef.current?.userData?.shader) {
-        materialRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
-    }
-  });
-
-  return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />;
 };
 
 
 // --- Scale Material (Lizard) ---
-export const ScaleMaterial = (props) => {
-    const materialRef = useRef();
-
-    const onBeforeCompile = useMemo(() => (shader) => {
-      materialRef.current.userData.shader = shader;
-      shader.uniforms.uTime = { value: 0 };
+export const scaleOnBeforeCompile = (shader) => {
+      shader.uniforms.uTime = proceduralUniforms.uTime;
 
       shader.vertexShader = `
         varying vec3 vPos;
@@ -224,25 +211,12 @@ export const ScaleMaterial = (props) => {
         normal = normalize(normal + bumpGrad * 1.5);
         `
       );
-    }, []);
-
-    useFrame((state) => {
-        if (materialRef.current?.userData?.shader) {
-            materialRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
-        }
-    });
-
-    return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />;
 };
 
 
 // --- Chitin Material (Scorpion) ---
-export const ChitinMaterial = (props) => {
-    const materialRef = useRef();
-
-    const onBeforeCompile = useMemo(() => (shader) => {
-      materialRef.current.userData.shader = shader;
-      shader.uniforms.uTime = { value: 0 };
+export const chitinOnBeforeCompile = (shader) => {
+      shader.uniforms.uTime = proceduralUniforms.uTime;
 
       shader.vertexShader = `
         varying vec3 vPos;
@@ -322,13 +296,4 @@ export const ChitinMaterial = (props) => {
         normal = normalize(normal + microBump * 0.1);
         `
       );
-    }, []);
-
-    useFrame((state) => {
-        if (materialRef.current?.userData?.shader) {
-            materialRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
-        }
-    });
-
-    return <meshStandardMaterial ref={materialRef} onBeforeCompile={onBeforeCompile} {...props} />;
 };

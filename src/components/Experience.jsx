@@ -11,6 +11,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
 import { getSkyColor } from '../utils/colorUtils'
+import { proceduralUniforms } from '../utils/proceduralMaterials'
 
 export const Experience = ({ onReady }) => {
   const currentDesertIndex = useStore((state) => state.currentDesertIndex)
@@ -61,7 +62,9 @@ export const Experience = ({ onReady }) => {
     }
   }, [currentDesertIndex]);
 
-  useFrame(() => {
+  useFrame((state) => {
+    proceduralUniforms.uTime.value = state.clock.elapsedTime
+
     const dayNightCycle = useStore.getState().dayNightCycle
     const angle = (dayNightCycle - 0.25) * Math.PI * 2
     const radius = 60

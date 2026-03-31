@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { ChitinMaterial } from '../../utils/proceduralMaterials'
+import { chitinOnBeforeCompile } from '../../utils/proceduralMaterials'
 
 const Leg = ({ side, index, offset, position }) => {
     const group = useRef()
@@ -37,26 +37,26 @@ const Leg = ({ side, index, offset, position }) => {
             {/* Coxa (Hip) */}
             <mesh rotation={[0, 0, side * 0.2]}>
                 <sphereGeometry args={[0.04, 4, 4]} />
-                <ChitinMaterial color="#1a1a1a" />
+                <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
             </mesh>
 
             {/* Femur */}
             <group ref={femurRef}>
                 <mesh position={[side * 0.15, 0.05, 0]} rotation={[0, 0, side * 0.5]}>
                     <capsuleGeometry args={[0.035, 0.3, 4, 4]} rotation={[0,0,Math.PI/2]} />
-                    <ChitinMaterial color="#1a1a1a" />
+                    <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
                 </mesh>
 
                 {/* Knee */}
                 <group position={[side * 0.3, 0.1, 0]} ref={tibiaRef}>
                      <mesh position={[side * 0.15, -0.1, 0]} rotation={[0, 0, -side * 0.8]}>
                         <capsuleGeometry args={[0.025, 0.35, 4, 4]} rotation={[0,0,Math.PI/2]} />
-                        <ChitinMaterial color="#1a1a1a" />
+                        <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
                      </mesh>
                      {/* Tarsus (Foot) */}
                      <mesh position={[side * 0.3, -0.25, 0]} rotation={[0, 0, -side * 0.5]}>
                         <coneGeometry args={[0.01, 0.1, 3]} />
-                        <ChitinMaterial color="#000" />
+                        <meshStandardMaterial color="#000" onBeforeCompile={chitinOnBeforeCompile} />
                      </mesh>
                 </group>
             </group>
@@ -87,7 +87,7 @@ const TailSegment = ({ index, count, offset }) => {
         <group ref={ref} position={[0, index === 0 ? 0 : 0.15, index === 0 ? 0 : 0.05]}>
              <mesh scale={[scale, scale, scale * 1.2]} castShadow receiveShadow>
                  <sphereGeometry args={[0.1, 6, 6]} />
-                 <ChitinMaterial color="#222" />
+                 <meshStandardMaterial color="#222" onBeforeCompile={chitinOnBeforeCompile} />
              </mesh>
 
              {index < count - 1 ? (
@@ -133,14 +133,14 @@ const Pincer = ({ side, offset }) => {
             <group rotation={[0, side * 0.8, 0]}>
                  <mesh position={[0, 0, -0.15]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
                      <capsuleGeometry args={[0.05, 0.3, 4, 4]} />
-                     <ChitinMaterial color="#1a1a1a" />
+                     <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
                  </mesh>
 
                  {/* Forearm */}
                  <group position={[0, 0, -0.3]} rotation={[0, -side * 0.5, 0]}>
                      <mesh position={[0, 0, -0.15]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
                          <capsuleGeometry args={[0.06, 0.35, 4, 4]} />
-                         <ChitinMaterial color="#1a1a1a" />
+                         <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
                      </mesh>
 
                      {/* Claw Hand */}
@@ -148,13 +148,13 @@ const Pincer = ({ side, offset }) => {
                          {/* Fixed Finger */}
                          <mesh position={[0.05, 0, 0]} rotation={[0, 0, 0.2]}>
                              <coneGeometry args={[0.04, 0.3, 4]} />
-                             <ChitinMaterial color="#000" />
+                             <meshStandardMaterial color="#000" onBeforeCompile={chitinOnBeforeCompile} />
                          </mesh>
                          {/* Moving Finger */}
                          <group ref={clawRef}>
                              <mesh position={[-0.05, 0, 0]} rotation={[0, 0, -0.2]}>
                                  <coneGeometry args={[0.04, 0.3, 4]} />
-                                 <ChitinMaterial color="#000" />
+                                 <meshStandardMaterial color="#000" onBeforeCompile={chitinOnBeforeCompile} />
                              </mesh>
                          </group>
                      </group>
@@ -182,15 +182,15 @@ export const Scorpion = (props) => {
       <group position={[0, 0.15, 0]}>
           <mesh position={[0, 0.05, -0.15]} scale={[1, 0.6, 1.2]} castShadow receiveShadow>
             <sphereGeometry args={[0.25, 8, 8]} />
-            <ChitinMaterial color="#1a1a1a" />
+            <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
           </mesh>
           <mesh position={[0, 0.08, 0.1]} scale={[1.1, 0.7, 1]} castShadow receiveShadow>
             <sphereGeometry args={[0.22, 8, 8]} />
-            <ChitinMaterial color="#1a1a1a" />
+            <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
           </mesh>
           <mesh position={[0, 0.06, 0.3]} scale={[0.9, 0.6, 0.8]} castShadow receiveShadow>
             <sphereGeometry args={[0.18, 8, 8]} />
-            <ChitinMaterial color="#1a1a1a" />
+            <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
           </mesh>
       </group>
 
