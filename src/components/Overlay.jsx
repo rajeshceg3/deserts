@@ -180,6 +180,11 @@ export const Overlay = ({ started }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [started, zenMode, prevDesert, nextDesert, play]);
 
+  // Chapter swipe on the dock: scene orbit stays exploration (OrbitControls),
+  // horizontal swipes on this nav surface move between deserts.
+  const dockTouchX = useRef(null);
+  const dockTouchY = useRef(null);
+
   const handleKeyDown = (e, index) => {
       if (e.key === 'Enter' || e.key === ' ') {
           setDesert(index);
@@ -574,7 +579,19 @@ export const Overlay = ({ started }) => {
         </AnimatePresence>
 
         {/* Navigation */}
-        <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-auto z-20 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none blur-sm' : 'translate-y-0 opacity-100 blur-0'}`}>
+        <div
+          className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-auto z-20 transition-all duration-1000 ease-[0.2,0.65,0.3,0.9] ${zenMode ? 'translate-y-20 opacity-0 pointer-events-none blur-sm' : 'translate-y-0 opacity-100 blur-0'}`}
+          onTouchStart={(e) => { dockTouchX.current = e.touches[0].clientX; dockTouchY.current = e.touches[0].clientY; }}
+          onTouchEnd={(e) => {
+            if (dockTouchX.current === null) return;
+            const dx = e.changedTouches[0].clientX - dockTouchX.current;
+            const dy = e.changedTouches[0].clientY - dockTouchY.current;
+            dockTouchX.current = null; dockTouchY.current = null;
+            if (Math.abs(dx) < 50 || Math.abs(dy) > 40) return;
+            if (dx < 0) { nextDesert(); } else { prevDesert(); }
+            play('click');
+          }}
+        >
 
           <div className="glass-panel rounded-full px-10 py-5 flex items-center gap-8">
             <MagneticButton
