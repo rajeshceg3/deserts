@@ -1,3 +1,4 @@
+import {useStore} from '../../store'
 import React, { useMemo, useRef, useEffect } from 'react'
 import * as THREE from 'three'
 
@@ -56,7 +57,7 @@ const FernGroup = ({ instances, dummy, tempColor }) => {
                     }
                 }
                 leafRef.current.instanceMatrix.needsUpdate = true;
-                if(leafRef.current.instanceColor) leafRef.current.instanceColor.needsUpdate = true;
+                if(leafRef.current.instanceColor) leafRef.current.instanceColor.needsUpdate = true; leafRef.current.material.needsUpdate=true;
             }
         }, [instances]);
 
@@ -94,7 +95,7 @@ const FlowerGroup = ({ instances, dummy, tempColor }) => {
                 }
                 stemRef.current.instanceMatrix.needsUpdate = true;
                 headRef.current.instanceMatrix.needsUpdate = true;
-                if(headRef.current.instanceColor) headRef.current.instanceColor.needsUpdate = true;
+                if(headRef.current.instanceColor) headRef.current.instanceColor.needsUpdate = true; headRef.current.material.needsUpdate=true;
             }
         }, [instances]);
 
@@ -157,7 +158,7 @@ const GrassGroup = ({ instances, dummy, tempColor }) => {
                     }
                 }
                 grassRef.current.instanceMatrix.needsUpdate = true;
-                if(grassRef.current.instanceColor) grassRef.current.instanceColor.needsUpdate = true;
+                if(grassRef.current.instanceColor) grassRef.current.instanceColor.needsUpdate = true; grassRef.current.material.needsUpdate=true;
             }
         }, [instances, bladesConfig]);
 
@@ -224,8 +225,8 @@ const MossGroup = ({ instances, dummy, tempColor }) => {
                 }
                 baseRef.current.instanceMatrix.needsUpdate = true;
                 bumpRef.current.instanceMatrix.needsUpdate = true;
-                if(baseRef.current.instanceColor) baseRef.current.instanceColor.needsUpdate = true;
-                if(bumpRef.current.instanceColor) bumpRef.current.instanceColor.needsUpdate = true;
+                if(baseRef.current.instanceColor) baseRef.current.instanceColor.needsUpdate = true; baseRef.current.material.needsUpdate=true;
+                if(bumpRef.current.instanceColor) bumpRef.current.instanceColor.needsUpdate = true; bumpRef.current.material.needsUpdate=true;
             }
         }, [instances, mossConfig]);
 
@@ -289,7 +290,7 @@ const BushGroup = ({ instances, dummy, tempColor }) => {
                 }
                 trunkRef.current.instanceMatrix.needsUpdate = true;
                 leavesRef.current.instanceMatrix.needsUpdate = true;
-                if(leavesRef.current.instanceColor) leavesRef.current.instanceColor.needsUpdate = true;
+                if(leavesRef.current.instanceColor) leavesRef.current.instanceColor.needsUpdate = true; leavesRef.current.material.needsUpdate=true;
             }
         }, [instances, bushConfig]);
 
@@ -340,8 +341,8 @@ const SucculentGroup = ({ instances, dummy, tempColor }) => {
                 }
                 centerRef.current.instanceMatrix.needsUpdate = true;
                 leafRef.current.instanceMatrix.needsUpdate = true;
-                if(centerRef.current.instanceColor) centerRef.current.instanceColor.needsUpdate = true;
-                if(leafRef.current.instanceColor) leafRef.current.instanceColor.needsUpdate = true;
+                if(centerRef.current.instanceColor) centerRef.current.instanceColor.needsUpdate = true; centerRef.current.material.needsUpdate=true;
+                if(leafRef.current.instanceColor) leafRef.current.instanceColor.needsUpdate = true; leafRef.current.material.needsUpdate=true;
             }
         }, [instances]);
 
@@ -385,8 +386,8 @@ const CrystalGroup = ({ instances, dummy, tempColor }) => {
                 }
                 mainRef.current.instanceMatrix.needsUpdate = true;
                 shardRef.current.instanceMatrix.needsUpdate = true;
-                if(mainRef.current.instanceColor) mainRef.current.instanceColor.needsUpdate = true;
-                if(shardRef.current.instanceColor) shardRef.current.instanceColor.needsUpdate = true;
+                if(mainRef.current.instanceColor) mainRef.current.instanceColor.needsUpdate = true; mainRef.current.material.needsUpdate=true;
+                if(shardRef.current.instanceColor) shardRef.current.instanceColor.needsUpdate = true; shardRef.current.material.needsUpdate=true;
             }
         }, [instances]);
 

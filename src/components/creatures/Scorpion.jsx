@@ -1,3 +1,4 @@
+import {useStore} from '../../store'
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -9,9 +10,10 @@ const Leg = ({ side, index, offset, position }) => {
     const tibiaRef = useRef()
 
     useFrame((state) => {
+
         if (!group.current) return;
 
-        const t = state.clock.elapsedTime * 8.0 + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) * 8.0 + offset
 
         // Spider/Scorpion gait: Ripple pattern
         // Alternating sets
@@ -68,8 +70,9 @@ const TailSegment = ({ index, count, offset }) => {
     const ref = useRef()
 
     useFrame((state) => {
+
         if (!ref.current) return;
-        const t = state.clock.elapsedTime + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
 
         // Threat display: Tail curls over head
         const curl = 0.4 + Math.sin(t * 2 + index * 0.5) * 0.05
@@ -114,8 +117,9 @@ const Pincer = ({ side, offset }) => {
     const clawRef = useRef()
 
     useFrame((state) => {
+
         if (!ref.current) return;
-        const t = state.clock.elapsedTime + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
 
         // Idle movement
         ref.current.position.y = 0.15 + Math.sin(t * 2) * 0.02
@@ -169,8 +173,9 @@ export const Scorpion = (props) => {
   const [offset] = React.useState(() => Math.random() * 100)
 
   useFrame((state) => {
+
       if (group.current) {
-          const t = state.clock.elapsedTime + offset
+          const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
           // Bob
           group.current.position.y = props.position[1] + Math.sin(t * 5) * 0.01
       }

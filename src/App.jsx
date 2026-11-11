@@ -1,87 +1,12 @@
-import React, { useState, Suspense, useEffect, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Experience } from './components/Experience'
-import { Overlay } from './components/Overlay'
-import { Cursor } from './components/Cursor'
-import { Loader } from './components/Loader'
+import React,{useEffect,useRef,useState} from 'react'
+import {Canvas} from '@react-three/fiber'
+import {Experience} from './components/Experience'
+import {useStore} from './store'
+import {deserts} from './data/deserts'
 import ErrorBoundary from './components/ErrorBoundary'
-import * as THREE from 'three'
-import { useStore } from './store'
-import { deserts } from './data/deserts'
-import { getSkyColor } from './utils/colorUtils'
-
-function App() {
-  const [started, setStarted] = useState(false)
-  const [experienceReady, setExperienceReady] = useState(false)
-  const containerRef = useRef()
-
-  // Optimize Performance: Subscribe to store changes directly to update DOM style
-  // This avoids re-rendering the entire App component (and Canvas) on every frame/drag of the time slider
-  useEffect(() => {
-    let lastColor = ''
-    const colorTarget = new THREE.Color()
-    const updateBackground = (state) => {
-        if (!containerRef.current) return
-        const desert = deserts[state.currentDesertIndex]
-        if (desert) {
-            getSkyColor(state.dayNightCycle, desert.colors, colorTarget)
-            const hexColor = '#' + colorTarget.getHexString()
-            if (hexColor !== lastColor) {
-                containerRef.current.style.backgroundColor = hexColor
-                lastColor = hexColor
-            }
-        }
-    }
-
-    // Subscribe to all store changes
-    const unsub = useStore.subscribe(updateBackground)
-
-    // Initial set
-    updateBackground(useStore.getState())
-
-    return unsub
-  }, [])
-
-  return (
-    <div
-      ref={containerRef}
-      className="w-full h-screen relative cursor-none overflow-hidden transition-colors duration-500 ease-linear"
-    >
-      <ErrorBoundary>
-        <Cursor />
-
-        {/* Loader handles the initial loading state and the 'Enter' interaction */}
-        <Loader started={started} onStarted={() => setStarted(true)} ready={experienceReady} />
-
-        {/* UI Overlay appears only after the user has entered */}
-        <Overlay started={started} />
-
-        <Canvas
-          shadows
-          dpr={[1, 1.5]} // Handle high-DPI screens, optimized to max 1.5
-          camera={{
-            fov: 45,
-            near: 0.1,
-            far: 200,
-            position: [0, 5, 10]
-          }}
-          gl={{
-            antialias: false, // Post-processing handles AA usually, or we want crispness
-            stencil: false,
-            alpha: false,
-            powerPreference: "high-performance",
-            toneMapping: THREE.ACESFilmicToneMapping,
-            outputColorSpace: THREE.SRGBColorSpace,
-            preserveDrawingBuffer: true
-          }}
-        >
-          <Suspense fallback={null}>
-            <Experience onReady={() => setExperienceReady(true)} />
-          </Suspense>
-        </Canvas>
-      </ErrorBoundary>
-    </div>
-  )
-}
-
-export default App
+function useWind(on){useEffect(()=>{if(!on)return;const c=new AudioContext(),gain=c.createGain(),filter=c.createBiquadFilter();gain.gain.value=.09;filter.type='lowpass';filter.frequency.value=360;filter.connect(gain);gain.connect(c.destination);const b=c.createBuffer(1,c.sampleRate*4,c.sampleRate),a=b.getChannelData(0);let last=0;for(let i=0;i<a.length;i++){last=(last+Math.random()*.14-.07)/1.025;a[i]=last*3}const source=c.createBufferSource();source.buffer=b;source.loop=true;source.connect(filter);source.start();void c.resume();return()=>{source.stop();void c.close()}},[on])}
+function Panel({modal,close,d,index,visited,setDesert}){const ref=useRef(),[tab,setTab]=useState('Logbook'),[phase,setPhase]=useState(0);useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close()},[]);useEffect(()=>{if(modal!=='breathe')return;const t=setInterval(()=>setPhase(x=>(x+1)%10),1000);return()=>clearInterval(t)},[modal]);return <dialog ref={ref} className='realm-dialog' onCancel={close}><header><h2>{modal==='journal'?'Explorer’s journal':modal==='collection'?'Your collection':modal==='breathe'?'A quiet minute':'About Desert Realms'}</h2><button onClick={close} aria-label='Close panel'>Close</button></header><div className='panel-content'>{modal==='journal'?<><p className='fiction-note'>Everything in this journal is fictional world-building, including its plants, creatures, climate and constellations.</p><nav className='panel-tabs'>{['Logbook','Field guide','Star chart'].map(x=><button key={x} aria-pressed={tab===x} onClick={()=>setTab(x)}>{x}</button>)}</nav><h3>{d.name}</h3>{tab==='Logbook'?<><p>{d.journalEntry}</p><blockquote>{d.wisdom}</blockquote><p>Original fictional reflection, not an attributed historical quotation.</p></>:tab==='Field guide'?<>{[...(d.floraDetails||[]),...(d.creatureDetails||[])].map(x=><section key={x.name}><h4>{x.name}</h4><p>{x.description}</p></section>)}<h4>Imagined climate</h4><p>{d.climate} · {d.weather} · {d.factoid}</p></>:<><h4>{d.constellation.name}</h4><p>{d.constellation.description}</p><p>{d.constellation.myth}</p><p>An invented star story, not an astronomical chart.</p></>}</>:modal==='collection'?<><p>Visited in this session: {visited.length} of {deserts.length}. These imagined artifacts are story details, not purchases or game rewards.</p><div className='collection-list'>{visited.map(i=><section key={i}><h3>{deserts[i].artifact.icon} {deserts[i].artifact.name}</h3><p>{deserts[i].artifact.description}</p><button onClick={()=>{setDesert(i);close()}}>Return to {deserts[i].name}</button></section>)}</div></>:modal==='breathe'?<><div className='breath-circle'>{phase<4?'Breathe in':phase<6?'Rest':'Breathe out'}</div><p>Follow the words at a comfortable pace. You can breathe normally or stop at any time. This is a visual pause, not health advice.</p></>:<><p>Ten invented desert realms, original procedural landscapes and stylised creatures. The lore and natural-history details are fiction, not a real travel or wildlife guide.</p><p>Drag the scene for a full 360° view. Scroll or pinch to zoom. With the scene focused, use arrows to rotate and Home to reset. Reset view returns to the subject-facing camera.</p><p>Motion animates creatures and plants. Sound is generated wind, not field recordings or the distinct sound profiles described in the original lore.</p><p>Photo downloads a local PNG of the scene. Copy scene puts a link on your clipboard and does not send it to anyone. Collection tracks visits in this session only.</p></>}</div></dialog>}
+export default function App(){const index=useStore(s=>s.currentDesertIndex),setDesert=useStore(s=>s.setDesert),visited=useStore(s=>s.visitedDeserts),markVisited=useStore(s=>s.markVisited),reset=useStore(s=>s.resetView),motion=useStore(s=>s.motion),setMotion=useStore(s=>s.setMotion),time=useStore(s=>s.dayNightCycle),setTime=useStore(s=>s.setDayNightCycle);const [dark,setDark]=useState(true),[modal,setModal]=useState(null),[sound,setSound]=useState(false),[zen,setZen]=useState(false),[status,setStatus]=useState('');useWind(sound);const d=deserts[index];useEffect(()=>{const n=Number(location.hash.slice(1));if(Number.isInteger(n)&&n>=0&&n<deserts.length)setDesert(n);const q=matchMedia('(prefers-reduced-motion: reduce)');setMotion(!q.matches);const f=()=>setMotion(!q.matches);q.addEventListener('change',f);return()=>q.removeEventListener('change',f)},[setDesert,setMotion]);useEffect(()=>{markVisited(index);document.title=d.name+' | Desert Realms'},[index,d.name,markVisited]);const photo=()=>{try{const canvas=document.querySelector('canvas'),a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='DesertRealms-'+d.name.replaceAll(' ','-')+'.png';a.click();setStatus('Scene photo downloaded')}catch{setStatus('Photo could not be saved. Try again.')}};const share=async()=>{try{const u=new URL(location.href);u.hash=''+index;await navigator.clipboard.writeText(u.href);setStatus('Scene link copied')}catch{setStatus('Clipboard unavailable in this browser')}};return <main className={'realms-app '+(dark?'dark':'')+(zen?' zen':'')}>
+ {!zen&&<header className='realm-header'><div><h1>Desert Realms</h1><p>Ten imagined landscapes</p></div><label>Explore a realm<select id='realm' value={index} onChange={e=>setDesert(+e.target.value)}>{deserts.map((x,i)=><option key={x.name} value={i}>{i+1}. {x.name}</option>)}</select></label></header>}
+ <section className='world-window' aria-label={d.name+' landscape'}><ErrorBoundary><Canvas frameloop='demand' dpr={[1,1.5]} camera={{fov:48,near:.1,far:150}} gl={{antialias:true,preserveDrawingBuffer:true,powerPreference:'low-power'}}><Experience/></Canvas></ErrorBoundary><span className='world-hint'>Fantasy landscape · Drag for 360°</span>{zen&&<button className='restore-ui' onClick={()=>setZen(false)}>Show controls</button>}</section>
+ {!zen&&<footer className='realm-footer'><section className='realm-story'><h2>{d.name}</h2><p>{d.description}</p><details><summary>Read the realm's lore</summary><p>{d.lore}</p><p>Fictional setting, not a real place or a health claim.</p></details></section><div className='realm-actions'><nav className='realm-nav'><button aria-label='Previous realm' onClick={()=>setDesert((index+9)%10)}>←</button><span>{index+1} of 10</span><button aria-label='Next realm' onClick={()=>setDesert((index+1)%10)}>→</button><button id='reset-view' onClick={reset}>Reset view</button></nav><div className='time-controls'><label htmlFor='time'>Light</label><select aria-label='Light preset' id='time' value={time} onChange={e=>setTime(+e.target.value)}><option value={.3}>Dawn</option><option value={.5}>Noon</option><option value={.7}>Dusk</option><option value={.95}>Night</option></select><button id='motion-toggle' aria-pressed={motion} onClick={()=>setMotion(!motion)}>{motion?'Pause motion':'Play motion'}</button><button id='sound-toggle' aria-pressed={sound} onClick={()=>setSound(!sound)}>{sound?'Sound off':'Sound on'}</button><button id='theme-toggle' onClick={()=>setDark(!dark)}>{dark?'Light UI':'Dark UI'}</button></div><nav className='tools'><button onClick={()=>setModal('journal')}>Journal</button><button onClick={()=>setModal('collection')}>Collection ({visited.length})</button><button onClick={photo}>Photo</button><button onClick={share}>Copy scene</button><button onClick={()=>setZen(true)}>Zen view</button><button onClick={()=>setModal('breathe')}>Breathe</button><button onClick={()=>setModal('about')}>About</button></nav><span className='status' role='status'>{status}</span></div></footer>}{modal&&<Panel key={modal} modal={modal} close={()=>setModal(null)} d={d} index={index} visited={visited} setDesert={setDesert}/>}</main>}

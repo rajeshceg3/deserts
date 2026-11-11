@@ -393,11 +393,7 @@ export const Atmosphere = ({ isHeadless }) => {
         <fogExp2 ref={fogRef} attach="fog" args={[desert.colors.fog, 0.01]} />
         <NightStars />
         <Sun />
-        {!isHeadless && (
-            <Suspense fallback={null}>
-                <VolumetricClouds color={baseCloudColor} />
-            </Suspense>
-        )}
+
     </>
   )
 }

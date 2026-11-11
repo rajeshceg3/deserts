@@ -65,18 +65,18 @@ export const FloraManager = () => {
     const groupedPlants = {}
 
     if (desert && desert.flora) {
-        const count = 60 // Number of plants
+        const count = 30 // Number of plants
 
     for (let i = 0; i < count; i++) {
         // Pick a random flora type from the desert's list
-        const floraName = desert.flora[Math.floor(Math.random() * desert.flora.length)]
+        const floraName = desert.flora[i % desert.flora.length]
         const config = floraConfig[floraName]
 
         if (!config) continue
 
         // Random position
-        const x = (Math.random() - 0.5) * 80
-        const z = (Math.random() - 0.5) * 80
+        const x = Math.cos(i*2.4)*(6+(i%5)*2.5)
+        const z = Math.sin(i*2.4)*(6+(i%5)*2.5)
 
         // Don't spawn too close to center (spawn point)
         if (Math.sqrt(x*x + z*z) < 5) continue
@@ -92,8 +92,8 @@ export const FloraManager = () => {
             id: i,
             position: [x, y, z],
             color: config.color,
-            scale: config.scale * (0.8 + Math.random() * 0.4),
-            rotation: [0, Math.random() * Math.PI * 2, 0]
+            scale: config.scale * (0.9 + (i%3)*0.1),
+            rotation: [0, i*2.4, 0]
         })
       }
     }

@@ -1,3 +1,4 @@
+import {useStore} from '../../store'
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -7,8 +8,9 @@ const TailSegment = ({ index, count, offset }) => {
     const ref = useRef()
 
     useFrame((state) => {
+
         if (!ref.current) return;
-        const t = state.clock.elapsedTime + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
 
         // Sinuous motion
         // Delay phase by index
@@ -42,8 +44,9 @@ export const Lizard = (props) => {
   const [offset] = React.useState(() => Math.random() * 100)
 
   useFrame((state) => {
+
     if(group.current) {
-        const t = state.clock.elapsedTime + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
 
         // Intermittent movement
         const speed = 10.0

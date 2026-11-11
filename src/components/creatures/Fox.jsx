@@ -1,3 +1,4 @@
+import {useStore} from '../../store'
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -8,8 +9,9 @@ const Leg = ({ position, offset, index }) => {
     const shinRef = useRef()
 
     useFrame((state) => {
+
         if (!ref.current) return
-        const t = state.clock.elapsedTime * 6.0 + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) * 6.0 + offset
 
         // Trot gait: Diagonal pairs move together
         // 0: FL, 1: FR, 2: BL, 3: BR
@@ -58,8 +60,9 @@ export const Fox = (props) => {
   const [offset] = React.useState(() => Math.random() * 100)
 
   useFrame((state) => {
+
     if(group.current) {
-        const t = state.clock.elapsedTime + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
 
         // Running bounce
         group.current.position.y = props.position[1] + Math.abs(Math.sin(t * 6)) * 0.08
