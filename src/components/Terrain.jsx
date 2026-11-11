@@ -256,7 +256,9 @@ export const Terrain = ({ isHeadless }) => {
       const z = positions[i * 3 + 2]
       const y = getTerrainHeight(x, z, desert.terrainParams)
       targetHeights.current[i] = y
+      positions[i*3+1] = y
     }
+    geometry.attributes.position.needsUpdate=true;geometry.computeVertexNormals();isAnimating.current=false;
   }, [desert, geometry])
 
   const targetColorLow = useMemo(() => new THREE.Color(), [])
@@ -270,11 +272,11 @@ export const Terrain = ({ isHeadless }) => {
 
     if (shaderRef.current) {
         // Updated speed
-        shaderRef.current.uniforms.uTime.value += delta * 0.15;
+        if(useStore.getState().motion)shaderRef.current.uniforms.uTime.value += delta * 0.15;
         targetColorLow.set(desert.colors.groundLow)
         targetColorHigh.set(desert.colors.groundHigh)
-        shaderRef.current.uniforms.uColorLow.value.lerp(targetColorLow, delta * 2)
-        shaderRef.current.uniforms.uColorHigh.value.lerp(targetColorHigh, delta * 2)
+        shaderRef.current.uniforms.uColorLow.value.copy(targetColorLow)
+        shaderRef.current.uniforms.uColorHigh.value.copy(targetColorHigh)
     }
 
     if (isAnimating.current) {

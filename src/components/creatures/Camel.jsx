@@ -1,3 +1,4 @@
+import {useStore} from '../../store'
 import React, { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -10,8 +11,9 @@ const Leg = ({ position, index, offset }) => {
     const shinRef = useRef()
 
     useFrame((state) => {
+
         if (!group.current) return;
-        const t = state.clock.elapsedTime * 4.0 + offset
+        const t = (useStore.getState().motion?state.clock.elapsedTime:0) * 4.0 + offset
 
         // Quadruped Walk Cycle: FL, BR, FR, BL
         // 0: FL, 1: FR, 2: BL, 3: BR
@@ -96,8 +98,9 @@ export const Camel = (props) => {
   }, [])
 
   useFrame((state) => {
+
       if (group.current) {
-          const t = state.clock.elapsedTime + offset
+          const t = (useStore.getState().motion?state.clock.elapsedTime:0) + offset
 
           // Body bob - slower
           group.current.position.y = props.position[1] + Math.sin(t * 8) * 0.03

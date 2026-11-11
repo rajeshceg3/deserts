@@ -3,6 +3,10 @@ import { deserts } from './data/deserts'
 
 export const useStore = create((set) => ({
   currentDesertIndex: 0,
+  motion: false,
+  setMotion: (motion) => set({ motion }),
+  resetId: 0,
+  resetView: () => set(state => ({resetId:state.resetId+1})),
   dayNightCycle: 0.5, // 0 to 1, where 0/1 is midnight, 0.5 is noon
   isDay: true,
   showInfo: false,

@@ -119,100 +119,15 @@ export const furOnBeforeCompile = (shader) => {
 
 
 // --- Scale Material (Lizard) ---
-export const scaleOnBeforeCompile = (shader) => {
-      shader.uniforms.uTime = proceduralUniforms.uTime;
-
-      shader.vertexShader = `
-        varying vec3 vPos;
-        uniform float uTime;
-        ${shader.vertexShader}
-      `.replace(
-        '#include <begin_vertex>',
-        `
-        #include <begin_vertex>
-        vPos = position;
-
-        // Breathing
-        float breath = sin(uTime * 3.0 + position.y * 2.0) * 0.003;
-        transformed += normal * breath;
-        `
-      );
-
-      shader.fragmentShader = `
-        varying vec3 vPos;
-        uniform float uTime;
-        ${noiseChunk}
-        ${voronoiChunk}
-        ${shader.fragmentShader}
-      `.replace(
-        '#include <color_fragment>',
-        `
-        #include <color_fragment>
-
-        // Domain Warping for Organic Scales (Simplified)
-        vec2 warpedUV = vUv * 25.0;
-        float warp = sin(warpedUV.x * 0.1 + uTime * 0.05) * sin(warpedUV.y * 0.1 + uTime * 0.05); // Slow morph
-        warpedUV += vec2(warp, warp) * 2.0;
-
-        // Simplified pattern instead of Voronoi
-        float v = sin(warpedUV.x) * sin(warpedUV.y) * 0.5 + 0.5;
-
-        // Edge Softness
-        float edge = smoothstep(0.05, 0.15, v);
-
-        // Iridescence based on viewing angle
-        vec3 viewVec = normalize(-vViewPosition);
-        float NdotV = dot(normalize(vNormal), viewVec);
-
-        vec3 scaleColor = diffuseColor.rgb;
-
-        // Color variation
-        float cellNoise = sin(floor(warpedUV.x)) * sin(floor(warpedUV.y));
-        scaleColor += (cellNoise * 0.1);
-
-        // Iridescence shift
-        vec3 shiftColor = vec3(0.0, 0.2, 0.1); // Green shift
-        float irid = pow(1.0 - NdotV, 2.0);
-        scaleColor = mix(scaleColor, scaleColor + shiftColor, irid * 0.5);
-
-        // Darken interstitial
-        scaleColor *= edge;
-        scaleColor = mix(vec3(0.05, 0.05, 0.02), scaleColor, edge);
-
-        diffuseColor.rgb = scaleColor;
-        `
-      ).replace(
-        '#include <roughnessmap_fragment>',
-        `
-        #include <roughnessmap_fragment>
-        float v = sin(vUv.x * 25.0 + sin(vUv.x * 2.5)) * sin(vUv.y * 25.0 + sin(vUv.y * 2.5)) * 0.5 + 0.5;
-        float edge = smoothstep(0.05, 0.1, v);
-        // Scales are shiny (wet/smooth), gaps are rough
-        roughnessFactor = mix(0.9, 0.3, edge);
-        `
-      ).replace(
-        '#include <normal_fragment_maps>',
-        `
-        #include <normal_fragment_maps>
-        // Procedural Bump
-        vec2 wUV = vUv * 25.0;
-        float warp = sin(wUV.x * 0.1) * sin(wUV.y * 0.1);
-        wUV += vec2(warp) * 2.0;
-
-        float v = sin(wUV.x) * sin(wUV.y) * 0.5 + 0.5;
-
-        // Dome profile
-        float dome = sqrt(clamp(1.0 - v, 0.0, 1.0));
-
-        // Derivatives
-        vec3 bumpGrad = vec3(dFdx(dome), dFdy(dome), 0.0);
-
-        // Perturb normal
-        normal = normalize(normal + bumpGrad * 1.5);
-        `
-      );
+export const scaleOnBeforeCompile = shader => {
+ shader.vertexShader = 'varying vec2 vScaleUv;\n'+shader.vertexShader;
+ shader.vertexShader = shader.vertexShader.replace('#include <uv_vertex>','#include <uv_vertex>\n vScaleUv = uv;');
+ shader.fragmentShader = 'varying vec2 vScaleUv;\n'+shader.fragmentShader;
+ shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+ {vec2 scaleUv=vScaleUv*25.0;float cell=sin(scaleUv.x)*sin(scaleUv.y)*0.5+0.5;float edge=smoothstep(0.08,0.2,cell);diffuseColor.rgb*=mix(0.55,1.15,edge);}`);
+ shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
+ {float cell=sin(vScaleUv.x*25.0)*sin(vScaleUv.y*25.0)*0.5+0.5;roughnessFactor=mix(0.85,0.45,smoothstep(0.08,0.2,cell));}`);
 };
-
 
 // --- Chitin Material (Scorpion) ---
 export const chitinOnBeforeCompile = (shader) => {

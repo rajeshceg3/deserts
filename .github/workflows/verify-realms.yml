@@ -1,0 +1,30 @@
+name: Verify fantasy realms
+on:
+  push:
+    branches: [main, 'repair/**']
+  pull_request:
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        width: [320, 390, 1440]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: node verification/check.cjs
+        env:
+          WIDTH: ${{ matrix.width }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proof-${{ matrix.width }}
+          path: verification/proof-*.json
