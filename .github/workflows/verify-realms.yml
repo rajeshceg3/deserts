@@ -19,10 +19,10 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=moderate
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
       - run: node verification/check.cjs
         env:
           WIDTH: ${{ matrix.width }}
+          CHROME: /usr/bin/google-chrome
       - uses: actions/upload-artifact@v4
         if: always()
         with:
