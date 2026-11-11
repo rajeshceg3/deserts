@@ -173,10 +173,14 @@ export const Fox = (props) => {
         </mesh>
       </group>
 
-      {/* Tail - Big and Fluffy */}
+      {/* Tail - Big and Fluffy, two overlapping volumes for a fuller brush */}
       <group position={[0, 0.5, -0.35]} ref={tailRef}>
            <mesh position={[0, 0.1, -0.3]} rotation={[1.2, 0, 0]} castShadow receiveShadow>
              <capsuleGeometry args={[0.15, 0.8, 8, 8]} />
+             <meshStandardMaterial color="#e67e22" onBeforeCompile={furOnBeforeCompile} />
+          </mesh>
+           <mesh position={[0, 0.22, -0.34]} rotation={[1.1, 0, 0]} castShadow={false} receiveShadow>
+             <capsuleGeometry args={[0.19, 0.55, 6, 8]} />
              <meshStandardMaterial color="#e67e22" onBeforeCompile={furOnBeforeCompile} />
           </mesh>
           {/* Tip */}
