@@ -41,7 +41,7 @@ const Leg = ({ position, offset, index }) => {
             <group position={[0, -0.35, 0]} ref={shinRef}>
                 <mesh position={[0, -0.2, 0]} castShadow receiveShadow>
                      <capsuleGeometry args={[0.05, 0.4, 4, 4]} />
-                     <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
+                     <meshStandardMaterial color="#6e3410" onBeforeCompile={furOnBeforeCompile} />
                 </mesh>
                 {/* Paw */}
                 <mesh position={[0, -0.4, 0.05]} castShadow receiveShadow>
@@ -89,10 +89,14 @@ export const Fox = (props) => {
          <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
       </mesh>
 
-      {/* Chest fluff */}
+      {/* Chest fluff + pale underbelly */}
       <mesh position={[0, 0.4, 0.25]} rotation={[0.5, 0, 0]} castShadow receiveShadow>
           <sphereGeometry args={[0.19, 8, 8]} />
-          <meshStandardMaterial color="#e67e22" onBeforeCompile={furOnBeforeCompile} />
+          <meshStandardMaterial color="#f3e4cf" onBeforeCompile={furOnBeforeCompile} />
+      </mesh>
+      <mesh position={[0, 0.33, -0.05]} rotation={[Math.PI/2, 0, 0]} castShadow={false} receiveShadow>
+          <capsuleGeometry args={[0.13, 0.55, 4, 8]} />
+          <meshStandardMaterial color="#f3e4cf" onBeforeCompile={furOnBeforeCompile} />
       </mesh>
 
       {/* Head Group */}
@@ -108,25 +112,64 @@ export const Fox = (props) => {
              <sphereGeometry args={[0.16, 8, 8]} />
              <meshStandardMaterial color="#d35400" onBeforeCompile={furOnBeforeCompile} />
         </mesh>
+        {/* White cheeks */}
+        <mesh position={[0.09, -0.04, 0.1]} castShadow={false} receiveShadow={false}>
+             <sphereGeometry args={[0.08, 6, 5]} />
+             <meshStandardMaterial color="#f3e4cf" onBeforeCompile={furOnBeforeCompile} />
+        </mesh>
+        <mesh position={[-0.09, -0.04, 0.1]} castShadow={false} receiveShadow={false}>
+             <sphereGeometry args={[0.08, 6, 5]} />
+             <meshStandardMaterial color="#f3e4cf" onBeforeCompile={furOnBeforeCompile} />
+        </mesh>
 
-        {/* Snout */}
+        {/* Snout - slimmer, white-cream lower jaw */}
         <mesh position={[0, -0.05, 0.2]} rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-             <coneGeometry args={[0.07, 0.35, 8]} />
+             <coneGeometry args={[0.06, 0.38, 8]} />
              <meshStandardMaterial color="#d35400" />
         </mesh>
-        <mesh position={[0, -0.05, 0.38]} castShadow receiveShadow>
-             <sphereGeometry args={[0.025, 4, 4]} />
+        <mesh position={[0, -0.075, 0.22]} rotation={[Math.PI/2, 0, 0]} castShadow={false} receiveShadow={false}>
+             <coneGeometry args={[0.045, 0.3, 6]} />
+             <meshStandardMaterial color="#f3e4cf" />
+        </mesh>
+        <mesh position={[0, -0.05, 0.4]} castShadow receiveShadow>
+             <sphereGeometry args={[0.028, 5, 4]} />
              <meshStandardMaterial color="#111" />
         </mesh>
 
-        {/* Ears */}
-        <mesh position={[0.1, 0.18, 0]} rotation={[0, 0, -0.2]} castShadow receiveShadow>
-             <coneGeometry args={[0.06, 0.25, 8]} />
+        {/* Eyes - dark amber with a bright catchlight */}
+        <mesh position={[0.085, 0.045, 0.12]} castShadow={false} receiveShadow={false}>
+             <sphereGeometry args={[0.032, 8, 6]} />
+             <meshStandardMaterial color="#241505" roughness={0.1} />
+        </mesh>
+        <mesh position={[-0.085, 0.045, 0.12]} castShadow={false} receiveShadow={false}>
+             <sphereGeometry args={[0.032, 8, 6]} />
+             <meshStandardMaterial color="#241505" roughness={0.1} />
+        </mesh>
+        <mesh position={[0.093, 0.058, 0.145]} castShadow={false} receiveShadow={false}>
+             <sphereGeometry args={[0.009, 4, 4]} />
+             <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.6} />
+        </mesh>
+        <mesh position={[-0.077, 0.058, 0.145]} castShadow={false} receiveShadow={false}>
+             <sphereGeometry args={[0.009, 4, 4]} />
+             <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.6} />
+        </mesh>
+
+        {/* Ears - taller triangles, pale inner ear */}
+        <mesh position={[0.1, 0.2, 0]} rotation={[0, 0, -0.18]} castShadow receiveShadow>
+             <coneGeometry args={[0.07, 0.3, 6]} />
              <meshStandardMaterial color="#3e2723" />
         </mesh>
-         <mesh position={[-0.1, 0.18, 0]} rotation={[0, 0, 0.2]} castShadow receiveShadow>
-             <coneGeometry args={[0.06, 0.25, 8]} />
+         <mesh position={[-0.1, 0.2, 0]} rotation={[0, 0, 0.18]} castShadow receiveShadow>
+             <coneGeometry args={[0.07, 0.3, 6]} />
              <meshStandardMaterial color="#3e2723" />
+        </mesh>
+        <mesh position={[0.095, 0.19, 0.03]} rotation={[0.15, 0, -0.18]} castShadow={false} receiveShadow={false}>
+             <coneGeometry args={[0.04, 0.2, 5]} />
+             <meshStandardMaterial color="#f3e4cf" />
+        </mesh>
+        <mesh position={[-0.095, 0.19, 0.03]} rotation={[0.15, 0, 0.18]} castShadow={false} receiveShadow={false}>
+             <coneGeometry args={[0.04, 0.2, 5]} />
+             <meshStandardMaterial color="#f3e4cf" />
         </mesh>
       </group>
 
