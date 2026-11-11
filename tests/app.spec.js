@@ -1,26 +1,24 @@
 import { test, expect } from '@playwright/test';
 
 test('Application loads and enters experience', async ({ page }) => {
-  test.slow(); // Mark test as slow (triples timeout)
+  test.slow();
 
-  // Navigate to root with headless param
-  await page.goto('/?headless=true');
+  await page.goto('/');
 
-  // Wait for the loader to finish (button appears)
-  const enterButton = page.getByRole('button', { name: 'Enter Experience' });
-  await expect(enterButton).toBeVisible({ timeout: 60000 });
+  // The app boots straight into the 360 experience (no loader gate).
+  const canvas = page.locator('canvas[data-camera]');
+  await expect(canvas).toBeVisible({ timeout: 30000 });
 
-  // Wait a bit for animations to settle
-  await page.waitForTimeout(1000);
+  // Ten realms are selectable.
+  const realm = page.locator('#realm');
+  await expect(realm).toBeVisible();
+  expect(await realm.locator('option').count()).toBe(10);
 
-  // Click enter
-  await enterButton.click({ force: true });
+  // Heading and per-realm story render.
+  await expect(page.locator('h1')).toHaveText('Desert Realms');
+  await expect(page.locator('.realm-story h2')).toHaveText('Ethereal Dunes');
 
-  // Wait for overlay to appear
-  const zenButton = page.getByLabel('Enable Zen Mode');
-  await expect(zenButton).toBeVisible({ timeout: 20000 });
-
-  // Verify heading
-  const heading = page.locator('h1');
-  await expect(heading).toBeVisible();
+  // Selecting another realm updates the story.
+  await realm.selectOption('1');
+  await expect(page.locator('.realm-story h2')).toHaveText('Glacial Serenity');
 });
