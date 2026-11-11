@@ -149,14 +149,19 @@ const Pincer = ({ side, offset }) => {
 
                      {/* Claw Hand */}
                      <group position={[0, 0, -0.35]} rotation={[0, 0, Math.PI/2]}>
+                         {/* Chela palm - broad, flattened */}
+                         <mesh position={[0, 0, 0.02]} scale={[1.6, 0.7, 1.1]} castShadow receiveShadow>
+                             <sphereGeometry args={[0.07, 6, 5]} />
+                             <meshStandardMaterial color="#111" onBeforeCompile={chitinOnBeforeCompile} />
+                         </mesh>
                          {/* Fixed Finger */}
-                         <mesh position={[0.05, 0, 0]} rotation={[0, 0, 0.2]}>
+                         <mesh position={[0.06, 0, 0]} rotation={[0, 0, 0.2]} scale={[1, 0.7, 1]}>
                              <coneGeometry args={[0.04, 0.3, 4]} />
                              <meshStandardMaterial color="#000" onBeforeCompile={chitinOnBeforeCompile} />
                          </mesh>
                          {/* Moving Finger */}
                          <group ref={clawRef}>
-                             <mesh position={[-0.05, 0, 0]} rotation={[0, 0, -0.2]}>
+                             <mesh position={[-0.06, 0, 0]} rotation={[0, 0, -0.2]} scale={[1, 0.7, 1]}>
                                  <coneGeometry args={[0.04, 0.3, 4]} />
                                  <meshStandardMaterial color="#000" onBeforeCompile={chitinOnBeforeCompile} />
                              </mesh>
@@ -188,6 +193,15 @@ export const Scorpion = (props) => {
           <mesh position={[0, 0.05, -0.15]} scale={[1, 0.6, 1.2]} castShadow receiveShadow>
             <sphereGeometry args={[0.25, 8, 8]} />
             <meshStandardMaterial color="#1a1a1a" onBeforeCompile={chitinOnBeforeCompile} />
+          </mesh>
+          {/* Median eye pair on top of the carapace */}
+          <mesh position={[0.04, 0.2, -0.2]} castShadow={false} receiveShadow={false}>
+            <sphereGeometry args={[0.018, 5, 4]} />
+            <meshStandardMaterial color="#0a0a0a" roughness={0.05} />
+          </mesh>
+          <mesh position={[-0.04, 0.2, -0.2]} castShadow={false} receiveShadow={false}>
+            <sphereGeometry args={[0.018, 5, 4]} />
+            <meshStandardMaterial color="#0a0a0a" roughness={0.05} />
           </mesh>
           <mesh position={[0, 0.08, 0.1]} scale={[1.1, 0.7, 1]} castShadow receiveShadow>
             <sphereGeometry args={[0.22, 8, 8]} />

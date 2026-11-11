@@ -84,10 +84,22 @@ export const Lizard = (props) => {
     <group ref={group} {...props}>
       {/* Main Body */}
       <group position={[0, 0.15, 0]} ref={bodyRef}>
-          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-             <capsuleGeometry args={[0.15, 0.6, 4, 4]} />
+          <mesh rotation={[Math.PI / 2, 0, 0]} scale={[1, 0.85, 1]} castShadow receiveShadow>
+             <capsuleGeometry args={[0.15, 0.6, 4, 6]} />
              <meshStandardMaterial color="#4caf50" onBeforeCompile={scaleOnBeforeCompile} />
           </mesh>
+          {/* Pale belly */}
+          <mesh position={[0, -0.07, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[0.8, 0.5, 1]} castShadow={false} receiveShadow>
+             <capsuleGeometry args={[0.12, 0.5, 4, 6]} />
+             <meshStandardMaterial color="#a5d6a7" onBeforeCompile={scaleOnBeforeCompile} />
+          </mesh>
+          {/* Dorsal crest: a row of small spines from neck to tail base */}
+          {[-0.42, -0.3, -0.18, -0.06, 0.06, 0.18, 0.3].map((z, i) => (
+              <mesh key={'spine'+i} position={[0, 0.14, z]} castShadow={false} receiveShadow={false}>
+                  <coneGeometry args={[0.02, 0.07 - Math.abs(z) * 0.06, 4]} />
+                  <meshStandardMaterial color="#2e7d32" onBeforeCompile={scaleOnBeforeCompile} />
+              </mesh>
+          ))}
 
           {/* Tail Start */}
           <group position={[0, 0, 0.3]}>
@@ -101,20 +113,42 @@ export const Lizard = (props) => {
                  <meshStandardMaterial color="#4caf50" onBeforeCompile={scaleOnBeforeCompile} />
               </mesh>
 
-              {/* Head */}
+              {/* Head - flattened triangular skull with a defined jaw */}
               <group position={[0, 0, -0.2]} ref={headRef}>
-                  <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-                      <coneGeometry args={[0.1, 0.4, 4]} />
+                  <mesh rotation={[Math.PI/2, 0, 0]} scale={[1.15, 0.75, 1]} castShadow receiveShadow>
+                      <coneGeometry args={[0.11, 0.42, 6]} />
                       <meshStandardMaterial color="#388e3c" onBeforeCompile={scaleOnBeforeCompile} />
                   </mesh>
-                  {/* Eyes */}
-                  <mesh position={[0.08, 0.05, -0.1]}>
-                      <sphereGeometry args={[0.03, 4, 4]} />
-                      <meshStandardMaterial color="#111" />
+                  {/* Jaw / throat, slightly paler */}
+                  <mesh position={[0, -0.035, -0.12]} rotation={[Math.PI/2, 0, 0]} scale={[1, 0.55, 0.9]} castShadow={false} receiveShadow>
+                      <coneGeometry args={[0.085, 0.34, 6]} />
+                      <meshStandardMaterial color="#a5d6a7" onBeforeCompile={scaleOnBeforeCompile} />
                   </mesh>
-                  <mesh position={[-0.08, 0.05, -0.1]}>
-                      <sphereGeometry args={[0.03, 4, 4]} />
-                      <meshStandardMaterial color="#111" />
+                  {/* Nostrils */}
+                  <mesh position={[0.02, 0.01, -0.32]}>
+                      <sphereGeometry args={[0.008, 4, 4]} />
+                      <meshStandardMaterial color="#1b3d1e" />
+                  </mesh>
+                  <mesh position={[-0.02, 0.01, -0.32]}>
+                      <sphereGeometry args={[0.008, 4, 4]} />
+                      <meshStandardMaterial color="#1b3d1e" />
+                  </mesh>
+                  {/* Eyes on the sides of the skull, dark with a ridge above */}
+                  <mesh position={[0.095, 0.045, -0.12]}>
+                      <sphereGeometry args={[0.032, 6, 5]} />
+                      <meshStandardMaterial color="#111" roughness={0.2} />
+                  </mesh>
+                  <mesh position={[-0.095, 0.045, -0.12]}>
+                      <sphereGeometry args={[0.032, 6, 5]} />
+                      <meshStandardMaterial color="#111" roughness={0.2} />
+                  </mesh>
+                  <mesh position={[0.095, 0.08, -0.12]} rotation={[0, 0, -0.15]} castShadow={false}>
+                      <boxGeometry args={[0.07, 0.02, 0.06]} />
+                      <meshStandardMaterial color="#2e7d32" onBeforeCompile={scaleOnBeforeCompile} />
+                  </mesh>
+                  <mesh position={[-0.095, 0.08, -0.12]} rotation={[0, 0, 0.15]} castShadow={false}>
+                      <boxGeometry args={[0.07, 0.02, 0.06]} />
+                      <meshStandardMaterial color="#2e7d32" onBeforeCompile={scaleOnBeforeCompile} />
                   </mesh>
               </group>
           </group>
@@ -144,6 +178,13 @@ export const Lizard = (props) => {
                     <capsuleGeometry args={[0.04, 0.25, 4, 4]} />
                     <meshStandardMaterial color="#2e7d32" onBeforeCompile={scaleOnBeforeCompile} />
                 </mesh>
+                {/* Splayed toes */}
+                {[-0.05, 0, 0.05].map((dz, ti) => (
+                    <mesh key={'toe'+ti} position={[i % 2 === 0 ? -0.44 : 0.44, -0.2, 0.12 + dz]} rotation={[0, 0, Math.PI / 2]} castShadow={false}>
+                        <coneGeometry args={[0.012, 0.08, 3]} />
+                        <meshStandardMaterial color="#2e7d32" />
+                    </mesh>
+                ))}
               </group>
           ))}
       </group>
