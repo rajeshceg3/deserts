@@ -8,7 +8,7 @@
 /* Quiet chrome: the world leads; controls visit when called. */
 .chrome{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s ease}
 .chrome.chrome-on{opacity:1;visibility:visible;pointer-events:auto}
-.realm-footer.solo{grid-template-columns:1fr}
+.realm-footer.solo{grid-template-columns:1fr;margin-bottom:64px}
 .chrome-hint{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:30;width:52px;height:40px;display:grid;place-items:center;background:#fff9ec;color:#26333b;border:2px solid #26333b;border-radius:14px 16px 13px 17px/16px 13px 17px 14px;box-shadow:3px 4px 0 rgba(38,51,59,.35);cursor:pointer}
 .chrome-hint .ink-icon{width:22px;height:22px}
 .dark .chrome-hint{background:#263d49;color:#fff2dc;border-color:#fff2dc}
